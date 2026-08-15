@@ -1,4 +1,4 @@
-// src/visualizers/ArrayVisualizer.jsx — Fluid, properly proportioned array visualizer
+// src/visualizers/ArrayVisualizer.jsx — Fluid, guaranteed height array visualizer
 
 import { motion } from 'framer-motion';
 
@@ -21,7 +21,7 @@ function getBarClass(i, frame, type) {
 
 export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   if (!frame) return (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
+    <div style={{ height: '100%', minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
       Select an algorithm and click Play to start
     </div>
   );
@@ -31,24 +31,26 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const showValues = array.length <= 25;
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-      {/* ── Bars Canvas (Flex-1 fluid container) ── */}
+    <div className="array-visualizer-container">
+      {/* ── Bars Canvas ── */}
       <div className="visualizer-canvas">
         {array.map((value, i) => {
           const barClass = getBarClass(i, frame, type);
-          // Scale height fluidly up to 92% of canvas height
-          const heightPercent = Math.max(6, (value / maxValue) * 88);
+          // Calculate proportional percentage height
+          const heightPercent = Math.max(8, (value / maxValue) * 88);
 
           return (
-            <div key={i} className="bar-wrapper" style={{ height: '100%', justifyContent: 'flex-end' }}>
+            <div key={i} className="bar-wrapper">
               {showValues && (
                 <span className="bar-value">{value}</span>
               )}
-              <motion.div
-                className={`bar ${barClass}`}
-                animate={{ height: `${heightPercent}%` }}
-                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-              />
+              <div className="bar-track">
+                <motion.div
+                  className={`bar ${barClass}`}
+                  animate={{ height: `${heightPercent}%` }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
+              </div>
               {showValues && (
                 <span className="bar-index">{i}</span>
               )}

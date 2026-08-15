@@ -1189,13 +1189,22 @@ body {
 
 /* Visualizer Canvas Area */
 .visualizer-area {
-  flex: 1;
   display: flex;
   flex-direction: column;
   padding: 14px 16px;
   position: relative;
+  height: 280px;
+  min-height: 240px;
   overflow: hidden;
-  min-height: 0;
+}
+
+.array-visualizer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 220px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .visualizer-canvas {
@@ -1204,9 +1213,10 @@ body {
   align-items: flex-end;
   justify-content: center;
   gap: 4px;
-  padding: 8px 0;
+  padding: 6px 0;
   position: relative;
-  min-height: 0;
+  height: 100%;
+  min-height: 140px;
 }
 
 /* Bar Elements */
@@ -1214,10 +1224,21 @@ body {
   flex: 1;
   max-width: 44px;
   min-width: 4px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 110px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .bar {
@@ -1225,6 +1246,7 @@ body {
   border-radius: 3px 3px 0 0;
   background: var(--bar-default);
   transition: background-color 100ms ease;
+  min-height: 6px;
 }
 
 .bar.comparing { background: var(--bar-comparing); }
@@ -1248,6 +1270,7 @@ body {
   color: var(--text-dim);
   margin-top: 4px;
 }
+
 
 /* Pointer Indicators */
 .pointers-row {
@@ -1805,17 +1828,30 @@ body {
 
   .visualizer-area {
     padding: 10px 12px;
+    height: 240px;
+    min-height: 220px;
+  }
+
+  .array-visualizer-container {
+    height: 100%;
+    min-height: 200px;
   }
 
   .visualizer-canvas {
-    min-height: 150px;
-    height: 150px;
+    min-height: 130px;
+    height: 100%;
+  }
+
+  .bar-track {
+    min-height: 95px;
+    height: 100%;
   }
 
   .controls-bar {
     padding: 10px 12px;
     gap: 8px;
   }
+
 
   .algo-page-right {
     flex: 1 !important;
