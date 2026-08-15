@@ -1,6 +1,6 @@
-// src/pages/AlgorithmPage.jsx — Responsive algorithm workspace showing visualizer + live code on all screen sizes
+// src/pages/AlgorithmPage.jsx — Resizable, fully dynamic desktop & mobile algorithm workspace
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStepper } from '../engine/useStepper.js';
 import { getAlgorithm, generateRandomArray, parseCustomArray } from '../data/algorithms.js';
 import ArrayVisualizer  from '../visualizers/ArrayVisualizer.jsx';
@@ -36,6 +36,36 @@ export default function AlgorithmPage({ slug }) {
   const [customInput,  setCustomInput]  = useState('');
   const [searchTarget, setSearchTarget] = useState('');
   const [inputData,    setInputData]    = useState(null);
+
+  // ── Resizable Splitter State ──
+  const [panelWidth, setPanelWidth]     = useState(420);
+  const isDraggingRef = useRef(false);
+
+  const startResizing = useCallback((e) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (moveEvent) => {
+      if (!isDraggingRef.current) return;
+      const newWidth = window.innerWidth - moveEvent.clientX;
+      if (newWidth >= 280 && newWidth <= Math.min(window.innerWidth * 0.65, 800)) {
+        setPanelWidth(newWidth);
+      }
+    };
+
+    const onMouseUp = () => {
+      isDraggingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, []);
 
   const buildInputData = useCallback((arr, target) => {
     if (!algo) return null;
@@ -98,7 +128,12 @@ export default function AlgorithmPage({ slug }) {
   const message = frame?.message || null;
 
   return (
-    <div className="algo-page">
+    <div
+      className="algo-page"
+      style={{
+        '--right-panel-width': `${panelWidth}px`,
+      }}
+    >
       {/* ── Left Workspace: Visualizer & Controls ── */}
       <div className="algo-page-left">
         {/* Step Message Status */}
@@ -107,7 +142,7 @@ export default function AlgorithmPage({ slug }) {
           <span className="message-text">{message || `Click Play to start ${algo.name}`}</span>
         </div>
 
-        {/* Visualizer Area */}
+        {/* Visualizer Area (Takes full flexible height) */}
         <div className="visualizer-area">
           {cat === 'sorting' && <ArrayVisualizer frame={frame} type="sorting" />}
           {cat === 'searching' && <ArrayVisualizer frame={frame} type="searching" />}
@@ -169,7 +204,17 @@ export default function AlgorithmPage({ slug }) {
         />
       </div>
 
-      {/* ── Right Workspace (Desktop) / Bottom Workspace (Mobile): Code & Details ── */}
+      {/* ── Draggable Splitter Handle (Desktop) ── */}
+      <div
+        className="workspace-resizer"
+        onMouseDown={startResizing}
+        onDoubleClick={() => setPanelWidth(420)}
+        title="Drag left/right to resize panels (Double-click to reset)"
+      >
+        <div className="resizer-handle-line" />
+      </div>
+
+      {/* ── Right Workspace: Code & Details ── */}
       <div className="algo-page-right">
         <CodePanel
           code={algo.module.CODE}

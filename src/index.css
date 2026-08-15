@@ -1139,17 +1139,41 @@ body {
 ───────────────────────────────────────── */
 .algo-page {
   display: grid;
-  grid-template-columns: 1fr 390px;
+  grid-template-columns: 1fr 6px var(--right-panel-width, 420px);
   height: 100%;
   overflow: hidden;
+}
+
+.workspace-resizer {
+  width: 6px;
+  background: var(--border);
+  cursor: col-resize;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease;
+  z-index: 20;
+}
+
+.workspace-resizer:hover,
+.workspace-resizer:active {
+  background: var(--primary);
+}
+
+.resizer-handle-line {
+  width: 2px;
+  height: 28px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .algo-page-left {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid var(--border);
   background: var(--bg-app);
+  height: 100%;
 }
 
 .algo-page-right {
@@ -1157,6 +1181,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   background: var(--bg-card);
+  height: 100%;
 }
 
 /* Status / Message Banner */
@@ -1187,22 +1212,24 @@ body {
   white-space: nowrap;
 }
 
-/* Visualizer Canvas Area */
+/* Visualizer Canvas Area (Fully stretchable & dynamic) */
 .visualizer-area {
   display: flex;
   flex-direction: column;
   padding: 14px 16px;
   position: relative;
-  height: 280px;
-  min-height: 240px;
+  flex: 1;
+  height: 100%;
+  min-height: 260px;
   overflow: hidden;
 }
 
 .array-visualizer-container {
   display: flex;
   flex-direction: column;
+  flex: 1;
   height: 100%;
-  min-height: 220px;
+  min-height: 240px;
   width: 100%;
   overflow: hidden;
 }
@@ -1210,14 +1237,16 @@ body {
 .visualizer-canvas {
   flex: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: center;
   gap: 4px;
-  padding: 6px 0;
+  padding: 8px 0;
   position: relative;
   height: 100%;
-  min-height: 140px;
+  min-height: 160px;
 }
+
+
 
 /* 1. Step Breakdown Card */
 .step-breakdown-card {
@@ -1371,6 +1400,7 @@ body {
   max-width: 44px;
   min-width: 4px;
   height: 100%;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1378,10 +1408,10 @@ body {
 }
 
 .bar-track {
-  flex: 1;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 36px);
   min-height: 100px;
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1393,8 +1423,9 @@ body {
   background: linear-gradient(180deg, #475569 0%, #1e293b 100%);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   transition: background 120ms ease, box-shadow 120ms ease;
-  min-height: 6px;
+  min-height: 8px;
 }
+
 
 .bar.comparing {
   background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
@@ -2015,11 +2046,16 @@ body {
     overflow-y: auto !important;
   }
 
+  .workspace-resizer {
+    display: none !important;
+  }
+
   .algo-page-left {
     flex-shrink: 0 !important;
     border-right: none !important;
     border-bottom: 1px solid var(--border) !important;
   }
+
 
   .visualizer-area {
     padding: 10px 12px;

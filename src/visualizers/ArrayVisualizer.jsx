@@ -1,5 +1,6 @@
 // src/visualizers/ArrayVisualizer.jsx — Intuitive, high-clarity DSA visualizer with step breakdown and expressive physics
 
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 function getBarState(i, frame, type) {
@@ -20,7 +21,7 @@ function getBarState(i, frame, type) {
 }
 
 function getDetailedBreakdown(frame, type) {
-  if (!frame) return { title: 'Ready', explanation: 'Click Play or Step Forward to begin execution.', type: 'info' };
+  if (!frame) return { title: 'Ready', explanation: 'Click Play or Step Forward to begin execution.', condition: 'Waiting to start', badge: 'READY', badgeType: 'neutral' };
 
   const array = frame.array || [];
   const { comparing = [], swapping = [], pointers = {} } = frame;
@@ -72,6 +73,22 @@ function getDetailedBreakdown(frame, type) {
 }
 
 export default function ArrayVisualizer({ frame, type = 'sorting' }) {
+  const containerRef = useRef(null);
+  const [trackHeight, setTrackHeight] = useState(160);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.height > 60) {
+          setTrackHeight(Math.max(120, entry.contentRect.height - 40));
+        }
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   if (!frame) return (
     <div style={{ height: '100%', minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
       Select an algorithm and click Play to start
@@ -150,15 +167,15 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
       </div>
 
       {/* ── 3. Bars Canvas with Rich Gradients & Physical Motion ── */}
-      <div className="visualizer-canvas">
+      <div className="visualizer-canvas" ref={containerRef}>
         {array.map((value, i) => {
           const barState = getBarState(i, frame, type);
           const isBarComp = barState === 'comparing';
           const isBarSwap = barState === 'swapping';
           const isBarSorted = barState === 'sorted';
 
-          // Proportional percentage height
-          const heightPercent = Math.max(8, (value / maxValue) * 75);
+          // Proportional exact pixel height based on available canvas height
+          const barHeightPx = Math.max(16, Math.round((value / maxValue) * trackHeight));
 
           return (
             <div key={i} className="bar-wrapper">
@@ -168,17 +185,11 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
                 </span>
               )}
               <div className="bar-track">
-                <motion.div
+                <div
                   className={`bar ${barState}`}
-                  animate={{
-                    height: `${heightPercent}%`,
-                    y: isBarSwap ? -8 : isBarComp ? -4 : 0,
-                    scale: isBarSwap ? [1, 1.08, 1.04] : isBarComp ? 1.03 : 1,
-                  }}
-                  transition={{
-                    height: { type: 'spring', stiffness: 320, damping: 26 },
-                    y: { duration: 0.18 },
-                    scale: { duration: 0.18 },
+                  style={{
+                    height: `${barHeightPx}px`,
+                    transform: isBarSwap ? 'translateY(-8px) scale(1.06)' : isBarComp ? 'translateY(-4px) scale(1.03)' : 'none',
                   }}
                 />
               </div>
