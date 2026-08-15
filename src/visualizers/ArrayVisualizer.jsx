@@ -1,4 +1,4 @@
-// src/visualizers/ArrayVisualizer.jsx — Rich, expressive, animated array visualizer with comparison & swap cues
+// src/visualizers/ArrayVisualizer.jsx — Fluid array visualizer with animated connecting comparison & swap arrows
 
 import { motion } from 'framer-motion';
 
@@ -29,47 +29,93 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const array = frame.array || [];
   const maxValue = Math.max(...array, 1);
   const showValues = array.length <= 25;
-  const comparingIndices = frame.comparing || [];
-  const isComparingTwo = comparingIndices.length === 2;
+  const n = array.length;
+
+  // Active comparison or swapping pair
+  const isSwapping = Boolean(frame.swapping && frame.swapping.length === 2);
+  const isComparing = !isSwapping && Boolean(frame.comparing && frame.comparing.length === 2);
+  const activePair = isSwapping ? frame.swapping : isComparing ? frame.comparing : null;
+
+  // Calculate coordinates for connecting bridge
+  let bridge = null;
+  if (activePair && n > 1) {
+    const [idxA, idxB] = activePair;
+    const minIdx = Math.min(idxA, idxB);
+    const maxIdx = Math.max(idxA, idxB);
+    const leftPercent = ((minIdx + 0.5) / n) * 100;
+    const rightPercent = ((maxIdx + 0.5) / n) * 100;
+    const widthPercent = Math.max(rightPercent - leftPercent, 2);
+    const centerPercent = (leftPercent + rightPercent) / 2;
+    const valA = array[minIdx];
+    const valB = array[maxIdx];
+    const operator = valA > valB ? '>' : valA < valB ? '<' : '=';
+
+    bridge = {
+      minIdx, maxIdx,
+      left: leftPercent,
+      right: rightPercent,
+      width: widthPercent,
+      center: centerPercent,
+      isSwap: isSwapping,
+      operator,
+      label: isSwapping ? '⇄ SWAP' : `${valA} ${operator} ${valB}`,
+      color: isSwapping ? '#f43f5e' : '#38bdf8',
+    };
+  }
 
   return (
     <div className="array-visualizer-container">
-      {/* ── Active Comparison Comparison Badge ── */}
-      {isComparingTwo && (
-        <div className="comparison-banner">
-          <span className="comp-tag">Comparing</span>
-          <span className="comp-expr">
-            arr[{comparingIndices[0]}] ({array[comparingIndices[0]]})
-            {' '}
-            <strong style={{ color: array[comparingIndices[0]] > array[comparingIndices[1]] ? 'var(--danger)' : 'var(--success)' }}>
-              {array[comparingIndices[0]] > array[comparingIndices[1]] ? '>' : '≤'}
-            </strong>
-            {' '}
-            arr[{comparingIndices[1]}] ({array[comparingIndices[1]]})
-          </span>
-          {array[comparingIndices[0]] > array[comparingIndices[1]] && (
-            <span className="comp-swap-badge">Needs Swap</span>
-          )}
-        </div>
-      )}
+      {/* ── Prominent Comparison & Swap Indicator Header ── */}
+      <div className="comparison-indicator-header">
+        {bridge ? (
+          <motion.div
+            key={`chip-${bridge.minIdx}-${bridge.maxIdx}-${bridge.isSwap}`}
+            className={`active-connection-pill ${bridge.isSwap ? 'swap-pill' : 'comp-pill'}`}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+          >
+            <span className="pill-action">{bridge.isSwap ? 'SWAPPING' : 'COMPARING'}</span>
+            <span className="pill-indices">[{bridge.minIdx}] ↔ [{bridge.maxIdx}]</span>
+            <span className="pill-expr">{bridge.label}</span>
+          </motion.div>
+        ) : (
+          <span className="idle-indicator">Execution in progress</span>
+        )}
+      </div>
 
-      {/* ── Bars Canvas ── */}
+      {/* ── Bars Canvas with Direct Arrow Bridge Overlay ── */}
       <div className="visualizer-canvas">
+        {bridge && (
+          <motion.div
+            key={`bridge-arch-${bridge.minIdx}-${bridge.maxIdx}-${bridge.isSwap}`}
+            className={`canvas-bridge-arch ${bridge.isSwap ? 'swap-arch' : 'comp-arch'}`}
+            style={{
+              left: `${bridge.left}%`,
+              width: `${bridge.width}%`,
+            }}
+            initial={{ opacity: 0, scaleY: 0 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            transition={{ duration: 0.12 }}
+          >
+            <div className="bridge-arch-line" />
+            <div className="bridge-arrow-left">◄</div>
+            <div className="bridge-arrow-right">►</div>
+          </motion.div>
+        )}
+
         {array.map((value, i) => {
           const barState = getBarState(i, frame, type);
-          const isComparing = barState === 'comparing';
-          const isSwapping = barState === 'swapping';
-          const isPivot = barState === 'pivot';
-          const isFound = barState === 'found';
-          const isSorted = barState === 'sorted';
+          const isBarComp = barState === 'comparing';
+          const isBarSwap = barState === 'swapping';
 
           // Proportional percentage height
-          const heightPercent = Math.max(8, (value / maxValue) * 88);
+          const heightPercent = Math.max(8, (value / maxValue) * 78);
 
           return (
             <div key={i} className="bar-wrapper">
               {showValues && (
-                <span className={`bar-value ${isComparing ? 'highlight-comp' : ''} ${isSwapping ? 'highlight-swap' : ''}`}>
+                <span className={`bar-value ${isBarComp ? 'highlight-comp' : ''} ${isBarSwap ? 'highlight-swap' : ''}`}>
                   {value}
                 </span>
               )}
@@ -78,8 +124,8 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
                   className={`bar ${barState}`}
                   animate={{
                     height: `${heightPercent}%`,
-                    y: isSwapping ? -6 : isComparing ? -3 : 0,
-                    scale: isSwapping ? 1.05 : isComparing ? 1.02 : 1,
+                    y: isBarSwap ? -6 : isBarComp ? -3 : 0,
+                    scale: isBarSwap ? 1.05 : isBarComp ? 1.02 : 1,
                   }}
                   transition={{
                     height: { type: 'spring', stiffness: 350, damping: 28 },
