@@ -1,4 +1,4 @@
-// src/visualizers/ArrayVisualizer.jsx — Fluid array visualizer with animated connecting comparison & swap arrows
+// src/visualizers/ArrayVisualizer.jsx — Intuitive, high-clarity DSA visualizer with step breakdown and expressive physics
 
 import { motion } from 'framer-motion';
 
@@ -19,6 +19,58 @@ function getBarState(i, frame, type) {
   return 'default';
 }
 
+function getDetailedBreakdown(frame, type) {
+  if (!frame) return { title: 'Ready', explanation: 'Click Play or Step Forward to begin execution.', type: 'info' };
+
+  const array = frame.array || [];
+  const { comparing = [], swapping = [], pointers = {} } = frame;
+
+  if (swapping.length === 2) {
+    const [a, b] = swapping;
+    return {
+      title: 'Swap Execution',
+      badge: 'SWAP',
+      badgeType: 'danger',
+      explanation: `Exchanging elements: arr[${a}]=${array[a]} and arr[${b}]=${array[b]}. The larger value moves rightward towards its sorted position.`,
+      condition: `Swap triggered because arr[${a}] was greater than arr[${b}]`,
+    };
+  }
+
+  if (comparing.length === 2) {
+    const [a, b] = comparing;
+    const isGreater = array[a] > array[b];
+    return {
+      title: 'Conditional Comparison',
+      badge: 'COMPARE',
+      badgeType: 'primary',
+      explanation: `Evaluating arr[${a}] (${array[a]}) ${isGreater ? '>' : '≤'} arr[${b}] (${array[b]}). ${
+        isGreater
+          ? 'Condition TRUE: elements are out of order, preparing swap.'
+          : 'Condition FALSE: elements are in correct relative order, skipping swap.'
+      }`,
+      condition: `if arr[${a}] > arr[${b}]: -> ${isGreater ? 'TRUE (Swap)' : 'FALSE (Keep)'}`,
+    };
+  }
+
+  if (frame.message && frame.message.includes('sorted')) {
+    return {
+      title: 'Pass Complete',
+      badge: 'SORTED',
+      badgeType: 'success',
+      explanation: frame.message,
+      condition: 'Element placed in guaranteed final position',
+    };
+  }
+
+  return {
+    title: 'Pointer Inspection',
+    badge: 'SCANNING',
+    badgeType: 'neutral',
+    explanation: frame.message || 'Advancing scanning indices across problem array.',
+    condition: pointers.i !== undefined ? `Loop index i = ${pointers.i}` : 'Scanning elements',
+  };
+}
+
 export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   if (!frame) return (
     <div style={{ height: '100%', minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
@@ -31,12 +83,12 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const showValues = array.length <= 25;
   const n = array.length;
 
-  // Active comparison or swapping pair
   const isSwapping = Boolean(frame.swapping && frame.swapping.length === 2);
   const isComparing = !isSwapping && Boolean(frame.comparing && frame.comparing.length === 2);
   const activePair = isSwapping ? frame.swapping : isComparing ? frame.comparing : null;
+  const breakdown = getDetailedBreakdown(frame, type);
 
-  // Calculate coordinates for connecting bridge
+  // Calculate coordinates for SVG connecting bridge
   let bridge = null;
   if (activePair && n > 1) {
     const [idxA, idxB] = activePair;
@@ -45,7 +97,6 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
     const leftPercent = ((minIdx + 0.5) / n) * 100;
     const rightPercent = ((maxIdx + 0.5) / n) * 100;
     const widthPercent = Math.max(rightPercent - leftPercent, 2);
-    const centerPercent = (leftPercent + rightPercent) / 2;
     const valA = array[minIdx];
     const valB = array[maxIdx];
     const operator = valA > valB ? '>' : valA < valB ? '<' : '=';
@@ -53,69 +104,66 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
     bridge = {
       minIdx, maxIdx,
       left: leftPercent,
-      right: rightPercent,
       width: widthPercent,
-      center: centerPercent,
       isSwap: isSwapping,
       operator,
-      label: isSwapping ? '⇄ SWAP' : `${valA} ${operator} ${valB}`,
+      label: isSwapping ? '⇄ SWAPPING' : `${valA} ${operator} ${valB}`,
       color: isSwapping ? '#f43f5e' : '#38bdf8',
     };
   }
 
   return (
     <div className="array-visualizer-container">
-      {/* ── Prominent Comparison & Swap Indicator Header ── */}
-      <div className="comparison-indicator-header">
-        {bridge ? (
-          <motion.div
-            key={`chip-${bridge.minIdx}-${bridge.maxIdx}-${bridge.isSwap}`}
-            className={`active-connection-pill ${bridge.isSwap ? 'swap-pill' : 'comp-pill'}`}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-          >
-            <span className="pill-action">{bridge.isSwap ? 'SWAPPING' : 'COMPARING'}</span>
-            <span className="pill-indices">[{bridge.minIdx}] ↔ [{bridge.maxIdx}]</span>
-            <span className="pill-expr">{bridge.label}</span>
-          </motion.div>
-        ) : (
-          <span className="idle-indicator">Execution in progress</span>
-        )}
+      {/* ── 1. Interactive Step Breakdown Card ── */}
+      <div className="step-breakdown-card">
+        <div className="breakdown-header">
+          <span className={`breakdown-badge badge-${breakdown.badgeType}`}>
+            {breakdown.badge}
+          </span>
+          <span className="breakdown-title">{breakdown.title}</span>
+          <span className="breakdown-condition-chip">{breakdown.condition}</span>
+        </div>
+        <p className="breakdown-explanation">{breakdown.explanation}</p>
       </div>
 
-      {/* ── Bars Canvas with Direct Arrow Bridge Overlay ── */}
-      <div className="visualizer-canvas">
+      {/* ── 2. Connecting Bridge Arc ── */}
+      <div className="bridge-track-area">
         {bridge && (
           <motion.div
-            key={`bridge-arch-${bridge.minIdx}-${bridge.maxIdx}-${bridge.isSwap}`}
-            className={`canvas-bridge-arch ${bridge.isSwap ? 'swap-arch' : 'comp-arch'}`}
+            key={`bridge-${bridge.minIdx}-${bridge.maxIdx}-${bridge.isSwap}`}
+            className={`connecting-bridge-arch ${bridge.isSwap ? 'swap-arch' : 'comp-arch'}`}
             style={{
               left: `${bridge.left}%`,
               width: `${bridge.width}%`,
             }}
             initial={{ opacity: 0, scaleY: 0 }}
             animate={{ opacity: 1, scaleY: 1 }}
-            transition={{ duration: 0.12 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
           >
-            <div className="bridge-arch-line" />
-            <div className="bridge-arrow-left">◄</div>
-            <div className="bridge-arrow-right">►</div>
+            <span className="bridge-arrow-start">▼</span>
+            <div className={`bridge-chip ${bridge.isSwap ? 'swap-chip' : 'comp-chip'}`}>
+              {bridge.label}
+            </div>
+            <span className="bridge-arrow-end">▼</span>
           </motion.div>
         )}
+      </div>
 
+      {/* ── 3. Bars Canvas with Rich Gradients & Physical Motion ── */}
+      <div className="visualizer-canvas">
         {array.map((value, i) => {
           const barState = getBarState(i, frame, type);
           const isBarComp = barState === 'comparing';
           const isBarSwap = barState === 'swapping';
+          const isBarSorted = barState === 'sorted';
 
           // Proportional percentage height
-          const heightPercent = Math.max(8, (value / maxValue) * 78);
+          const heightPercent = Math.max(8, (value / maxValue) * 75);
 
           return (
             <div key={i} className="bar-wrapper">
               {showValues && (
-                <span className={`bar-value ${isBarComp ? 'highlight-comp' : ''} ${isBarSwap ? 'highlight-swap' : ''}`}>
+                <span className={`bar-value ${isBarComp ? 'highlight-comp' : ''} ${isBarSwap ? 'highlight-swap' : ''} ${isBarSorted ? 'highlight-sorted' : ''}`}>
                   {value}
                 </span>
               )}
@@ -124,13 +172,13 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
                   className={`bar ${barState}`}
                   animate={{
                     height: `${heightPercent}%`,
-                    y: isBarSwap ? -6 : isBarComp ? -3 : 0,
-                    scale: isBarSwap ? 1.05 : isBarComp ? 1.02 : 1,
+                    y: isBarSwap ? -8 : isBarComp ? -4 : 0,
+                    scale: isBarSwap ? [1, 1.08, 1.04] : isBarComp ? 1.03 : 1,
                   }}
                   transition={{
-                    height: { type: 'spring', stiffness: 350, damping: 28 },
-                    y: { duration: 0.15 },
-                    scale: { duration: 0.15 },
+                    height: { type: 'spring', stiffness: 320, damping: 26 },
+                    y: { duration: 0.18 },
+                    scale: { duration: 0.18 },
                   }}
                 />
               </div>
@@ -142,7 +190,7 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
         })}
       </div>
 
-      {/* ── Pointer Arrows ── */}
+      {/* ── 4. Pointer Arrows with Spring Glide ── */}
       {frame.pointers && Object.keys(frame.pointers).length > 0 && (
         <div className="pointers-row">
           {array.map((_, i) => {
@@ -153,9 +201,9 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
                   <motion.div
                     key={name}
                     className="pointer-tag"
-                    initial={{ scale: 0.8, opacity: 0 }}
+                    initial={{ scale: 0.7, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                   >
                     <span>{name}</span>
                     <span style={{ fontSize: 9 }}>▲</span>
@@ -167,28 +215,10 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
         </div>
       )}
 
-      {/* ── Search Bounds Indicator ── */}
-      {type === 'searching' && frame.pointers && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: '4px 12px',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: 'var(--text-muted)',
-          background: 'var(--bg-card)',
-          borderTop: '1px solid var(--border)',
-        }}>
-          {frame.pointers.left !== undefined && <span>left = {frame.pointers.left}</span>}
-          {frame.pointers.mid !== undefined && <span style={{ color: 'var(--primary)', fontWeight: 600 }}>mid = {frame.pointers.mid}</span>}
-          {frame.pointers.right !== undefined && <span>right = {frame.pointers.right}</span>}
-        </div>
-      )}
-
-      {/* ── State / Variable Inspector ── */}
+      {/* ── 5. State / Variable Inspector Strip ── */}
       {frame.variables && Object.keys(frame.variables).length > 0 && (
         <div className="variable-inspector">
-          <span className="var-inspector-label">State:</span>
+          <span className="var-inspector-label">Memory:</span>
           {Object.entries(frame.variables).map(([name, value]) => (
             <div key={name} className="var-item">
               <span className="var-name">{name}</span>
