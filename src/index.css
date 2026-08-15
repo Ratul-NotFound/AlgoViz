@@ -295,14 +295,202 @@ body {
   gap: 36px;
 }
 
-/* 1. Platform Hero */
+/* 1. Creative Platform Hero Grid */
+.creative-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  align-items: center;
+}
+
 .platform-hero {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  max-width: 840px;
 }
+
+
+/* Live Hero Sandbox Card */
+.hero-sandbox-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.sandbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sandbox-label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.sandbox-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sandbox-canvas {
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 10px 8px 4px;
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.sandbox-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.sandbox-bar {
+  width: 100%;
+  background: var(--bar-default);
+  border-radius: 2px 2px 0 0;
+  transition: height 120ms ease, background-color 100ms ease;
+}
+
+.sandbox-bar.active {
+  background: var(--primary);
+}
+
+.sandbox-val {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+}
+
+.sandbox-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+/* 6. Growth Calculator Section */
+.growth-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.growth-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.growth-slider-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.growth-slider-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.growth-slider {
+  flex: 1;
+  min-width: 140px;
+}
+
+.growth-slider-val {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.growth-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.growth-metric-box {
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.growth-comp-tag {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.growth-label {
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.growth-ops-count {
+  font-size: 15px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.growth-ops-count.good { color: var(--success); }
+.growth-ops-count.med  { color: var(--warning); }
+.growth-ops-count.bad  { color: var(--danger); }
+
 
 .hero-badge-pill {
   display: inline-flex;
@@ -908,6 +1096,13 @@ body {
   gap: 8px;
 }
 
+@media (max-width: 900px) {
+  .creative-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
 @media (max-width: 768px) {
   .home-container {
     padding: 20px 14px 40px;
@@ -934,6 +1129,7 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
 
 
 

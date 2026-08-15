@@ -1,8 +1,8 @@
-// src/pages/HomePage.jsx — World-class DSA learning platform home & curriculum
+// src/pages/HomePage.jsx — Creative, interactive DSA learning platform home
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
-import { SearchIcon, ArrowRightIcon, CodeIcon, PlayIcon } from '../components/Icons.jsx';
+import { SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon, CodeIcon } from '../components/Icons.jsx';
 
 // Learning Tracks Curriculum
 const LEARNING_TRACKS = [
@@ -53,11 +53,75 @@ const LEARNING_TRACKS = [
   },
 ];
 
+// Interactive Big-O Growth Curves
+function calculateOperations(n) {
+  return [
+    { name: 'O(1)', label: 'Constant', ops: 1, class: 'good' },
+    { name: 'O(log n)', label: 'Logarithmic', ops: Math.round(Math.log2(n || 1)), class: 'good' },
+    { name: 'O(n)', label: 'Linear', ops: n, class: 'med' },
+    { name: 'O(n log n)', label: 'Linearithmic', ops: Math.round(n * Math.log2(n || 1)), class: 'med' },
+    { name: 'O(n²)', label: 'Quadratic', ops: n * n, class: 'bad' },
+  ];
+}
+
 export default function HomePage({ onSelectAlgo }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('tracks'); // 'tracks' | 'catalog' | 'matrix'
+  const [activeTab, setActiveTab] = useState('tracks'); // 'tracks' | 'catalog' | 'matrix' | 'growth'
   const [selectedLang, setSelectedLang] = useState('python');
+  const [sliderN, setSliderN] = useState(64);
+
+  // ── Hero Interactive Mini-Playground State ──
+  const [heroArray, setHeroArray] = useState([45, 12, 89, 34, 67, 23, 90, 15, 52, 78]);
+  const [heroActiveIdx, setHeroActiveIdx] = useState({ i: -1, j: -1 });
+  const [heroSorting, setHeroSorting] = useState(false);
+  const heroTimerRef = useRef(null);
+
+  const shuffleHero = () => {
+    clearInterval(heroTimerRef.current);
+    setHeroSorting(false);
+    setHeroActiveIdx({ i: -1, j: -1 });
+    setHeroArray(Array.from({ length: 10 }, () => Math.floor(Math.random() * 85) + 15));
+  };
+
+  const runHeroBubbleSort = () => {
+    if (heroSorting) {
+      clearInterval(heroTimerRef.current);
+      setHeroSorting(false);
+      return;
+    }
+
+    setHeroSorting(true);
+    let arr = [...heroArray];
+    let i = 0, j = 0;
+    const n = arr.length;
+
+    heroTimerRef.current = setInterval(() => {
+      if (i < n) {
+        if (j < n - i - 1) {
+          setHeroActiveIdx({ i: j, j: j + 1 });
+          if (arr[j] > arr[j + 1]) {
+            const temp = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = temp;
+            setHeroArray([...arr]);
+          }
+          j++;
+        } else {
+          j = 0;
+          i++;
+        }
+      } else {
+        clearInterval(heroTimerRef.current);
+        setHeroSorting(false);
+        setHeroActiveIdx({ i: -1, j: -1 });
+      }
+    }, 120);
+  };
+
+  useEffect(() => {
+    return () => clearInterval(heroTimerRef.current);
+  }, []);
 
   // Filtered algorithms for catalog & matrix
   const filteredAlgos = useMemo(() => {
@@ -74,63 +138,85 @@ export default function HomePage({ onSelectAlgo }) {
     });
   }, [activeCategory, searchQuery]);
 
+  const complexityResults = useMemo(() => calculateOperations(sliderN), [sliderN]);
+
   return (
     <div className="home-container">
-      {/* ── 1. Platform Hero Header ── */}
-      <section className="platform-hero">
-        <div className="hero-badge-pill">
-          <span>Interactive DSA Learning Platform</span>
+      {/* ── 1. Platform Hero with Live Interactive Mini-Sandbox ── */}
+      <section className="creative-hero-grid">
+        <div className="platform-hero">
+          <div className="hero-badge-pill">
+            <span>Interactive DSA Learning Platform</span>
+          </div>
+
+          <h1 className="platform-hero-title">
+            Master Data Structures & Algorithms <br />
+            <span className="hero-gradient-text">Through Visual Execution</span>
+          </h1>
+
+          <p className="platform-hero-sub">
+            Bridge the gap between theoretical pseudocode and practical implementation.
+            Observe pointer states, variable mutations, and synchronized code execution across 5 programming languages.
+          </p>
+
+          <div className="platform-hero-actions">
+            <button className="btn btn-primary btn-lg" onClick={() => onSelectAlgo('bubble-sort')}>
+              <PlayIcon size={13} />
+              <span>Start Learning Track</span>
+            </button>
+            <button className="btn btn-secondary btn-lg" onClick={() => setActiveTab('matrix')}>
+              <span>View Big-O Matrix</span>
+              <ArrowRightIcon size={13} />
+            </button>
+          </div>
         </div>
 
-        <h1 className="platform-hero-title">
-          Master Data Structures & Algorithms <br />
-          <span className="hero-gradient-text">Through Visual Execution</span>
-        </h1>
-
-        <p className="platform-hero-sub">
-          Bridge the gap between theoretical pseudocode and practical implementation.
-          Observe pointer states, variable mutations, and line-by-line synchronized code execution across 5 programming languages.
-        </p>
-
-        <div className="platform-hero-actions">
-          <button className="btn btn-primary btn-lg" onClick={() => onSelectAlgo('bubble-sort')}>
-            <PlayIcon size={13} />
-            <span>Start Learning Track</span>
-          </button>
-          <button className="btn btn-secondary btn-lg" onClick={() => setActiveTab('matrix')}>
-            <span>View Big-O Matrix</span>
-            <ArrowRightIcon size={13} />
-          </button>
-        </div>
-
-        {/* ── Learning Metric Strip ── */}
-        <div className="platform-stats-strip">
-          <div className="platform-stat">
-            <span className="stat-value">{ALGORITHMS.length}</span>
-            <span className="stat-label">Core Algorithms</span>
+        {/* ── Live Hero Interactive Sandbox ── */}
+        <div className="hero-sandbox-card">
+          <div className="sandbox-header">
+            <span className="sandbox-label">Live Interactive Sandbox</span>
+            <div className="sandbox-controls">
+              <button className="btn btn-sm btn-icon" onClick={shuffleHero} title="Randomize Array">
+                <ShuffleIcon size={12} />
+              </button>
+              <button className="btn btn-sm btn-primary" onClick={runHeroBubbleSort}>
+                {heroSorting ? <PauseIcon size={11} /> : <PlayIcon size={11} />}
+                <span>{heroSorting ? 'Pause' : 'Sort'}</span>
+              </button>
+            </div>
           </div>
-          <div className="platform-stat">
-            <span className="stat-value">5</span>
-            <span className="stat-label">Language Targets</span>
+
+          <div className="sandbox-canvas">
+            {heroArray.map((val, idx) => {
+              const isActive = idx === heroActiveIdx.i || idx === heroActiveIdx.j;
+              return (
+                <div key={idx} className="sandbox-bar-col">
+                  <div
+                    className={`sandbox-bar ${isActive ? 'active' : ''}`}
+                    style={{ height: `${val}%` }}
+                  />
+                  <span className="sandbox-val">{val}</span>
+                </div>
+              );
+            })}
           </div>
-          <div className="platform-stat">
-            <span className="stat-value">5</span>
-            <span className="stat-label">Structured Tracks</span>
-          </div>
-          <div className="platform-stat">
-            <span className="stat-value">100%</span>
-            <span className="stat-label">Step-by-Step Control</span>
+
+          <div className="sandbox-footer">
+            <span className="sandbox-note">Live Bubble Sort • O(n²) Step Engine</span>
+            <button className="btn-link" onClick={() => onSelectAlgo('bubble-sort')}>
+              Open Full Debugger →
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ── 2. Platform Navigation Tabs ── */}
+      {/* ── 2. Platform Navigation View Tabs ── */}
       <div className="platform-view-tabs">
         <button
           className={`platform-tab ${activeTab === 'tracks' ? 'active' : ''}`}
           onClick={() => setActiveTab('tracks')}
         >
-          Curriculum Tracks
+          Curriculum Tracks (5)
         </button>
         <button
           className={`platform-tab ${activeTab === 'catalog' ? 'active' : ''}`}
@@ -143,6 +229,12 @@ export default function HomePage({ onSelectAlgo }) {
           onClick={() => setActiveTab('matrix')}
         >
           Big-O Complexity Matrix
+        </button>
+        <button
+          className={`platform-tab ${activeTab === 'growth' ? 'active' : ''}`}
+          onClick={() => setActiveTab('growth')}
+        >
+          Big-O Growth Calculator
         </button>
       </div>
 
@@ -345,7 +437,47 @@ export default function HomePage({ onSelectAlgo }) {
         </section>
       )}
 
-      {/* ── 6. Multi-Language Interactive Showcase ── */}
+      {/* ── 6. View D: Interactive Big-O Growth Calculator ── */}
+      {activeTab === 'growth' && (
+        <section className="growth-section">
+          <div className="section-header-row">
+            <div>
+              <h2 className="section-title">Interactive Big-O Growth Calculator</h2>
+              <p className="section-subtitle">Adjust problem size (N) to observe why logarithmic and linearithmic algorithms drastically outperform quadratic approaches.</p>
+            </div>
+          </div>
+
+          <div className="growth-card">
+            <div className="growth-slider-bar">
+              <span className="growth-slider-label">Dataset Size (N = {sliderN}):</span>
+              <input
+                type="range"
+                min={4}
+                max={1024}
+                step={4}
+                value={sliderN}
+                onChange={e => setSliderN(parseInt(e.target.value))}
+                className="slider growth-slider"
+              />
+              <span className="growth-slider-val">{sliderN} elements</span>
+            </div>
+
+            <div className="growth-metrics-grid">
+              {complexityResults.map(item => (
+                <div key={item.name} className="growth-metric-box">
+                  <span className="growth-comp-tag">{item.name}</span>
+                  <span className="growth-label">{item.label}</span>
+                  <div className={`growth-ops-count ${item.class}`}>
+                    {item.ops.toLocaleString()} ops
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 7. Multi-Language Interactive Showcase ── */}
       <section className="lang-showcase-section">
         <div className="lang-showcase-card">
           <div className="lang-showcase-content">
