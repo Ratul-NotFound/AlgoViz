@@ -1,78 +1,14 @@
-// src/pages/HomePage.jsx — Modern, interactive landing page for AlgoViz
+// src/pages/HomePage.jsx — Professional technical catalog for AlgoViz
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
-
-// Mini Interactive Demo for Hero Section
-function HeroInteractiveDemo({ onSelectAlgo }) {
-  const [bars, setBars] = useState([35, 75, 20, 90, 50, 65, 30, 85, 45]);
-  const [comparing, setComparing] = useState([1, 2]);
-  const [currentStep, setCurrentStep] = useState(1);
-
-  // Subtle automatic cycle for demo preview
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setBars(prev => {
-        const next = [...prev];
-        const i = Math.floor(Math.random() * (next.length - 1));
-        setComparing([i, i + 1]);
-        if (next[i] > next[i + 1]) {
-          const tmp = next[i];
-          next[i] = next[i + 1];
-          next[i + 1] = tmp;
-        }
-        return next;
-      });
-      setCurrentStep(s => (s % 42) + 1);
-    }, 1200);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="hero-preview-card" onClick={() => onSelectAlgo('quick-sort')}>
-      <div className="hero-preview-header">
-        <div className="preview-dots">
-          <span className="dot red" />
-          <span className="dot yellow" />
-          <span className="dot green" />
-        </div>
-        <span className="preview-title">Quick Sort — Visual Demo</span>
-        <span className="preview-badge">Live</span>
-      </div>
-
-      <div className="hero-preview-canvas">
-        {bars.map((val, idx) => {
-          const isComp = comparing.includes(idx);
-          return (
-            <div key={idx} className="preview-bar-wrapper">
-              <div
-                className={`preview-bar ${isComp ? 'comparing' : ''}`}
-                style={{ height: `${val}%` }}
-              />
-              <span className="preview-bar-val">{val}</span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="hero-preview-footer">
-        <div className="preview-status">
-          <span className="pulse-dot" />
-          <span>Step {currentStep}: Comparing pivot with partition elements</span>
-        </div>
-        <button className="btn btn-sm btn-primary">
-          Launch Visualizer →
-        </button>
-      </div>
-    </div>
-  );
-}
+import { SearchIcon, ArrowRightIcon } from '../components/Icons.jsx';
 
 export default function HomePage({ onSelectAlgo }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filtered algorithms
+  // Filter algorithms by category and search query
   const filteredAlgos = useMemo(() => {
     return ALGORITHMS.filter(algo => {
       const matchesCat = activeCategory === 'all' || algo.category === activeCategory;
@@ -89,64 +25,62 @@ export default function HomePage({ onSelectAlgo }) {
 
   return (
     <div className="home-container">
-      {/* ── 1. Hero Section with Interactive Preview ── */}
-      <section className="hero-section">
-        <div className="hero-content">
+      {/* ── 1. Hero Documentation Header ── */}
+      <section className="hero-section" style={{ gridTemplateColumns: '1fr' }}>
+        <div className="hero-content" style={{ maxWidth: '820px' }}>
           <div className="hero-badge-pill">
-            <span className="badge-icon">⚡</span>
-            <span>Interactive Data Structures & Algorithms</span>
+            <span>Algorithm Visualization & Analysis Platform</span>
           </div>
 
           <h1 className="hero-heading">
-            Master Algorithms by <br />
-            <span className="hero-gradient-text">Seeing Them in Action</span>
+            Data Structures & <span className="hero-gradient-text">Algorithms Visualizer</span>
           </h1>
 
           <p className="hero-subtext">
-            Step through sorting, searching, graph traversal, and tree operations.
-            Observe real-time pointer shifts, variable states, and synchronized
-            code execution across <strong>5 programming languages</strong>.
+            Step-by-step visual execution engine with real-time pointer tracking,
+            variable state inspection, and synchronized code execution across
+            <strong> Python, C, C++, Java, and JavaScript</strong>.
           </p>
 
           <div className="hero-cta-group">
-            <button className="btn btn-primary btn-lg" onClick={() => onSelectAlgo('quick-sort')}>
-              Explore Quick Sort
+            <button className="btn btn-primary btn-lg" onClick={() => onSelectAlgo('bubble-sort')}>
+              <span>Quick Start: Bubble Sort</span>
+              <ArrowRightIcon size={14} />
             </button>
-            <button className="btn btn-secondary btn-lg" onClick={() => onSelectAlgo('bfs')}>
-              Explore Graphs
+            <button className="btn btn-secondary btn-lg" onClick={() => onSelectAlgo('dijkstra')}>
+              <span>Graph Search: Dijkstra</span>
             </button>
           </div>
 
           <div className="hero-feature-tags">
-            <span>✓ 5-Language Code Sync</span>
-            <span>✓ Step-by-Step Stepper</span>
-            <span>✓ Custom Array Inputs</span>
-            <span>✓ Complexity Breakdown</span>
+            <span>Synchronized Code Editor</span>
+            <span>•</span>
+            <span>Variable State Inspector</span>
+            <span>•</span>
+            <span>Step-by-Step Playback</span>
+            <span>•</span>
+            <span>Custom Datasets</span>
           </div>
-        </div>
-
-        <div className="hero-preview-wrapper">
-          <HeroInteractiveDemo onSelectAlgo={onSelectAlgo} />
         </div>
       </section>
 
-      {/* ── 2. Metric Statistics Strip ── */}
+      {/* ── 2. Metric Overview Strip ── */}
       <section className="stats-strip">
         <div className="stat-item">
           <div className="stat-num">{ALGORITHMS.length}</div>
-          <div className="stat-desc">Core DSA Algorithms</div>
+          <div className="stat-desc">Supported Algorithms</div>
         </div>
         <div className="stat-item">
           <div className="stat-num">5</div>
-          <div className="stat-desc">Languages (C, C++, Java, Py, JS)</div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-num">100%</div>
-          <div className="stat-desc">Step-by-Step Frame Control</div>
+          <div className="stat-desc">Language Implementations</div>
         </div>
         <div className="stat-item">
           <div className="stat-num">4</div>
-          <div className="stat-desc">Algorithmic Categories</div>
+          <div className="stat-desc">Algorithm Domains</div>
+        </div>
+        <div className="stat-item">
+          <div className="stat-num">O(1) – O(V²)</div>
+          <div className="stat-desc">Complexity Spectrum</div>
         </div>
       </section>
 
@@ -154,17 +88,17 @@ export default function HomePage({ onSelectAlgo }) {
       <section className="catalog-header">
         <div className="catalog-header-top">
           <div>
-            <h2 className="section-heading">Algorithm Catalog</h2>
-            <p className="section-subheading">Select any algorithm below to launch the interactive visualization workspace.</p>
+            <h2 className="section-heading">Algorithm Directory</h2>
+            <p className="section-subheading">Select an algorithm to launch the interactive visualization workspace.</p>
           </div>
 
-          {/* Search Input */}
+          {/* Search Box */}
           <div className="search-box">
-            <span className="search-icon">🔍</span>
+            <SearchIcon size={14} className="search-icon" />
             <input
               type="text"
               className="search-input"
-              placeholder="Search algorithm or complexity (e.g. quick, O(log n))..."
+              placeholder="Search by name or complexity (e.g. quick, O(log n))..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
@@ -174,13 +108,13 @@ export default function HomePage({ onSelectAlgo }) {
           </div>
         </div>
 
-        {/* Category Filter Pills */}
+        {/* Category Pills */}
         <div className="category-pills">
           <button
             className={`category-pill ${activeCategory === 'all' ? 'active' : ''}`}
             onClick={() => setActiveCategory('all')}
           >
-            All Algorithms ({ALGORITHMS.length})
+            All ({ALGORITHMS.length})
           </button>
           {Object.entries(CATEGORIES).map(([key, cat]) => {
             const count = ALGORITHMS.filter(a => a.category === key).length;
@@ -197,14 +131,13 @@ export default function HomePage({ onSelectAlgo }) {
         </div>
       </section>
 
-      {/* ── 4. Algorithm Grid ── */}
+      {/* ── 4. Algorithm Catalog Grid ── */}
       <section className="algo-catalog-grid">
         {filteredAlgos.length === 0 ? (
           <div className="no-results-box">
-            <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>No algorithms found</div>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>No matching algorithms</div>
             <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              Try searching for "bubble", "graph", or "dijkstra"
+              Try searching for "sort", "search", "dijkstra", or "bst"
             </div>
             <button className="btn btn-sm" style={{ marginTop: 12 }} onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
               Reset Filters
@@ -222,7 +155,7 @@ export default function HomePage({ onSelectAlgo }) {
                 <div className="catalog-card-header">
                   <span className="category-tag-sm">{catLabel}</span>
                   <span className="complexity-badge-sm">
-                    Avg: {algo.timeComplexity.average}
+                    {algo.timeComplexity.average}
                   </span>
                 </div>
 
@@ -231,7 +164,7 @@ export default function HomePage({ onSelectAlgo }) {
 
                 <div className="catalog-card-details">
                   <div className="detail-row">
-                    <span className="detail-label">Worst Time:</span>
+                    <span className="detail-label">Worst Case:</span>
                     <span className="detail-val">{algo.timeComplexity.worst}</span>
                   </div>
                   <div className="detail-row">
@@ -247,8 +180,8 @@ export default function HomePage({ onSelectAlgo }) {
                 </div>
 
                 <div className="catalog-card-action">
-                  <span>Launch Visualizer</span>
-                  <span className="action-arrow">→</span>
+                  <span>Launch Workspace</span>
+                  <ArrowRightIcon size={13} className="action-arrow" />
                 </div>
               </div>
             );
@@ -256,29 +189,26 @@ export default function HomePage({ onSelectAlgo }) {
         )}
       </section>
 
-      {/* ── 5. Features Showcase ── */}
+      {/* ── 5. Technical Specifications Grid ── */}
       <section className="features-grid">
         <div className="feature-box">
-          <div className="feature-icon">💻</div>
-          <h4 className="feature-title">5-Language Synchronized Code</h4>
+          <h4 className="feature-title">Multi-Language Code Synchronization</h4>
           <p className="feature-desc">
-            See the exact line of code highlighted as algorithms run. Switch between Python, C, C++, Java, and JavaScript instantly.
+            Observe line-by-line active execution mappings across Python, C, C++, Java, and JavaScript during each step of the animation.
           </p>
         </div>
 
         <div className="feature-box">
-          <div className="feature-icon">⏱️</div>
-          <h4 className="feature-title">Step-by-Step Playback</h4>
+          <h4 className="feature-title">Deterministic Step Engine</h4>
           <p className="feature-desc">
-            Step forward, step backward, or pause at any moment. Inspect variables, loop indices, and pointer states in real time.
+            Inspect pointer movements and variable memory states with bidirectional step forward and backward controls at adjustable clock speeds.
           </p>
         </div>
 
         <div className="feature-box">
-          <div className="feature-icon">🎲</div>
-          <h4 className="feature-title">Custom Data & Sizing</h4>
+          <h4 className="feature-title">Dynamic Dataset Inputs</h4>
           <p className="feature-desc">
-            Type your own custom arrays or test edge cases with randomized datasets from 5 to 40 elements.
+            Supply arbitrary comma-separated numerical arrays or generate randomized problem instances with custom length parameters.
           </p>
         </div>
       </section>

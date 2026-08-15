@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Sidebar       from './components/Sidebar.jsx';
 import HomePage      from './pages/HomePage.jsx';
 import AlgorithmPage from './pages/AlgorithmPage.jsx';
+import { MenuIcon }  from './components/Icons.jsx';
 
 export default function App() {
   const [currentSlug, setCurrentSlug] = useState(null);
@@ -34,7 +35,7 @@ export default function App() {
           onClick={() => setSidebarOpen(v => !v)}
           aria-label="Toggle menu"
         >
-          ☰
+          <MenuIcon size={16} />
         </button>
 
         <a className="header-logo" href="#" onClick={() => { setCurrentSlug(null); setSidebarOpen(false); }}>

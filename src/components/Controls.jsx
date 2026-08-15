@@ -1,4 +1,13 @@
-// src/components/Controls.jsx — Structured, properly aligned playback controls
+// src/components/Controls.jsx — Professional playback controls with standard SVG icons
+
+import {
+  PlayIcon,
+  PauseIcon,
+  StepForwardIcon,
+  StepBackIcon,
+  ResetIcon,
+  ShuffleIcon,
+} from './Icons.jsx';
 
 export default function Controls({
   isPlaying, isDone, speed, setSpeed,
@@ -11,43 +20,45 @@ export default function Controls({
 }) {
   return (
     <div className="controls-bar">
-      {/* ── Progress Track ── */}
+      {/* ── Step Progress Track ── */}
       <div className="step-progress">
         <div className="step-progress-bar" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* ── Row 1: Playback Navigation ── */}
+      {/* ── Row 1: Playback Controls & Frame Status ── */}
       <div className="controls-row" style={{ justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button className="btn btn-icon" title="Reset to Start" onClick={onReset}>
-            ⏮
+          <button className="btn btn-icon" title="Reset (R)" onClick={onReset}>
+            <ResetIcon size={13} />
           </button>
-          <button className="btn btn-icon" title="Step Back" onClick={onStepBackward} disabled={currentIdx === 0}>
-            ⏪
+          <button className="btn btn-icon" title="Step Back (Left Arrow)" onClick={onStepBackward} disabled={currentIdx === 0}>
+            <StepBackIcon size={13} />
           </button>
 
           {isPlaying ? (
             <button className="btn btn-primary" onClick={onPause} style={{ minWidth: 84 }}>
-              Pause
+              <PauseIcon size={13} />
+              <span>Pause</span>
             </button>
           ) : (
             <button className="btn btn-primary" onClick={onPlay} disabled={isDone} style={{ minWidth: 84 }}>
-              {isDone ? 'Finished' : 'Play'}
+              <PlayIcon size={13} />
+              <span>{isDone ? 'Finished' : 'Play'}</span>
             </button>
           )}
 
-          <button className="btn btn-icon" title="Step Forward" onClick={onStepForward} disabled={isDone}>
-            ⏩
+          <button className="btn btn-icon" title="Step Forward (Right Arrow)" onClick={onStepForward} disabled={isDone}>
+            <StepForwardIcon size={13} />
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-muted)' }}>
-            {currentIdx + 1} / {totalFrames}
+            Step {currentIdx + 1} / {totalFrames}
           </span>
 
           <div className="speed-control">
-            <span>Speed</span>
+            <span>Speed:</span>
             <input
               type="range"
               className="slider"
@@ -60,7 +71,7 @@ export default function Controls({
         </div>
       </div>
 
-      {/* ── Row 2: Array / Data Controls ── */}
+      {/* ── Row 2: Array & Data Configuration ── */}
       {(type === 'sorting' || type === 'searching') && (
         <div className="controls-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
           {type === 'sorting' && (
@@ -84,7 +95,7 @@ export default function Controls({
           <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'center' }}>
             <input
               className="custom-input"
-              placeholder="Custom array (e.g. 50, 20, 80, 10, 40)"
+              placeholder="Custom elements (e.g. 50, 20, 80, 10, 40)"
               value={customInput}
               onChange={e => setCustomInput(e.target.value)}
             />
@@ -98,7 +109,10 @@ export default function Controls({
               />
             )}
             <button className="btn" onClick={onApplyCustom}>Apply</button>
-            <button className="btn" onClick={onRandomize}>Randomize</button>
+            <button className="btn" onClick={onRandomize}>
+              <ShuffleIcon size={12} />
+              <span>Random</span>
+            </button>
           </div>
         </div>
       )}

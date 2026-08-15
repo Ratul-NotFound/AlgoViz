@@ -1,6 +1,7 @@
-// src/components/CodePanel.jsx — Clean, VS Code-styled code viewer
+// src/components/CodePanel.jsx — Clean, professional multi-language code inspector
 
 import { useState, useEffect, useRef } from 'react';
+import { CopyIcon, CheckIcon } from './Icons.jsx';
 
 const LANGUAGES = [
   { id: 'python', label: 'Python' },
@@ -72,7 +73,7 @@ export default function CodePanel({ code, activeLine, title }) {
 
   return (
     <div className="code-panel">
-      {/* Language Switcher */}
+      {/* ── Language Tabs ── */}
       <div className="code-panel-tabs">
         {LANGUAGES.map(l => (
           <div
@@ -85,17 +86,27 @@ export default function CodePanel({ code, activeLine, title }) {
         ))}
       </div>
 
-      {/* Editor Header */}
+      {/* ── Editor Toolbar ── */}
       <div className="code-panel-header">
         <span className="code-panel-title">
           {title || 'Algorithm'} Implementation
         </span>
-        <button className="btn-copy" onClick={handleCopy}>
-          {copied ? 'Copied' : 'Copy'}
+        <button className="btn-copy" onClick={handleCopy} title="Copy code to clipboard">
+          {copied ? (
+            <>
+              <CheckIcon size={12} />
+              <span>Copied</span>
+            </>
+          ) : (
+            <>
+              <CopyIcon size={12} />
+              <span>Copy</span>
+            </>
+          )}
         </button>
       </div>
 
-      {/* Code Editor Body */}
+      {/* ── Code Gutter & Content ── */}
       <div className="code-body">
         {currentCode.map((line, i) => {
           const isActive = i === activeIdx;
