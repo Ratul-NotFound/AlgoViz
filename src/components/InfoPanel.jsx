@@ -1,9 +1,8 @@
-// src/components/InfoPanel.jsx
-// Algorithm info: complexity table, description, current step explanation
+// src/components/InfoPanel.jsx — Clean algorithm complexity and description panel
 
-function complexityClass(val) {
-  if (val.includes('1)')) return 'good';
-  if (val.includes('log')) return 'good';
+function getComplexityClass(val) {
+  if (!val) return '';
+  if (val.includes('1)') || val.includes('log')) return 'good';
   if (val.includes('n²') || val.includes('n^2') || val.includes('V²')) return 'bad';
   return 'med';
 }
@@ -16,49 +15,43 @@ export default function InfoPanel({ metadata, currentMessage }) {
     <div className="info-panel">
       <div className="info-panel-title">{name}</div>
 
-      {/* Current step message */}
-      {currentMessage && (
-        <div className="info-step-box">
-          💡 {currentMessage}
-        </div>
-      )}
-
-      {/* Complexity Table */}
+      {/* Complexity Breakdown */}
       <table className="complexity-table">
         <thead>
           <tr>
-            <th>Case</th>
-            <th>Time</th>
-            <th>Space</th>
+            <th>Scenario</th>
+            <th>Time Complexity</th>
+            <th>Space Complexity</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Best</td>
-            <td className={complexityClass(timeComplexity.best)}>{timeComplexity.best}</td>
-            <td rowSpan={3} className={complexityClass(spaceComplexity)} style={{ verticalAlign: 'middle' }}>{spaceComplexity}</td>
+            <td>Best Case</td>
+            <td className={getComplexityClass(timeComplexity.best)}>{timeComplexity.best}</td>
+            <td rowSpan={3} style={{ verticalAlign: 'middle' }}>{spaceComplexity}</td>
           </tr>
           <tr>
             <td>Average</td>
-            <td className={complexityClass(timeComplexity.average)}>{timeComplexity.average}</td>
+            <td className={getComplexityClass(timeComplexity.average)}>{timeComplexity.average}</td>
           </tr>
           <tr>
-            <td>Worst</td>
-            <td className={complexityClass(timeComplexity.worst)}>{timeComplexity.worst}</td>
+            <td>Worst Case</td>
+            <td className={getComplexityClass(timeComplexity.worst)}>{timeComplexity.worst}</td>
           </tr>
           <tr>
-            <td>Stable</td>
-            <td colSpan={2} className={stable ? 'good' : 'bad'}>{stable ? '✅ Yes' : '❌ No'}</td>
+            <td>Stability</td>
+            <td colSpan={2}>{stable ? 'Stable' : 'Unstable'}</td>
           </tr>
         </tbody>
       </table>
 
+      {/* Description */}
       <p className="info-description">{description}</p>
 
+      {/* Key Insight */}
       {fact && (
         <div className="info-fact-box">
-          <span>💡</span>
-          <span>{fact}</span>
+          <strong>Note:</strong> {fact}
         </div>
       )}
     </div>

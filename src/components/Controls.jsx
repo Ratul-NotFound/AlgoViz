@@ -1,53 +1,51 @@
-// src/components/Controls.jsx
-// Playback controls bar
+// src/components/Controls.jsx — Clean, user-friendly playback controls
 
 export default function Controls({
   isPlaying, isDone, speed, setSpeed,
   onPlay, onPause, onStepForward, onStepBackward, onReset,
   currentIdx, totalFrames, progress,
-  // Array-specific
   arraySize, setArraySize,
   onRandomize, customInput, setCustomInput, onApplyCustom,
-  // Search-specific
-  searchTarget, setSearchTarget, onSearch,
-  // Type
+  searchTarget, setSearchTarget,
   type = 'sorting',
 }) {
   return (
     <div className="controls-bar">
-      {/* Progress bar */}
+      {/* Progress Bar */}
       <div className="step-progress">
         <div className="step-progress-bar" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Main playback row */}
+      {/* Main Playback Row */}
       <div className="controls-row">
-        <button className="btn btn-icon tooltip" data-tip="Reset" onClick={onReset}>⏮</button>
-        <button className="btn btn-icon tooltip" data-tip="Step Back" onClick={onStepBackward} disabled={currentIdx === 0}>
+        <button className="btn btn-icon" title="Reset" onClick={onReset}>
+          ⏮
+        </button>
+        <button className="btn btn-icon" title="Previous Step" onClick={onStepBackward} disabled={currentIdx === 0}>
           ⏪
         </button>
 
         {isPlaying ? (
-          <button className="btn btn-primary btn-icon" onClick={onPause} style={{ minWidth: 100 }}>
-            ⏸ Pause
+          <button className="btn btn-primary" onClick={onPause} style={{ minWidth: 90 }}>
+            Pause
           </button>
         ) : (
-          <button className="btn btn-primary btn-icon" onClick={onPlay} disabled={isDone} style={{ minWidth: 100 }}>
-            {isDone ? '✅ Done' : '▶ Play'}
+          <button className="btn btn-primary" onClick={onPlay} disabled={isDone} style={{ minWidth: 90 }}>
+            {isDone ? 'Completed' : 'Play'}
           </button>
         )}
 
-        <button className="btn btn-icon tooltip" data-tip="Step Forward" onClick={onStepForward} disabled={isDone}>
+        <button className="btn btn-icon" title="Next Step" onClick={onStepForward} disabled={isDone}>
           ⏩
         </button>
 
-        <div style={{ fontFamily: 'var(--font-code)', fontSize: 12, color: 'var(--text-muted)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-muted)' }}>
           {currentIdx + 1} / {totalFrames}
-        </div>
+        </span>
 
-        {/* Speed control */}
-        <div className="speed-control">
-          <span>🐢</span>
+        {/* Speed Slider */}
+        <div className="speed-control" style={{ marginLeft: 'auto' }}>
+          <span>Speed:</span>
           <input
             type="range"
             className="slider"
@@ -55,12 +53,11 @@ export default function Controls({
             value={speed}
             onChange={e => setSpeed(parseFloat(e.target.value))}
           />
-          <span>🐇</span>
-          <span style={{ fontFamily: 'var(--font-code)', fontSize: 12, minWidth: 32 }}>{speed}x</span>
+          <span style={{ fontFamily: 'var(--font-mono)', minWidth: 28 }}>{speed}x</span>
         </div>
       </div>
 
-      {/* Array / Search controls */}
+      {/* Array Configuration Row */}
       {(type === 'sorting' || type === 'searching') && (
         <div className="controls-row">
           {type === 'sorting' && (
@@ -69,18 +66,22 @@ export default function Controls({
               <input
                 type="range"
                 className="slider"
-                min={5} max={50} step={1}
+                min={5} max={40} step={1}
                 value={arraySize}
-                onChange={e => { setArraySize(parseInt(e.target.value)); onRandomize && onRandomize(parseInt(e.target.value)); }}
+                onChange={e => {
+                  const val = parseInt(e.target.value);
+                  setArraySize(val);
+                  onRandomize && onRandomize(val);
+                }}
               />
-              <span style={{ fontFamily: 'var(--font-code)', fontSize: 12 }}>{arraySize}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', minWidth: 20 }}>{arraySize}</span>
             </div>
           )}
 
-          <div className="input-row" style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'center' }}>
             <input
               className="custom-input"
-              placeholder={type === 'searching' ? "Enter array (e.g. 10,30,5,20,40)" : "Custom array (e.g. 64,34,25,12)"}
+              placeholder="Custom array (e.g. 45, 12, 89, 23)"
               value={customInput}
               onChange={e => setCustomInput(e.target.value)}
             />
@@ -94,7 +95,7 @@ export default function Controls({
               />
             )}
             <button className="btn" onClick={onApplyCustom}>Apply</button>
-            <button className="btn btn-danger" onClick={onRandomize}>🎲 Random</button>
+            <button className="btn" onClick={onRandomize}>Randomize</button>
           </div>
         </div>
       )}

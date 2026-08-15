@@ -1,4 +1,4 @@
-// src/components/Sidebar.jsx
+// src/components/Sidebar.jsx — Clean, minimalist sidebar navigation
 
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 
@@ -14,7 +14,6 @@ export default function Sidebar({ currentSlug, onSelect }) {
       {grouped.map(group => (
         <div className="sidebar-category" key={group.key}>
           <div className="sidebar-category-header">
-            <span className="sidebar-category-icon">{group.icon}</span>
             {group.label}
           </div>
           <div className="sidebar-items">
@@ -24,15 +23,15 @@ export default function Sidebar({ currentSlug, onSelect }) {
                 className={`sidebar-item ${currentSlug === algo.slug ? 'active' : ''}`}
                 onClick={() => onSelect(algo.slug)}
               >
-                <span>{algo.icon}</span>
-                <span>{algo.name}</span>
+                <span className="sidebar-item-name">
+                  <span>{algo.name}</span>
+                </span>
                 <span className="sidebar-item-complexity">
                   {algo.timeComplexity.average}
                 </span>
               </div>
             ))}
           </div>
-          <div className="sidebar-divider" />
         </div>
       ))}
     </aside>

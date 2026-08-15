@@ -1,5 +1,4 @@
-// src/pages/AlgorithmPage.jsx
-// Main algorithm visualization page — fully responsive with mobile bottom tabs
+// src/pages/AlgorithmPage.jsx — Clean, user-friendly algorithm workspace
 
 import { useState, useEffect, useCallback } from 'react';
 import { useStepper } from '../engine/useStepper.js';
@@ -15,26 +14,24 @@ import { DEFAULT_GRAPH as DIJKSTRA_GRAPH } from '../algorithms/graphs/dijkstra.j
 
 const LEGEND_ITEMS = {
   sorting: [
-    { color: 'var(--bar-default)', label: 'Unsorted'   },
-    { color: 'var(--bar-compare)', label: 'Comparing'  },
-    { color: 'var(--bar-swap)',    label: 'Swapping'   },
-    { color: 'var(--bar-sorted)',  label: 'Sorted'     },
-    { color: 'var(--bar-pivot)',   label: 'Pivot'      },
-    { color: 'var(--bar-current)', label: 'Current'    },
+    { color: 'var(--bar-default)',   label: 'Default' },
+    { color: 'var(--bar-comparing)', label: 'Comparing' },
+    { color: 'var(--bar-swapping)',  label: 'Swapping' },
+    { color: 'var(--bar-sorted)',    label: 'Sorted' },
+    { color: 'var(--bar-pivot)',     label: 'Pivot' },
   ],
   searching: [
-    { color: 'var(--bar-default)',  label: 'Unchecked'  },
-    { color: 'var(--bar-compare)',  label: 'Checking'   },
-    { color: 'var(--bar-found)',    label: 'Found'      },
-    { color: 'var(--bar-sorted)',   label: 'Eliminated' },
+    { color: 'var(--bar-default)',   label: 'Unchecked' },
+    { color: 'var(--bar-comparing)', label: 'Comparing' },
+    { color: 'var(--bar-found)',     label: 'Found' },
+    { color: 'var(--bar-sorted)',    label: 'Eliminated' },
   ],
 };
 
-// Mobile tab definitions
 const MOBILE_TABS = [
-  { id: 'visual', icon: '📊', label: 'Visual' },
-  { id: 'code',   icon: '💻', label: 'Code'   },
-  { id: 'info',   icon: 'ℹ️',  label: 'Info'   },
+  { id: 'visual', label: 'Visualizer' },
+  { id: 'code',   label: 'Code' },
+  { id: 'info',   label: 'Explanation' },
 ];
 
 export default function AlgorithmPage({ slug }) {
@@ -45,17 +42,15 @@ export default function AlgorithmPage({ slug }) {
   const [customInput,  setCustomInput]  = useState('');
   const [searchTarget, setSearchTarget] = useState('');
   const [inputData,    setInputData]    = useState(null);
-  const [mobileTab,    setMobileTab]    = useState('visual'); // 'visual' | 'code' | 'info'
+  const [mobileTab,    setMobileTab]    = useState('visual');
   const [isMobile,     setIsMobile]     = useState(window.innerWidth <= 768);
 
-  // Track mobile breakpoint
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Build input data based on algorithm type
   const buildInputData = useCallback((arr, target) => {
     if (!algo) return null;
     const cat = algo.category;
@@ -66,7 +61,6 @@ export default function AlgorithmPage({ slug }) {
     return null;
   }, [algo, slug]);
 
-  // Reset when slug changes
   useEffect(() => {
     if (!algo) return;
     const arr = generateRandomArray(arraySize);
@@ -118,35 +112,24 @@ export default function AlgorithmPage({ slug }) {
   const cat     = algo.category;
   const message = frame?.message || null;
 
-  // Which panels are visible on mobile
   const leftVisible  = !isMobile || mobileTab === 'visual';
   const rightVisible = !isMobile || mobileTab === 'code' || mobileTab === 'info';
 
   return (
     <>
       <div className="algo-page">
-        {/* ────── LEFT: Visualizer + Controls ────── */}
-        <div
-          className={`algo-page-left ${isMobile && !leftVisible ? 'tab-hidden' : ''}`}
-        >
-          {/* Message bar */}
-          <div style={{ padding: '10px 16px 0', flexShrink: 0 }}>
-            <div className="visualizer-message-bar">
-              <div className="visualizer-message-dot" />
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {message || `Press ▶ Play to visualize ${algo.name}`}
-              </span>
-            </div>
+        {/* ── Left Workspace: Visualizer & Controls ── */}
+        <div className={`algo-page-left ${isMobile && !leftVisible ? 'tab-hidden' : ''}`}>
+          {/* Step Message Status */}
+          <div className="visualizer-message-bar">
+            <span className="status-dot" />
+            <span>{message || `Click Play to start ${algo.name}`}</span>
           </div>
 
-          {/* Visualizer canvas */}
+          {/* Visualizer Area */}
           <div className="visualizer-area">
-            {cat === 'sorting' && (
-              <ArrayVisualizer frame={frame} type="sorting" />
-            )}
-            {cat === 'searching' && (
-              <ArrayVisualizer frame={frame} type="searching" />
-            )}
+            {cat === 'sorting' && <ArrayVisualizer frame={frame} type="sorting" />}
+            {cat === 'searching' && <ArrayVisualizer frame={frame} type="searching" />}
             {cat === 'graphs' && (
               <GraphVisualizer
                 frame={frame}
@@ -154,35 +137,31 @@ export default function AlgorithmPage({ slug }) {
                 type={slug}
               />
             )}
-            {cat === 'trees' && (
-              <TreeVisualizer frame={frame} />
-            )}
+            {cat === 'trees' && <TreeVisualizer frame={frame} />}
 
-            {/* Done overlay */}
             {stepper.isDone && (
               <div className="done-overlay">
-                <div className="done-overlay-emoji">🎉</div>
-                <div className="done-overlay-text">Complete!</div>
-                <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={stepper.reset}>
-                  🔄 Run Again
+                <div className="done-overlay-text">Algorithm Finished</div>
+                <button className="btn btn-primary" onClick={stepper.reset}>
+                  Reset & Run Again
                 </button>
               </div>
             )}
           </div>
 
-          {/* Color Legend */}
+          {/* Legend */}
           {LEGEND_ITEMS[cat] && (
             <div className="legend">
               {LEGEND_ITEMS[cat].map(item => (
                 <div className="legend-item" key={item.label}>
                   <div className="legend-dot" style={{ background: item.color }} />
-                  {item.label}
+                  <span>{item.label}</span>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Controls */}
+          {/* Controls Bar */}
           <Controls
             isPlaying={stepper.isPlaying}
             isDone={stepper.isDone}
@@ -209,13 +188,8 @@ export default function AlgorithmPage({ slug }) {
           />
         </div>
 
-        {/* ────── RIGHT: Code + Info ────── */}
-        <div
-          className={`algo-page-right ${
-            isMobile && rightVisible ? 'tab-visible' : ''
-          }`}
-        >
-          {/* On mobile, show either code or info based on active tab */}
+        {/* ── Right Workspace: Code & Details ── */}
+        <div className={`algo-page-right ${isMobile && rightVisible ? 'tab-visible' : ''}`}>
           {(!isMobile || mobileTab === 'code') && (
             <CodePanel
               code={algo.module.CODE}
@@ -232,19 +206,16 @@ export default function AlgorithmPage({ slug }) {
         </div>
       </div>
 
-      {/* ────── Mobile Bottom Tab Bar ────── */}
+      {/* ── Mobile Navigation Tabs ── */}
       <div className="mobile-tabs">
         <div className="mobile-tab-bar">
           {MOBILE_TABS.map(tab => (
             <button
               key={tab.id}
-              id={`tab-${tab.id}`}
-              type="button"
               className={`mobile-tab-btn ${mobileTab === tab.id ? 'active' : ''}`}
               onClick={() => setMobileTab(tab.id)}
             >
-              <span className="mobile-tab-icon">{tab.icon}</span>
-              <span>{tab.label}</span>
+              {tab.label}
             </button>
           ))}
         </div>

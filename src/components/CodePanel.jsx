@@ -1,74 +1,53 @@
-// src/components/CodePanel.jsx
-// Multi-language code display with synchronized line highlighting
+// src/components/CodePanel.jsx — Clean, VS Code-styled code viewer
 
 import { useState, useEffect, useRef } from 'react';
 
 const LANGUAGES = [
-  { id: 'python', label: 'Python',     color: '#60a5fa' },
-  { id: 'c',      label: 'C',          color: 'var(--sky)' },
-  { id: 'cpp',    label: 'C++',        color: '#a5b4fc' },
-  { id: 'java',   label: 'Java',       color: 'var(--amber-light)' },
-  { id: 'js',     label: 'JavaScript', color: 'var(--lime-light)' },
+  { id: 'python', label: 'Python' },
+  { id: 'c',      label: 'C' },
+  { id: 'cpp',    label: 'C++' },
+  { id: 'java',   label: 'Java' },
+  { id: 'js',     label: 'JavaScript' },
 ];
 
-// Simple syntax token colorizer
-function tokenizeLine(line, lang) {
-  if (!line) return [{ text: ' ', type: 'plain' }];
+function tokenize(line) {
+  if (!line) return [{ text: ' ', color: 'var(--text-code)' }];
 
   const tokens = [];
-  let remaining = line;
+  let rem = line;
 
   const rules = [
-    // Comments
-    { re: /^(\/\/.*|#.*)/, type: 'comment' },
-    // Strings
-    { re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/, type: 'string' },
-    // Keywords
+    { re: /^(\/\/.*|#.*)/, color: '#64748b' }, // comment
+    { re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/, color: '#a5d6a7' }, // string
     {
-      re: /^(def|class|return|if|else|elif|for|while|in|not|and|or|True|False|None|import|from|pass|break|continue|void|int|float|double|bool|char|string|struct|const|static|new|this|self|null|NULL|nullptr|public|private|protected|override|extends|implements|interface|function|let|const|var|of|typeof|instanceof|throw|try|catch|finally|include|using|namespace|template|auto|size_t|unsigned)\b/,
-      type: 'keyword',
+      re: /^(def|class|return|if|else|elif|for|while|in|not|and|or|True|False|None|void|int|float|double|bool|char|struct|const|static|new|this|self|null|NULL|nullptr|public|private|function|let|const|var|typeof)\b/,
+      color: '#f472b6', // keyword
     },
-    // Types
-    { re: /^(vector|list|set|map|queue|stack|deque|pair|array|List|Set|Map|Queue|Stack|Dict|tuple|LinkedList|HashMap|HashSet|PriorityQueue|heapq|deque|ArrayList|Scanner|System|Arrays|Math|Collections)\b/, type: 'type' },
-    // Functions/methods
-    { re: /^([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/, type: 'function' },
-    // Numbers
-    { re: /^(\d+\.?\d*|\.\d+)/, type: 'number' },
-    // Operators
-    { re: /^([+\-*/<>=!&|^%~?:]+|={1,3}|!=|<=|>=|->|=>|::)/, type: 'operator' },
-    // Plain text
-    { re: /^[^"'#/a-zA-Z0-9+\-*/<>=!&|^%~?:]+/, type: 'plain' },
-    { re: /^./, type: 'plain' },
+    { re: /^(vector|list|set|map|queue|stack|List|Set|Map|Queue|Stack|Arrays|Math|Node)\b/, color: '#38bdf8' }, // type
+    { re: /^([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/, color: '#60a5fa' }, // function
+    { re: /^(\d+\.?\d*|\.\d+)/, color: '#fbbf24' }, // number
+    { re: /^([+\-*/<>=!&|^%~?:]+|={1,3}|!=|<=|>=|->|=>)/, color: '#94a3b8' }, // op
+    { re: /^[^"'#/a-zA-Z0-9+\-*/<>=!&|^%~?:]+/, color: 'var(--text-code)' },
+    { re: /^./, color: 'var(--text-code)' },
   ];
 
-  while (remaining.length > 0) {
+  while (rem.length > 0) {
     let matched = false;
     for (const rule of rules) {
-      const m = remaining.match(rule.re);
+      const m = rem.match(rule.re);
       if (m) {
-        tokens.push({ text: m[0], type: rule.type });
-        remaining = remaining.slice(m[0].length);
+        tokens.push({ text: m[0], color: rule.color });
+        rem = rem.slice(m[0].length);
         matched = true;
         break;
       }
     }
-    if (!matched) { tokens.push({ text: remaining[0], type: 'plain' }); remaining = remaining.slice(1); }
+    if (!matched) {
+      tokens.push({ text: rem[0], color: 'var(--text-code)' });
+      rem = rem.slice(1);
+    }
   }
   return tokens;
-}
-
-function TokenSpan({ token }) {
-  const colors = {
-    keyword:  'var(--violet-light)',
-    function: 'var(--cyan-light)',
-    string:   '#86efac',
-    number:   'var(--amber)',
-    comment:  'var(--text-muted)',
-    type:     'var(--pink)',
-    operator: '#94a3b8',
-    plain:    'var(--text-code)',
-  };
-  return <span style={{ color: colors[token.type] || 'var(--text-code)' }}>{token.text}</span>;
 }
 
 export default function CodePanel({ code, activeLine, title }) {
@@ -79,7 +58,6 @@ export default function CodePanel({ code, activeLine, title }) {
   const currentCode = code?.[lang] || [];
   const activeIdx = activeLine?.[lang] ?? -1;
 
-  // Auto-scroll to active line
   useEffect(() => {
     if (activeLineRef.current) {
       activeLineRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -89,40 +67,39 @@ export default function CodePanel({ code, activeLine, title }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode.join('\n'));
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   return (
     <div className="code-panel">
-      {/* Language tabs */}
+      {/* Language Switcher */}
       <div className="code-panel-tabs">
         {LANGUAGES.map(l => (
           <div
             key={l.id}
             className={`lang-tab ${lang === l.id ? 'active' : ''}`}
             onClick={() => setLang(l.id)}
-            style={lang === l.id ? { borderBottomColor: l.color, color: l.color } : {}}
           >
             {l.label}
           </div>
         ))}
       </div>
 
-      {/* Header */}
+      {/* Editor Header */}
       <div className="code-panel-header">
         <span className="code-panel-title">
-          {title || 'Code'} — {LANGUAGES.find(l => l.id === lang)?.label}
+          {title || 'Algorithm'} Implementation
         </span>
         <button className="btn-copy" onClick={handleCopy}>
-          {copied ? '✅ Copied!' : '📋 Copy'}
+          {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
 
-      {/* Code body */}
+      {/* Code Editor Body */}
       <div className="code-body">
         {currentCode.map((line, i) => {
           const isActive = i === activeIdx;
-          const tokens = tokenizeLine(line, lang);
+          const tokens = tokenize(line);
           return (
             <div
               key={i}
@@ -131,7 +108,9 @@ export default function CodePanel({ code, activeLine, title }) {
             >
               <span className="code-line-number">{i + 1}</span>
               <code className="code-content">
-                {tokens.map((t, ti) => <TokenSpan key={ti} token={t} />)}
+                {tokens.map((t, ti) => (
+                  <span key={ti} style={{ color: t.color }}>{t.text}</span>
+                ))}
               </code>
             </div>
           );
