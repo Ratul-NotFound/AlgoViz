@@ -123,7 +123,7 @@ export default function AlgorithmPage({ slug }) {
           {/* Step Message Status */}
           <div className="visualizer-message-bar">
             <span className="status-dot" />
-            <span>{message || `Click Play to start ${algo.name}`}</span>
+            <span className="message-text">{message || `Click Play to start ${algo.name}`}</span>
           </div>
 
           {/* Visualizer Area */}

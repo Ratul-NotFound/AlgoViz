@@ -1,8 +1,6 @@
-// src/visualizers/ArrayVisualizer.jsx — Clean, professional array visualizer
+// src/visualizers/ArrayVisualizer.jsx — Fluid, properly proportioned array visualizer
 
 import { motion } from 'framer-motion';
-
-const MAX_HEIGHT = 240;
 
 function getBarClass(i, frame, type) {
   if (!frame) return 'default';
@@ -23,8 +21,8 @@ function getBarClass(i, frame, type) {
 
 export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   if (!frame) return (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-subtle)' }}>
-      Select an algorithm and click Play
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
+      Select an algorithm and click Play to start
     </div>
   );
 
@@ -33,22 +31,23 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const showValues = array.length <= 25;
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* ── Bars Canvas ── */}
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+      {/* ── Bars Canvas (Flex-1 fluid container) ── */}
       <div className="visualizer-canvas">
         {array.map((value, i) => {
           const barClass = getBarClass(i, frame, type);
-          const height = Math.max(12, (value / maxValue) * MAX_HEIGHT);
+          // Scale height fluidly up to 92% of canvas height
+          const heightPercent = Math.max(6, (value / maxValue) * 88);
 
           return (
-            <div key={i} className="bar-wrapper">
+            <div key={i} className="bar-wrapper" style={{ height: '100%', justifyContent: 'flex-end' }}>
               {showValues && (
                 <span className="bar-value">{value}</span>
               )}
               <motion.div
                 className={`bar ${barClass}`}
-                animate={{ height }}
-                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                animate={{ height: `${heightPercent}%` }}
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
               />
               {showValues && (
                 <span className="bar-index">{i}</span>
@@ -68,7 +67,7 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
                 {ptrs.map(([name]) => (
                   <div key={name} className="pointer-tag">
                     <span>{name}</span>
-                    <span>▲</span>
+                    <span style={{ fontSize: 9 }}>▲</span>
                   </div>
                 ))}
               </div>
@@ -77,24 +76,25 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
         </div>
       )}
 
-      {/* ── Search Bounds ── */}
+      {/* ── Search Bounds Indicator ── */}
       {type === 'searching' && frame.pointers && (
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          padding: '4px 8px',
+          padding: '4px 12px',
           fontFamily: 'var(--font-mono)',
           fontSize: '11px',
           color: 'var(--text-muted)',
+          background: 'var(--bg-card)',
           borderTop: '1px solid var(--border)',
         }}>
           {frame.pointers.left !== undefined && <span>left = {frame.pointers.left}</span>}
-          {frame.pointers.mid !== undefined && <span style={{ color: 'var(--primary)' }}>mid = {frame.pointers.mid}</span>}
+          {frame.pointers.mid !== undefined && <span style={{ color: 'var(--primary)', fontWeight: 600 }}>mid = {frame.pointers.mid}</span>}
           {frame.pointers.right !== undefined && <span>right = {frame.pointers.right}</span>}
         </div>
       )}
 
-      {/* ── Variable Inspector ── */}
+      {/* ── State / Variable Inspector ── */}
       {frame.variables && Object.keys(frame.variables).length > 0 && (
         <div className="variable-inspector">
           <span className="var-inspector-label">State:</span>
