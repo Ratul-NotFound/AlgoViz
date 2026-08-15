@@ -1,8 +1,8 @@
-// src/visualizers/ArrayVisualizer.jsx — Fluid, guaranteed height array visualizer
+// src/visualizers/ArrayVisualizer.jsx — Rich, expressive, animated array visualizer with comparison & swap cues
 
 import { motion } from 'framer-motion';
 
-function getBarClass(i, frame, type) {
+function getBarState(i, frame, type) {
   if (!frame) return 'default';
   if (type === 'searching') {
     if (frame.found === i) return 'found';
@@ -29,26 +29,63 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const array = frame.array || [];
   const maxValue = Math.max(...array, 1);
   const showValues = array.length <= 25;
+  const comparingIndices = frame.comparing || [];
+  const isComparingTwo = comparingIndices.length === 2;
 
   return (
     <div className="array-visualizer-container">
+      {/* ── Active Comparison Comparison Badge ── */}
+      {isComparingTwo && (
+        <div className="comparison-banner">
+          <span className="comp-tag">Comparing</span>
+          <span className="comp-expr">
+            arr[{comparingIndices[0]}] ({array[comparingIndices[0]]})
+            {' '}
+            <strong style={{ color: array[comparingIndices[0]] > array[comparingIndices[1]] ? 'var(--danger)' : 'var(--success)' }}>
+              {array[comparingIndices[0]] > array[comparingIndices[1]] ? '>' : '≤'}
+            </strong>
+            {' '}
+            arr[{comparingIndices[1]}] ({array[comparingIndices[1]]})
+          </span>
+          {array[comparingIndices[0]] > array[comparingIndices[1]] && (
+            <span className="comp-swap-badge">Needs Swap</span>
+          )}
+        </div>
+      )}
+
       {/* ── Bars Canvas ── */}
       <div className="visualizer-canvas">
         {array.map((value, i) => {
-          const barClass = getBarClass(i, frame, type);
-          // Calculate proportional percentage height
+          const barState = getBarState(i, frame, type);
+          const isComparing = barState === 'comparing';
+          const isSwapping = barState === 'swapping';
+          const isPivot = barState === 'pivot';
+          const isFound = barState === 'found';
+          const isSorted = barState === 'sorted';
+
+          // Proportional percentage height
           const heightPercent = Math.max(8, (value / maxValue) * 88);
 
           return (
             <div key={i} className="bar-wrapper">
               {showValues && (
-                <span className="bar-value">{value}</span>
+                <span className={`bar-value ${isComparing ? 'highlight-comp' : ''} ${isSwapping ? 'highlight-swap' : ''}`}>
+                  {value}
+                </span>
               )}
               <div className="bar-track">
                 <motion.div
-                  className={`bar ${barClass}`}
-                  animate={{ height: `${heightPercent}%` }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  className={`bar ${barState}`}
+                  animate={{
+                    height: `${heightPercent}%`,
+                    y: isSwapping ? -6 : isComparing ? -3 : 0,
+                    scale: isSwapping ? 1.05 : isComparing ? 1.02 : 1,
+                  }}
+                  transition={{
+                    height: { type: 'spring', stiffness: 350, damping: 28 },
+                    y: { duration: 0.15 },
+                    scale: { duration: 0.15 },
+                  }}
                 />
               </div>
               {showValues && (
@@ -67,10 +104,16 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
             return (
               <div key={i} className="pointer-cell">
                 {ptrs.map(([name]) => (
-                  <div key={name} className="pointer-tag">
+                  <motion.div
+                    key={name}
+                    className="pointer-tag"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  >
                     <span>{name}</span>
                     <span style={{ fontSize: 9 }}>▲</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             );

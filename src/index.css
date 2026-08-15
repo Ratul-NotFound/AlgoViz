@@ -1219,6 +1219,48 @@ body {
   min-height: 140px;
 }
 
+/* Active Comparison Banner */
+.comparison-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  width: fit-content;
+  align-self: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.comp-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--primary-subtle);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+}
+
+.comp-expr {
+  color: var(--text-main);
+}
+
+.comp-swap-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--danger);
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+}
+
 /* Bar Elements */
 .bar-wrapper {
   flex: 1;
@@ -1245,16 +1287,37 @@ body {
   width: 100%;
   border-radius: 3px 3px 0 0;
   background: var(--bar-default);
-  transition: background-color 100ms ease;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
   min-height: 6px;
 }
 
-.bar.comparing { background: var(--bar-comparing); }
-.bar.swapping  { background: var(--bar-swapping); }
-.bar.sorted    { background: var(--bar-sorted); }
-.bar.pivot     { background: var(--bar-pivot); }
-.bar.found     { background: var(--bar-found); }
-.bar.current   { background: var(--bar-current); }
+.bar.comparing {
+  background: var(--bar-comparing);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.bar.swapping {
+  background: var(--bar-swapping);
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.5);
+}
+
+.bar.sorted {
+  background: var(--bar-sorted);
+}
+
+.bar.pivot {
+  background: var(--bar-pivot);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+.bar.found {
+  background: var(--bar-found);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
+}
+
+.bar.current {
+  background: var(--bar-current);
+}
 
 .bar-value {
   font-size: 11px;
@@ -1262,6 +1325,19 @@ body {
   color: var(--text-muted);
   margin-bottom: 4px;
   font-weight: 500;
+  transition: color 120ms ease, transform 120ms ease;
+}
+
+.bar-value.highlight-comp {
+  color: var(--primary);
+  font-weight: 700;
+  transform: scale(1.15);
+}
+
+.bar-value.highlight-swap {
+  color: var(--danger);
+  font-weight: 700;
+  transform: scale(1.2);
 }
 
 .bar-index {
@@ -1270,6 +1346,7 @@ body {
   color: var(--text-dim);
   margin-top: 4px;
 }
+
 
 
 /* Pointer Indicators */
