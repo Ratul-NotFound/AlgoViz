@@ -1208,56 +1208,10 @@ body {
   padding: 8px;
 }
 
-.mobile-tabs {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--bg-sidebar);
-  border-top: 1px solid var(--border);
-  z-index: 40;
-}
-
-.mobile-tab-bar {
-  display: flex;
-  height: 48px;
-}
-
-.mobile-tab-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.mobile-tab-btn.active {
-  color: var(--primary);
-  border-top: 2px solid var(--primary);
-}
-
 /* ─────────────────────────────────────────
    Responsive Breakpoints
 ───────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .algo-page {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    overflow-y: auto;
-  }
-  .algo-page-left { min-height: 440px; }
-  .algo-page-right { min-height: 380px; border-top: 1px solid var(--border); }
-  .home-stats { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 768px) {
   .app-shell {
     grid-template-columns: 1fr;
     grid-template-areas: "header" "main";
@@ -1265,21 +1219,53 @@ body {
   .sidebar { display: none; }
   .hamburger-btn { display: flex; }
   .header-langs, .header-badge { display: none; }
-  
-  .mobile-tabs { display: block; }
-  .main { padding-bottom: 48px; }
 
+  /* Mobile/Tablet algo page: clean vertical stack (Visualizer top -> Code middle -> Info bottom) */
   .algo-page {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - var(--header-h) - 48px);
-    overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: auto !important;
   }
 
-  .algo-page-left.tab-hidden { display: none !important; }
-  .algo-page-right.tab-hidden { display: none !important; }
-  .algo-page-right.tab-visible { display: flex !important; flex: 1; }
-  
-  .algo-grid { grid-template-columns: 1fr; }
-  .home-stats { grid-template-columns: 1fr 1fr; }
+  .algo-page-left {
+    flex-shrink: 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .visualizer-area {
+    padding: 10px 12px;
+  }
+
+  .visualizer-canvas {
+    min-height: 150px;
+    height: 150px;
+  }
+
+  .controls-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .algo-page-right {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 380px !important;
+    border-top: none !important;
+  }
+
+  .code-panel {
+    min-height: 240px;
+    max-height: 360px;
+  }
+
+  .info-panel {
+    max-height: none;
+    padding: 16px 12px;
+  }
 }
+
+
