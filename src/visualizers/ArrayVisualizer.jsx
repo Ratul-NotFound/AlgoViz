@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playNote, playCompleteFanfare } from '../utils/sound.js';
+import { playNote, playComparisonSound, playSwapSound, playActionSound, playCompleteFanfare } from '../utils/sound.js';
 
 /**
  * Maps algorithm internal frame state to semantic bar styling classes.
@@ -144,13 +144,15 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
       setCmpGeometry(null);
     }
 
-    // Audio Sonification on Swaps & Comparisons
+    // Audio Sonification on Swaps, Comparisons & Completion
     if (frame) {
-      if (frame.isSwapping && pA != null) {
-        playNote(array[pA] || 50, maxVal, 'triangle', 0.06);
-      } else if (frame.isComparing && pA != null) {
-        playNote(array[pA] || 50, maxVal, 'sine', 0.04);
-      } else if (frame.message?.includes('complete') || frame.message?.includes('✅')) {
+      if (isSwap && pA != null && pB != null) {
+        playSwapSound(array[pA] || 50, array[pB] || 50, maxVal);
+      } else if (isCmp && pA != null) {
+        playComparisonSound(array[pA] || 50, maxVal);
+      } else if (frame.found != null) {
+        playActionSound('found');
+      } else if (frame.message && (frame.message.toLowerCase().includes('complete') || frame.message.includes('✅') || frame.message.toLowerCase().includes('finished'))) {
         playCompleteFanfare();
       }
     }

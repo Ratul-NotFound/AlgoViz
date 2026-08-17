@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Sidebar       from './components/Sidebar.jsx';
 import HomePage      from './pages/HomePage.jsx';
 import AlgorithmPage from './pages/AlgorithmPage.jsx';
-import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon } from './components/Icons.jsx';
+import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon, AlgoFlowXLogo } from './components/Icons.jsx';
 import { isAudioEnabled, toggleSound } from './utils/sound.js';
 
 export default function App() {
@@ -61,8 +61,8 @@ export default function App() {
         </button>
 
         <a className="header-logo" href="#" onClick={() => { setCurrentSlug(null); setSidebarOpen(false); }}>
-          <div className="header-logo-icon">AV</div>
-          <div className="header-logo-text">AlgoViz</div>
+          <AlgoFlowXLogo size={32} />
+          <div className="header-logo-text">AlgoFlow<span className="logo-x-accent">X</span></div>
         </a>
 
         {algoName && (
@@ -89,9 +89,33 @@ export default function App() {
         <button
           className={`header-sound-pill ${soundOn ? 'sound-active' : ''}`}
           onClick={handleToggleSound}
-          title={soundOn ? 'Mute Sonification' : 'Enable Audio Sonification'}
+          title={soundOn ? 'Audio Sonification Enabled (Click to Mute)' : 'Enable Audio Sonification (Live Audio Feedback)'}
+          aria-label="Toggle Audio"
         >
-          <span>{soundOn ? '🔊 Audio ON' : '🔇 Audio OFF'}</span>
+          {soundOn ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              </svg>
+              <span className="sound-pill-text">Audio ON</span>
+              <span className="sound-wave-bars">
+                <span className="wave-bar bar-1" />
+                <span className="wave-bar bar-2" />
+                <span className="wave-bar bar-3" />
+              </span>
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+              <span className="sound-pill-text">Muted</span>
+            </>
+          )}
         </button>
 
         <div className="header-langs">

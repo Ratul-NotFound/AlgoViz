@@ -2,7 +2,49 @@
 
 import React from 'react';
 
-// ── Standard UI Controls ──
+// ── Standard UI Controls & Brand Logo ──
+export function AlgoFlowXLogo({ size = 28, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="afxG1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#38bdf8" />
+          <stop offset="100%" stopColor="#2563eb" />
+        </linearGradient>
+        <linearGradient id="afxG2" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#6366f1" />
+          <stop offset="100%" stopColor="#a855f7" />
+        </linearGradient>
+        <linearGradient id="afxBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0f172a" />
+          <stop offset="100%" stopColor="#020617" />
+        </linearGradient>
+      </defs>
+      <rect width="40" height="40" rx="10" fill="url(#afxBg)" stroke="rgba(255,255,255,0.12)" strokeWidth="1.2" />
+      <path
+        d="M10 30 C 13 30, 17 24, 20 20 C 23 16, 27 10, 30 10"
+        stroke="url(#afxG1)"
+        strokeWidth="4.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 10 C 13 10, 17 16, 20 20 C 23 24, 27 30, 30 30"
+        stroke="url(#afxG2)"
+        strokeWidth="4.2"
+        strokeLinecap="round"
+      />
+      <circle cx="20" cy="20" r="2.2" fill="#ffffff" />
+    </svg>
+  );
+}
+
 export function PlayIcon({ size = 14, className = '' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>

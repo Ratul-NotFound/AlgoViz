@@ -1,7 +1,8 @@
 // src/utils/audioFX.js — High-fidelity procedural audio synthesis for physical interactions
 
+import { isAudioEnabled } from './sound.js';
+
 let audioCtx = null;
-let isMuted = false;
 
 function getAudioContext() {
   if (typeof window === 'undefined') return null;
@@ -18,17 +19,16 @@ function getAudioContext() {
 }
 
 export function toggleMute() {
-  isMuted = !isMuted;
-  return isMuted;
+  return !isAudioEnabled();
 }
 
 export function getIsMuted() {
-  return isMuted;
+  return !isAudioEnabled();
 }
 
 // 1. Realistic Mechanical Clack / Drop Impact (Push / Enqueue Landing)
 export function playImpactSound(pitch = 280) {
-  if (isMuted) return;
+  if (!isAudioEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -42,7 +42,7 @@ export function playImpactSound(pitch = 280) {
     osc.frequency.setValueAtTime(pitch, now);
     osc.frequency.exponentialRampToValueAtTime(60, now + 0.08);
 
-    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.setValueAtTime(0.25, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
     osc.connect(gain);
@@ -56,7 +56,7 @@ export function playImpactSound(pitch = 280) {
     const clickGain = ctx.createGain();
     clickOsc.type = 'sine';
     clickOsc.frequency.setValueAtTime(pitch * 2.5, now);
-    clickGain.gain.setValueAtTime(0.15, now);
+    clickGain.gain.setValueAtTime(0.12, now);
     clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
     clickOsc.connect(clickGain);
     clickGain.connect(ctx.destination);
@@ -69,7 +69,7 @@ export function playImpactSound(pitch = 280) {
 
 // 2. Pneumatic / Magnetic Lift Sound (Pop / Dequeue Extraction)
 export function playLiftSound() {
-  if (isMuted) return;
+  if (!isAudioEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -83,7 +83,7 @@ export function playLiftSound() {
     osc.frequency.exponentialRampToValueAtTime(580, now + 0.12);
 
     gain.gain.setValueAtTime(0.05, now);
-    gain.gain.linearRampToValueAtTime(0.2, now + 0.04);
+    gain.gain.linearRampToValueAtTime(0.18, now + 0.04);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
     osc.connect(gain);
@@ -96,7 +96,7 @@ export function playLiftSound() {
 
 // 3. Laser / Inspection Chime (Peek)
 export function playChimeSound() {
-  if (isMuted) return;
+  if (!isAudioEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -122,7 +122,7 @@ export function playChimeSound() {
 
 // 4. Conveyor Step / Roll Sound
 export function playConveyorSound() {
-  if (isMuted) return;
+  if (!isAudioEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 

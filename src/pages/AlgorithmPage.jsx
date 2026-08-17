@@ -31,8 +31,11 @@ const LEGEND_ITEMS = {
 export default function AlgorithmPage({ slug }) {
   const algo = getAlgorithm(slug);
 
-  const [arraySize,    setArraySize]    = useState(15);
-  const [inputArray,   setInputArray]   = useState(() => generateRandomArray(15));
+  const isMobileInitial = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const defaultSize = isMobileInitial ? 10 : 14;
+
+  const [arraySize,    setArraySize]    = useState(defaultSize);
+  const [inputArray,   setInputArray]   = useState(() => generateRandomArray(defaultSize));
   const [customInput,  setCustomInput]  = useState('');
   const [searchTarget, setSearchTarget] = useState('');
   const [inputData,    setInputData]    = useState(null);
@@ -80,7 +83,9 @@ export default function AlgorithmPage({ slug }) {
 
   useEffect(() => {
     if (!algo) return;
-    const count = algo.category === 'datastructures' ? 3 : arraySize;
+    const isMob = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const count = algo.category === 'datastructures' ? 3 : (isMob ? 10 : 14);
+    setArraySize(count);
     const arr = generateRandomArray(count);
     setInputArray(arr);
     setCustomInput('');

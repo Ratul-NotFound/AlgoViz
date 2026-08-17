@@ -26,33 +26,33 @@ export default function Controls({
       </div>
 
       {/* ── Row 1: Playback Controls & Frame Status ── */}
-      <div className="controls-row" style={{ justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="controls-row controls-row-main">
+        <div className="controls-playback-group">
           <button className="btn btn-icon" title="Reset (R)" onClick={onReset}>
-            <ResetIcon size={18} />
+            <ResetIcon size={16} />
           </button>
           <button className="btn btn-icon" title="Step Back (Left Arrow)" onClick={onStepBackward} disabled={currentIdx === 0}>
-            <StepBackIcon size={18} />
+            <StepBackIcon size={16} />
           </button>
 
           {isPlaying ? (
-            <button className="btn btn-primary" onClick={onPause}>
-              <PauseIcon size={18} />
+            <button className="btn btn-primary btn-play-main" onClick={onPause}>
+              <PauseIcon size={16} />
               <span>Pause</span>
             </button>
           ) : (
-            <button className="btn btn-primary" onClick={onPlay} disabled={isDone}>
-              <PlayIcon size={18} />
+            <button className="btn btn-primary btn-play-main" onClick={onPlay} disabled={isDone}>
+              <PlayIcon size={16} />
               <span>{isDone ? 'Finished' : 'Play'}</span>
             </button>
           )}
 
           <button className="btn btn-icon" title="Step Forward (Right Arrow)" onClick={onStepForward} disabled={isDone}>
-            <StepForwardIcon size={18} />
+            <StepForwardIcon size={16} />
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div className="controls-status-group">
           <span className="step-counter-text">
             Step {currentIdx + 1} / {totalFrames}
           </span>
@@ -73,7 +73,7 @@ export default function Controls({
 
       {/* ── Row 2: Array & Data Configuration ── */}
       {(type === 'sorting' || type === 'searching' || type === 'datastructures') && (
-        <div className="controls-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+        <div className="controls-row controls-row-config">
           {type === 'sorting' && (
             <div className="size-control">
               <span>Size:</span>
@@ -108,11 +108,13 @@ export default function Controls({
                 onChange={e => setSearchTarget(e.target.value)}
               />
             )}
-            <button className="btn btn-action" onClick={onApplyCustom}>Apply</button>
-            <button className="btn btn-action btn-random" onClick={onRandomize}>
-              <ShuffleIcon size={16} />
-              <span>Random</span>
-            </button>
+            <div className="config-buttons-group">
+              <button className="btn btn-action" onClick={onApplyCustom}>Apply</button>
+              <button className="btn btn-action btn-random" onClick={onRandomize}>
+                <ShuffleIcon size={15} />
+                <span>Random</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

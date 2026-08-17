@@ -3,7 +3,7 @@ import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import AlgorithmDuel from '../components/AlgorithmDuel.jsx';
 import {
   SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon, CodeIcon,
-  PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, getAlgoIcon
+  PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, getAlgoIcon, AlgoFlowXLogo
 } from '../components/Icons.jsx';
 
 const LANG_OPTIONS = [
@@ -204,13 +204,14 @@ export default function HomePage({ onSelectAlgo }) {
       <section className="creative-hero-grid">
         <div className="platform-hero">
           <div className="hero-badge-pill">
+            <AlgoFlowXLogo size={16} />
             <span className="hero-pulse-dot" />
-            <span>Interactive DSA Visualizer & Learning Engine</span>
+            <span className="hero-badge-text">AlgoFlowX • Interactive DSA Engine</span>
           </div>
 
           <h1 className="platform-hero-title">
-            Master Algorithms <br />
-            <span className="hero-gradient-text">Through Visual Execution</span>
+            Master Algorithms <br className="hero-title-br" />
+            <span className="hero-title-accent">Through Visual Execution</span>
           </h1>
 
           <p className="platform-hero-sub">
@@ -218,30 +219,42 @@ export default function HomePage({ onSelectAlgo }) {
           </p>
 
           <div className="platform-stats-strip">
-            <div className="stat-pill">
-              <span className="stat-num">{ALGORITHMS.length}</span>
+            <div className="stat-card">
+              <div className="stat-card-head">
+                <span className="stat-dot dot-cyan" />
+                <span className="stat-val">{ALGORITHMS.length}</span>
+              </div>
               <span className="stat-lbl">Algorithms</span>
             </div>
-            <div className="stat-pill">
-              <span className="stat-num">5</span>
+            <div className="stat-card">
+              <div className="stat-card-head">
+                <span className="stat-dot dot-indigo" />
+                <span className="stat-val">5</span>
+              </div>
               <span className="stat-lbl">Languages</span>
             </div>
-            <div className="stat-pill">
-              <span className="stat-num">O(1) → O(n²)</span>
+            <div className="stat-card">
+              <div className="stat-card-head">
+                <span className="stat-dot dot-emerald" />
+                <span className="stat-val">O(1) → O(n²)</span>
+              </div>
               <span className="stat-lbl">Complexities</span>
             </div>
-            <div className="stat-pill">
-              <span className="stat-num">Step-by-Step</span>
+            <div className="stat-card">
+              <div className="stat-card-head">
+                <span className="stat-dot dot-violet" />
+                <span className="stat-val">Step Trace</span>
+              </div>
               <span className="stat-lbl">Execution</span>
             </div>
           </div>
 
           <div className="platform-hero-actions">
-            <button className="btn btn-primary btn-lg" onClick={() => onSelectAlgo('bubble-sort')}>
+            <button className="btn btn-primary btn-hero-cta" onClick={() => onSelectAlgo('bubble-sort')}>
               <PlayIcon size={14} />
               <span>Start Visualizer</span>
             </button>
-            <button className="btn btn-secondary btn-lg" onClick={() => setActiveTab('matrix')}>
+            <button className="btn btn-secondary btn-hero-cta" onClick={() => setActiveTab('matrix')}>
               <span>Big-O Matrix</span>
               <ArrowRightIcon size={14} />
             </button>
@@ -598,7 +611,7 @@ export default function HomePage({ onSelectAlgo }) {
             <div className="hero-compact-badge">Multi-Language Code Engine</div>
             <h3 className="showcase-title">Study in Your Preferred Programming Language</h3>
             <p className="showcase-desc">
-              Whether you are preparing for coding interviews in Python, competitive programming in C++, or systems coursework in C/Java, AlgoViz synchronizes execution across all five language targets.
+              Whether you are preparing for coding interviews in Python, competitive programming in C++, or systems coursework in C/Java, AlgoFlowX synchronizes execution across all five language targets.
             </p>
             <div className="lang-pills-row">
               {LANG_OPTIONS.map(l => {
