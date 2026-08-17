@@ -260,10 +260,8 @@ body {
 /* ─────────────────────────────────────────
    Sidebar
 ───────────────────────────────────────── */
-.sidebar {
+.desktop-sidebar-wrapper {
   grid-area: sidebar;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   height: calc(100vh - var(--header-h));
@@ -271,9 +269,20 @@ body {
   position: relative;
 }
 
-/* Sidebar Top Brand Header */
-.sidebar-brand {
+.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Sidebar Top Brand Header (Hidden on desktop to avoid header redundancy; shown in mobile drawer) */
+.sidebar-brand {
+  display: none;
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
@@ -283,6 +292,10 @@ body {
   transition: background 150ms ease;
   user-select: none;
   flex-shrink: 0;
+}
+
+.sidebar-drawer .sidebar-brand {
+  display: flex;
 }
 
 .sidebar-brand:hover {
@@ -3164,47 +3177,68 @@ body {
 ───────────────────────────────────────── */
 .hamburger-btn {
   display: none;
-  background: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 6px;
+  padding: 7px 8px;
   cursor: pointer;
-  color: var(--text-muted);
+  color: var(--text-main);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.hamburger-btn:hover, .hamburger-btn:active {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 .sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 100;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(3px) !important;
+  z-index: 99998 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease !important;
 }
 
-.sidebar-overlay.open { display: block; }
+.sidebar-overlay.open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
 
 .sidebar-drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 270px;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  z-index: 101;
-  transform: translateX(-100%);
-  transition: transform var(--ease);
-  padding-top: 0;
-  overflow-y: auto;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 290px !important;
+  max-width: 85vw !important;
+  background: var(--bg-sidebar) !important;
+  border-right: 1px solid var(--border) !important;
+  z-index: 99999 !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  padding-top: 0 !important;
+  overflow-y: auto !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.85) !important;
 }
 
-.sidebar-drawer.open { transform: translateX(0); }
+.sidebar-drawer.open {
+  transform: translateX(0) !important;
+}
 
 .sidebar-drawer .sidebar {
   display: flex !important;
-  border-right: none;
-  padding: 0;
-  height: 100%;
+  border-right: none !important;
+  padding: 0 !important;
+  height: 100% !important;
 }
 
 /* ─────────────────────────────────────────
@@ -3212,12 +3246,12 @@ body {
 ───────────────────────────────────────── */
 @media (max-width: 1024px) {
   .app-shell {
-    grid-template-columns: 1fr;
-    grid-template-areas: "header" "main";
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "header" "main" !important;
   }
-  .sidebar { display: none; }
-  .hamburger-btn { display: flex; }
-  .header-langs, .header-badge { display: none; }
+  .desktop-sidebar-wrapper { display: none !important; }
+  .hamburger-btn { display: flex !important; }
+  .header-langs, .header-badge { display: none !important; }
 
   /* Mobile/Tablet algo page: clean unified vertical flow */
   .algo-page {

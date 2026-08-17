@@ -10,7 +10,7 @@ import { isAudioEnabled, toggleSound } from './utils/sound.js';
 export default function App() {
   const [currentSlug, setCurrentSlug] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1024 : false);
   const [soundOn, setSoundOn] = useState(isAudioEnabled());
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -34,7 +34,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    const onResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -53,11 +53,15 @@ export default function App() {
       {/* ── Header ── */}
       <header className="header">
         <button
+          type="button"
           className="hamburger-btn"
-          onClick={() => setSidebarOpen(v => !v)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSidebarOpen(v => !v);
+          }}
           aria-label="Toggle menu"
         >
-          <MenuIcon size={16} />
+          <MenuIcon size={18} />
         </button>
 
         <a className="header-logo" href="#" onClick={() => { setCurrentSlug(null); setSidebarOpen(false); }}>
@@ -145,20 +149,18 @@ export default function App() {
       </header>
 
       {/* ── Sidebar (Desktop) ── */}
-      <Sidebar currentSlug={currentSlug} onSelect={handleSelectAlgo} />
+      <div className="desktop-sidebar-wrapper">
+        <Sidebar currentSlug={currentSlug} onSelect={handleSelectAlgo} />
+      </div>
 
-      {/* ── Mobile Drawer ── */}
-      {isMobile && (
-        <>
-          <div
-            className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className={`sidebar-drawer ${sidebarOpen ? 'open' : ''}`}>
-            <Sidebar currentSlug={currentSlug} onSelect={handleSelectAlgo} />
-          </div>
-        </>
-      )}
+      {/* ── Mobile / Tablet Drawer ── */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      <div className={`sidebar-drawer ${sidebarOpen ? 'open' : ''}`}>
+        <Sidebar currentSlug={currentSlug} onSelect={handleSelectAlgo} />
+      </div>
 
       {/* ── Main Content ── */}
       <main className="main">
