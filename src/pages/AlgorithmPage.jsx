@@ -1,5 +1,4 @@
 // src/pages/AlgorithmPage.jsx — Resizable, fully dynamic desktop & mobile algorithm workspace
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStepper } from '../engine/useStepper.js';
 import { getAlgorithm, generateRandomArray, parseCustomArray } from '../data/algorithms.js';
@@ -142,7 +141,7 @@ export default function AlgorithmPage({ slug }) {
           <span className="message-text">{message || `Click Play to start ${algo.name}`}</span>
         </div>
 
-        {/* Visualizer Area (Takes full flexible height) */}
+        {/* Visualizer Area */}
         <div className="visualizer-area">
           {cat === 'sorting' && <ArrayVisualizer frame={frame} type="sorting" />}
           {cat === 'searching' && <ArrayVisualizer frame={frame} type="searching" />}
@@ -165,8 +164,8 @@ export default function AlgorithmPage({ slug }) {
           )}
         </div>
 
-        {/* Legend */}
-        {LEGEND_ITEMS[cat] && (
+        {/* Legend — only for graph/tree */}
+        {LEGEND_ITEMS[cat] && (cat === 'graphs' || cat === 'trees') && (
           <div className="legend">
             {LEGEND_ITEMS[cat].map(item => (
               <div className="legend-item" key={item.label}>

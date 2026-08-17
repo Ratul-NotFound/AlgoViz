@@ -1,244 +1,381 @@
-// src/visualizers/ArrayVisualizer.jsx — Intuitive, high-clarity DSA visualizer with step breakdown and expressive physics
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-
-function getBarState(i, frame, type) {
-  if (!frame) return 'default';
-  if (type === 'searching') {
-    if (frame.found === i) return 'found';
-    if (frame.comparing?.includes(i)) return 'comparing';
-    if (frame.checked?.[i] === 'found') return 'found';
-    if (frame.checked?.[i] || frame.eliminated?.[i]) return 'sorted';
-    return 'default';
-  }
-  if (frame.swapping?.includes(i))  return 'swapping';
-  if (frame.comparing?.includes(i)) return 'comparing';
-  if (frame.sorted?.[i])            return 'sorted';
-  if (frame.pivot === i)            return 'pivot';
-  if (frame.current === i)          return 'current';
+/**
+ * Maps algorithm internal frame state to semantic bar styling classes.
+ */
+function getBarState(idx, frame, type) {
+  if (frame.sorted?.includes(idx))     return 'sorted';
+  if (frame.swapping?.includes(idx))   return 'swapping';
+  if (frame.comparing?.includes(idx))  return 'comparing';
+  if (frame.pivot === idx)             return 'pivot';
+  if (frame.current === idx)           return 'current';
+  if (frame.leftHalf?.includes(idx))   return 'left-half';
+  if (frame.rightHalf?.includes(idx))  return 'right-half';
   return 'default';
 }
 
-function getDetailedBreakdown(frame, type) {
-  if (!frame) return { title: 'Ready', explanation: 'Click Play or Step Forward to begin execution.', condition: 'Waiting to start', badge: 'READY', badgeType: 'neutral' };
-
-  const array = frame.array || [];
-  const { comparing = [], swapping = [], pointers = {} } = frame;
-
-  if (swapping.length === 2) {
-    const [a, b] = swapping;
+/**
+ * Returns a human-friendly phase badge + description for the current step.
+ */
+function getBanner(frame) {
+  if (!frame) return { label: 'IDLE', color: 'neutral', text: 'Ready to run.' };
+  if (frame.swapping?.length === 2) {
+    const [a, b] = frame.swapping;
+    const arr = frame.array || [];
     return {
-      title: 'Swap Execution',
-      badge: 'SWAP',
-      badgeType: 'danger',
-      explanation: `Exchanging elements: arr[${a}]=${array[a]} and arr[${b}]=${array[b]}. The larger value moves rightward towards its sorted position.`,
-      condition: `Swap triggered because arr[${a}] was greater than arr[${b}]`,
+      label: '⇄ SWAPPING',
+      color: 'swap',
+      text: `Swapped! arr[${a}]=${arr[a]} ↔ arr[${b}]=${arr[b]} — exchanging positions`,
     };
   }
-
-  if (comparing.length === 2) {
-    const [a, b] = comparing;
-    const isGreater = array[a] > array[b];
+  if (frame.comparing?.length === 2) {
+    const [a, b] = frame.comparing;
+    const arr = frame.array || [];
+    const gt = arr[a] > arr[b];
     return {
-      title: 'Conditional Comparison',
-      badge: 'COMPARE',
-      badgeType: 'primary',
-      explanation: `Evaluating arr[${a}] (${array[a]}) ${isGreater ? '>' : '≤'} arr[${b}] (${array[b]}). ${
-        isGreater
-          ? 'Condition TRUE: elements are out of order, preparing swap.'
-          : 'Condition FALSE: elements are in correct relative order, skipping swap.'
-      }`,
-      condition: `if arr[${a}] > arr[${b}]: -> ${isGreater ? 'TRUE (Swap)' : 'FALSE (Keep)'}`,
+      label: '⚡ COMPARING',
+      color: gt ? 'bad' : 'ok',
+      text: `arr[${a}]=${arr[a]} ${gt ? '>' : '≤'} arr[${b}]=${arr[b]} — ${gt ? 'Swap needed.' : 'Already in order.'}`,
     };
   }
-
-  if (frame.message && frame.message.includes('sorted')) {
-    return {
-      title: 'Pass Complete',
-      badge: 'SORTED',
-      badgeType: 'success',
-      explanation: frame.message,
-      condition: 'Element placed in guaranteed final position',
-    };
+  if (
+    frame.message?.toLowerCase().includes('sort') ||
+    frame.message?.toLowerCase().includes('complete') ||
+    frame.message?.toLowerCase().includes('finish')
+  ) {
+    return { label: '✅ COMPLETE', color: 'done', text: frame.message };
   }
-
-  return {
-    title: 'Pointer Inspection',
-    badge: 'SCANNING',
-    badgeType: 'neutral',
-    explanation: frame.message || 'Advancing scanning indices across problem array.',
-    condition: pointers.i !== undefined ? `Loop index i = ${pointers.i}` : 'Scanning elements',
-  };
+  return { label: '🔍 RUNNING', color: 'neutral', text: frame.message || 'Executing algorithm step…' };
 }
 
 export default function ArrayVisualizer({ frame, type = 'sorting' }) {
-  const containerRef = useRef(null);
-  const [trackHeight, setTrackHeight] = useState(160);
+  const canvasRef = useRef(null);
+  const barsContainerRef = useRef(null);
+  const colRefs = useRef({});
+  const [dim, setDim] = useState({ w: 600, h: 240 });
+  const [swapGeometry, setSwapGeometry] = useState(null);
+  const [cmpGeometry, setCmpGeometry] = useState(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.contentRect.height > 60) {
-          setTrackHeight(Math.max(120, entry.contentRect.height - 40));
-        }
-      }
+    const el = canvasRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => {
+      const { width, height } = e.contentRect;
+      if (height > 30 && width > 30) setDim({ w: width, h: height });
     });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
+  const array    = frame?.array || [];
+  const n        = array.length;
+  const maxVal   = Math.max(...array, 1);
+  const showLbl  = n <= 24;
+
+  const isSwap   = frame?.swapping?.length === 2;
+  const isCmp    = !isSwap && frame?.comparing?.length === 2;
+  const pair     = isSwap ? frame.swapping : isCmp ? frame.comparing : [];
+  const [pA, pB] = pair.length === 2 ? pair : [null, null];
+
+  const banner   = getBanner(frame);
+
+  const hasPointers = frame?.pointers && Object.keys(frame.pointers).length > 0;
+  // Reserve space for labels: number on top (24px) + index below (18px) + pointers below (20px)
+  const topPad  = showLbl ? 24 : 8;
+  const botPad  = (showLbl ? 20 : 6) + (hasPointers ? 22 : 0);
+  const trackH  = Math.max(50, dim.h - topPad - botPad);
+  const barPxH  = (v) => Math.max(6, Math.round((v / maxVal) * trackH));
+
+  // Compute exact pixel coordinates of swapping/comparing bars with instant mathematical sync
+  useLayoutEffect(() => {
+    if (!barsContainerRef.current) return;
+    const parentRect = barsContainerRef.current.getBoundingClientRect();
+    if (parentRect.width === 0) return;
+
+    if (isSwap && pA != null && pB != null) {
+      const idxA = Math.min(pA, pB);
+      const idxB = Math.max(pA, pB);
+      const elA  = colRefs.current[idxA];
+      const elB  = colRefs.current[idxB];
+      if (elA && elB) {
+        const rectA = elA.getBoundingClientRect();
+        const rectB = elB.getBoundingClientRect();
+        const xA = (rectA.left + rectA.right) / 2 - parentRect.left;
+        const xB = (rectB.left + rectB.right) / 2 - parentRect.left;
+
+        // Calculate bar baseline relative to barsContainer
+        const ptrsCount = frame.pointers ? Object.keys(frame.pointers).length : 0;
+        const baseY     = parentRect.height - (showLbl ? 20 : 4) - (ptrsCount > 0 ? 22 : 0);
+        const lift      = 14; // Swapping bars lift by 14px
+        const hA        = barPxH(array[idxA]);
+        const hB        = barPxH(array[idxB]);
+        const yA        = baseY - hA - lift;
+        const yB        = baseY - hB - lift;
+
+        setSwapGeometry({ xA, xB, yA, yB });
+      } else {
+        setSwapGeometry(null);
+      }
+    } else {
+      setSwapGeometry(null);
+    }
+
+    if (isCmp && pA != null && pB != null) {
+      const idxA = Math.min(pA, pB);
+      const idxB = Math.max(pA, pB);
+      const elA  = colRefs.current[idxA];
+      const elB  = colRefs.current[idxB];
+      if (elA && elB) {
+        const rectA = elA.getBoundingClientRect();
+        const rectB = elB.getBoundingClientRect();
+        const midX  = (rectA.left + rectA.right + rectB.left + rectB.right) / 4 - parentRect.left;
+        const ptrsCount = frame.pointers ? Object.keys(frame.pointers).length : 0;
+        const baseY     = parentRect.height - (showLbl ? 20 : 4) - (ptrsCount > 0 ? 22 : 0);
+        const lift      = 6; // Comparing bars lift by 6px
+        const maxH      = Math.max(barPxH(array[idxA]), barPxH(array[idxB]));
+        const topY      = baseY - maxH - lift - 18;
+        setCmpGeometry({ midX, topY });
+      } else {
+        setCmpGeometry(null);
+      }
+    } else {
+      setCmpGeometry(null);
+    }
+  }, [frame, isSwap, isCmp, pA, pB, array, dim]);
+
   if (!frame) return (
-    <div style={{ height: '100%', minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
-      Select an algorithm and click Play to start
+    <div className="avz-empty">
+      <div className="avz-empty-icon">▶</div>
+      <p>Select an algorithm and press Play</p>
     </div>
   );
 
-  const array = frame.array || [];
-  const maxValue = Math.max(...array, 1);
-  const showValues = array.length <= 25;
-  const n = array.length;
-
-  const isSwapping = Boolean(frame.swapping && frame.swapping.length === 2);
-  const isComparing = !isSwapping && Boolean(frame.comparing && frame.comparing.length === 2);
-  const activePair = isSwapping ? frame.swapping : isComparing ? frame.comparing : null;
-  const breakdown = getDetailedBreakdown(frame, type);
-
-  // Calculate coordinates for SVG connecting bridge
-  let bridge = null;
-  if (activePair && n > 1) {
-    const [idxA, idxB] = activePair;
-    const minIdx = Math.min(idxA, idxB);
-    const maxIdx = Math.max(idxA, idxB);
-    const leftPercent = ((minIdx + 0.5) / n) * 100;
-    const rightPercent = ((maxIdx + 0.5) / n) * 100;
-    const widthPercent = Math.max(rightPercent - leftPercent, 2);
-    const valA = array[minIdx];
-    const valB = array[maxIdx];
-    const operator = valA > valB ? '>' : valA < valB ? '<' : '=';
-
-    bridge = {
-      minIdx, maxIdx,
-      left: leftPercent,
-      width: widthPercent,
-      isSwap: isSwapping,
-      operator,
-      label: isSwapping ? '⇄ SWAPPING' : `${valA} ${operator} ${valB}`,
-      color: isSwapping ? '#f43f5e' : '#38bdf8',
-    };
-  }
-
   return (
-    <div className="array-visualizer-container">
-      {/* ── 1. Interactive Step Breakdown Card ── */}
-      <div className="step-breakdown-card">
-        <div className="breakdown-header">
-          <span className={`breakdown-badge badge-${breakdown.badgeType}`}>
-            {breakdown.badge}
-          </span>
-          <span className="breakdown-title">{breakdown.title}</span>
-          <span className="breakdown-condition-chip">{breakdown.condition}</span>
-        </div>
-        <p className="breakdown-explanation">{breakdown.explanation}</p>
-      </div>
+    <div className="avz-root">
+      {/* ── Phase Banner ── */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={banner.label}
+          className={`avz-banner avz-banner-${banner.color}`}
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.14 }}
+        >
+          <span className="avz-banner-label">{banner.label}</span>
+          <span className="avz-banner-text">{banner.text}</span>
+        </motion.div>
+      </AnimatePresence>
 
-      {/* ── 2. Connecting Bridge Arc ── */}
-      <div className="bridge-track-area">
-        {bridge && (
-          <motion.div
-            key={`bridge-${bridge.minIdx}-${bridge.maxIdx}-${bridge.isSwap}`}
-            className={`connecting-bridge-arch ${bridge.isSwap ? 'swap-arch' : 'comp-arch'}`}
-            style={{
-              left: `${bridge.left}%`,
-              width: `${bridge.width}%`,
-            }}
-            initial={{ opacity: 0, scaleY: 0 }}
-            animate={{ opacity: 1, scaleY: 1 }}
-            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          >
-            <span className="bridge-arrow-start">▼</span>
-            <div className={`bridge-chip ${bridge.isSwap ? 'swap-chip' : 'comp-chip'}`}>
-              {bridge.label}
-            </div>
-            <span className="bridge-arrow-end">▼</span>
-          </motion.div>
-        )}
-      </div>
+      {/* ── Main Canvas (pinned to bottom baseline) ── */}
+      <div className="avz-canvas" ref={canvasRef}>
+        {/* ── Bars Row (strictly bottom-aligned baseline) ── */}
+        <div className="avz-bars" ref={barsContainerRef}>
+          {/* Dynamic Curved Swap Arrow connecting Bar A and Bar B */}
+          {swapGeometry && (
+            <svg className="avz-swap-arrow-svg">
+              <defs>
+                <marker
+                  id="swap-arr-left"
+                  viewBox="0 0 10 10"
+                  refX="3"
+                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto"
+                >
+                  <path d="M 10 1 L 1 5 L 10 9 z" fill="#38bdf8" />
+                </marker>
+                <marker
+                  id="swap-arr-right"
+                  viewBox="0 0 10 10"
+                  refX="7"
+                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto"
+                >
+                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#38bdf8" />
+                </marker>
+              </defs>
+              <motion.path
+                d={`M ${swapGeometry.xA},${swapGeometry.yA - 4} C ${swapGeometry.xA},${Math.min(swapGeometry.yA, swapGeometry.yB) - 26} ${swapGeometry.xB},${Math.min(swapGeometry.yA, swapGeometry.yB) - 26} ${swapGeometry.xB},${swapGeometry.yB - 4}`}
+                fill="none"
+                stroke="#38bdf8"
+                strokeWidth="2.5"
+                strokeDasharray="5,3"
+                markerStart="url(#swap-arr-left)"
+                markerEnd="url(#swap-arr-right)"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              />
+            </svg>
+          )}
 
-      {/* ── 3. Bars Canvas with Rich Gradients & Physical Motion ── */}
-      <div className="visualizer-canvas" ref={containerRef}>
-        {array.map((value, i) => {
-          const barState = getBarState(i, frame, type);
-          const isBarComp = barState === 'comparing';
-          const isBarSwap = barState === 'swapping';
-          const isBarSorted = barState === 'sorted';
+          {/* Central Curved Swap Badge at Arch Apex */}
+          {swapGeometry && (
+            <AnimatePresence>
+              <motion.div
+                key={`swap-badge-${pA}-${pB}`}
+                className="avz-swap-curved-badge"
+                style={{
+                  left: `${(swapGeometry.xA + swapGeometry.xB) / 2}px`,
+                  top: `${Math.min(swapGeometry.yA, swapGeometry.yB) - 34}px`,
+                }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+              >
+                <span>⇄</span>
+              </motion.div>
+            </AnimatePresence>
+          )}
 
-          // Proportional exact pixel height based on available canvas height
-          const barHeightPx = Math.max(16, Math.round((value / maxValue) * trackHeight));
+          {/* Floating Comparison Operator */}
+          {cmpGeometry && (
+            <AnimatePresence>
+              <motion.div
+                key={`cmp-badge-${pA}-${pB}`}
+                className={`avz-op ${array[pA] > array[pB] ? 'op-red' : 'op-green'}`}
+                style={{
+                  left: `${cmpGeometry.midX}px`,
+                  top: `${cmpGeometry.topY}px`,
+                }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+              >
+                {array[pA] > array[pB] ? '>' : array[pA] < array[pB] ? '<' : '='}
+              </motion.div>
+            </AnimatePresence>
+          )}
 
-          return (
-            <div key={i} className="bar-wrapper">
-              {showValues && (
-                <span className={`bar-value ${isBarComp ? 'highlight-comp' : ''} ${isBarSwap ? 'highlight-swap' : ''} ${isBarSorted ? 'highlight-sorted' : ''}`}>
-                  {value}
-                </span>
-              )}
-              <div className="bar-track">
-                <div
-                  className={`bar ${barState}`}
-                  style={{
-                    height: `${barHeightPx}px`,
-                    transform: isBarSwap ? 'translateY(-8px) scale(1.06)' : isBarComp ? 'translateY(-4px) scale(1.03)' : 'none',
-                  }}
-                />
-              </div>
-              {showValues && (
-                <span className="bar-index">{i}</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
+          {array.map((val, i) => {
+            const state  = getBarState(i, frame, type);
+            const inPair = pair.includes(i);
+            const isSwappingBar = isSwap && inPair;
+            const isComparingBar = isCmp && inPair;
+            const h      = barPxH(val);
 
-      {/* ── 4. Pointer Arrows with Spring Glide ── */}
-      {frame.pointers && Object.keys(frame.pointers).length > 0 && (
-        <div className="pointers-row">
-          {array.map((_, i) => {
-            const ptrs = Object.entries(frame.pointers).filter(([, v]) => v === i);
+            // On-bar badge only if bar is tall enough to avoid clutter
+            let badge = null;
+            if (isSwappingBar) {
+              badge = { icon: '⇄', label: '', cls: 'bdg-sw' };
+            } else if (isComparingBar) {
+              badge = { icon: i === pA ? 'A' : 'B', label: '', cls: i === pA ? 'bdg-a' : 'bdg-b' };
+            } else if (frame.pivot === i) {
+              badge = { icon: '◆', label: 'P', cls: 'bdg-pv' };
+            }
+
+            // Pointers on this index (e.g. i, j, min)
+            const ptrs = frame.pointers
+              ? Object.entries(frame.pointers).filter(([, v]) => v === i)
+              : [];
+
             return (
-              <div key={i} className="pointer-cell">
-                {ptrs.map(([name]) => (
-                  <motion.div
-                    key={name}
-                    className="pointer-tag"
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+              <div
+                key={i}
+                ref={(el) => (colRefs.current[i] = el)}
+                className={`avz-col ${isSwap && !inPair ? 'avz-col-dim' : ''}`}
+              >
+                {/* Number Value Label above the bar */}
+                {showLbl && (
+                  <motion.span
+                    className={`avz-num${inPair ? ` nm-${state}` : ''}${isSwappingBar ? ' nm-swap-active' : ''}`}
+                    animate={{
+                      scale: isSwappingBar ? 1.25 : inPair ? 1.15 : 1,
+                      y: isSwappingBar ? -8 : inPair ? -3 : 0,
+                    }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 22 }}
                   >
-                    <span>{name}</span>
-                    <span style={{ fontSize: 9 }}>▲</span>
-                  </motion.div>
-                ))}
+                    {val}
+                  </motion.span>
+                )}
+
+                {/* The Histogram Bar with smooth spring morphing */}
+                <motion.div
+                  className={`avz-bar bar-${state}${isSwappingBar ? ' bar-swap-active' : ''}`}
+                  animate={{
+                    height: h,
+                    y: isSwappingBar ? -14 : isCmp && inPair ? -6 : 0,
+                  }}
+                  transition={{
+                    height: { type: 'spring', stiffness: 280, damping: 22 },
+                    y:      { type: 'spring', stiffness: 360, damping: 20 },
+                  }}
+                >
+                  {badge && h >= 32 && (
+                    <AnimatePresence>
+                      <motion.div
+                        key={`b${i}${state}`}
+                        className={`avz-badge ${badge.cls}`}
+                        initial={{ opacity: 0, scale: 0.4 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.4 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <span className="bi">{badge.icon}</span>
+                        {badge.label && <span className="bl">{badge.label}</span>}
+                      </motion.div>
+                    </AnimatePresence>
+                  )}
+                </motion.div>
+
+                {/* Index Label below the bar (permanently fixed baseline) */}
+                {showLbl && (
+                  <span className={`avz-idx${inPair ? ' ai' : ''}${isSwappingBar ? ' avz-idx-swap' : ''}`}>{i}</span>
+                )}
+
+                {/* Pointer tags below index (e.g. i ▲, min ▲) */}
+                {ptrs.length > 0 && (
+                  <div className="avz-ptrs">
+                    {ptrs.map(([name]) => (
+                      <span key={name} className="avz-ptr-tag">
+                        <span className="avz-ptr-arrow">▲</span>
+                        <span className="avz-ptr-name">{name}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
-      )}
+      </div>
 
-      {/* ── 5. State / Variable Inspector Strip ── */}
+      {/* ── Variable Inspector ── */}
       {frame.variables && Object.keys(frame.variables).length > 0 && (
-        <div className="variable-inspector">
-          <span className="var-inspector-label">Memory:</span>
-          {Object.entries(frame.variables).map(([name, value]) => (
-            <div key={name} className="var-item">
-              <span className="var-name">{name}</span>
-              <span className="var-equals">=</span>
-              <span className="var-value">{String(value)}</span>
-            </div>
+        <div className="avz-vars">
+          {Object.entries(frame.variables).map(([k, v]) => (
+            <span key={k} className="avz-var">
+              <span className="vk">{k}</span>
+              <span className="ve">=</span>
+              <span className="vv">{String(v)}</span>
+            </span>
           ))}
         </div>
       )}
+
+      {/* ── Color Legend ── */}
+      <div className="avz-legend">
+        {[
+          ['bar-comparing', 'Comparing'],
+          ['bar-swapping',  'Swapping' ],
+          ['bar-sorted',    'Sorted'   ],
+          ['bar-pivot',     'Pivot / Min'],
+          ['bar-current',   'Current'  ],
+        ].map(([cls, lbl]) => (
+          <div key={lbl} className="avz-leg-item">
+            <div className={`avz-leg-dot ${cls}`} />
+            <span>{lbl}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

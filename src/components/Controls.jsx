@@ -27,33 +27,33 @@ export default function Controls({
 
       {/* ── Row 1: Playback Controls & Frame Status ── */}
       <div className="controls-row" style={{ justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button className="btn btn-icon" title="Reset (R)" onClick={onReset}>
-            <ResetIcon size={13} />
+            <ResetIcon size={18} />
           </button>
           <button className="btn btn-icon" title="Step Back (Left Arrow)" onClick={onStepBackward} disabled={currentIdx === 0}>
-            <StepBackIcon size={13} />
+            <StepBackIcon size={18} />
           </button>
 
           {isPlaying ? (
-            <button className="btn btn-primary" onClick={onPause} style={{ minWidth: 84 }}>
-              <PauseIcon size={13} />
+            <button className="btn btn-primary" onClick={onPause}>
+              <PauseIcon size={18} />
               <span>Pause</span>
             </button>
           ) : (
-            <button className="btn btn-primary" onClick={onPlay} disabled={isDone} style={{ minWidth: 84 }}>
-              <PlayIcon size={13} />
+            <button className="btn btn-primary" onClick={onPlay} disabled={isDone}>
+              <PlayIcon size={18} />
               <span>{isDone ? 'Finished' : 'Play'}</span>
             </button>
           )}
 
           <button className="btn btn-icon" title="Step Forward (Right Arrow)" onClick={onStepForward} disabled={isDone}>
-            <StepForwardIcon size={13} />
+            <StepForwardIcon size={18} />
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <span className="step-counter-text">
             Step {currentIdx + 1} / {totalFrames}
           </span>
 
@@ -66,14 +66,14 @@ export default function Controls({
               value={speed}
               onChange={e => setSpeed(parseFloat(e.target.value))}
             />
-            <span style={{ fontFamily: 'var(--font-mono)', minWidth: 26, color: 'var(--text-main)' }}>{speed}x</span>
+            <span className="control-val-badge">{speed}x</span>
           </div>
         </div>
       </div>
 
       {/* ── Row 2: Array & Data Configuration ── */}
       {(type === 'sorting' || type === 'searching') && (
-        <div className="controls-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+        <div className="controls-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
           {type === 'sorting' && (
             <div className="size-control">
               <span>Size:</span>
@@ -88,11 +88,11 @@ export default function Controls({
                   onRandomize && onRandomize(val);
                 }}
               />
-              <span style={{ fontFamily: 'var(--font-mono)', minWidth: 18, color: 'var(--text-main)' }}>{arraySize}</span>
+              <span className="control-val-badge">{arraySize}</span>
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'center' }}>
+          <div className="config-inputs">
             <input
               className="custom-input"
               placeholder="Custom elements (e.g. 50, 20, 80, 10, 40)"
@@ -108,9 +108,9 @@ export default function Controls({
                 onChange={e => setSearchTarget(e.target.value)}
               />
             )}
-            <button className="btn" onClick={onApplyCustom}>Apply</button>
-            <button className="btn" onClick={onRandomize}>
-              <ShuffleIcon size={12} />
+            <button className="btn btn-action" onClick={onApplyCustom}>Apply</button>
+            <button className="btn btn-action btn-random" onClick={onRandomize}>
+              <ShuffleIcon size={16} />
               <span>Random</span>
             </button>
           </div>
