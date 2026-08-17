@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { playNote, playCompleteFanfare } from '../utils/sound.js';
 
 /**
  * Maps algorithm internal frame state to semantic bar styling classes.
@@ -142,7 +143,18 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
     } else {
       setCmpGeometry(null);
     }
-  }, [frame, isSwap, isCmp, pA, pB, array, dim]);
+
+    // Audio Sonification on Swaps & Comparisons
+    if (frame) {
+      if (frame.isSwapping && pA != null) {
+        playNote(array[pA] || 50, maxVal, 'triangle', 0.06);
+      } else if (frame.isComparing && pA != null) {
+        playNote(array[pA] || 50, maxVal, 'sine', 0.04);
+      } else if (frame.message?.includes('complete') || frame.message?.includes('✅')) {
+        playCompleteFanfare();
+      }
+    }
+  }, [frame, isSwap, isCmp, pA, pB, array, dim, maxVal]);
 
   if (!frame) return (
     <div className="avz-empty">

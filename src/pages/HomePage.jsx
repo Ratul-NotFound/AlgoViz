@@ -1,55 +1,97 @@
-// src/pages/HomePage.jsx — Creative, interactive DSA learning platform home
-
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
-import { SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon, CodeIcon } from '../components/Icons.jsx';
+import AlgorithmDuel from '../components/AlgorithmDuel.jsx';
+import {
+  SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon, CodeIcon,
+  PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, getAlgoIcon
+} from '../components/Icons.jsx';
+
+const LANG_OPTIONS = [
+  { id: 'python', label: 'Python', icon: PythonIcon },
+  { id: 'c',      label: 'C',      icon: CIcon },
+  { id: 'cpp',    label: 'C++',    icon: CppIcon },
+  { id: 'java',   label: 'Java',   icon: JavaIcon },
+  { id: 'js',     label: 'JavaScript', icon: JSIcon },
+];
 
 // Learning Tracks Curriculum
 const LEARNING_TRACKS = [
   {
     id: 'sorting-foundations',
     title: 'Sorting Fundamentals',
+    category: 'sorting',
     description: 'Learn iterative sorting mechanisms, adjacent swaps, and index partitioning.',
     difficulty: 'Beginner',
-    diffColor: 'var(--success)',
+    diffColor: '#34d399',
     timeEst: '25 mins',
+    icon: '📊',
     algorithms: ['bubble-sort', 'selection-sort', 'insertion-sort'],
   },
   {
     id: 'divide-and-conquer',
     title: 'Divide & Conquer Sorting',
+    category: 'sorting',
     description: 'Master logarithmic decompositions, recursive merges, pivot partitioning, and binary heaps.',
     difficulty: 'Intermediate',
-    diffColor: 'var(--warning)',
+    diffColor: '#fbbf24',
     timeEst: '35 mins',
+    icon: '⚡',
     algorithms: ['merge-sort', 'quick-sort', 'heap-sort'],
   },
   {
     id: 'searching-algorithms',
     title: 'Search Strategies',
+    category: 'searching',
     description: 'Understand sequential scans vs logarithmic interval bisection in sorted data.',
     difficulty: 'Beginner',
-    diffColor: 'var(--success)',
+    diffColor: '#34d399',
     timeEst: '15 mins',
+    icon: '🔍',
     algorithms: ['linear-search', 'binary-search'],
   },
   {
     id: 'graph-traversals',
-    title: 'Graph Theory & Shortest Path',
+    title: 'Graph Theory & Paths',
+    category: 'graphs',
     description: 'Traverse complex topologies using queues, recursion stacks, and greedy edge relaxation.',
     difficulty: 'Advanced',
-    diffColor: 'var(--primary)',
+    diffColor: '#38bdf8',
     timeEst: '45 mins',
+    icon: '🕸️',
     algorithms: ['bfs', 'dfs', 'dijkstra'],
   },
   {
     id: 'tree-structures',
     title: 'Hierarchical Trees',
+    category: 'trees',
     description: 'Binary Search Tree property, dynamic subtree insertions, and logarithmic lookups.',
     difficulty: 'Intermediate',
-    diffColor: 'var(--warning)',
+    diffColor: '#a855f7',
     timeEst: '20 mins',
+    icon: '🌳',
     algorithms: ['bst'],
+  },
+  {
+    id: 'linear-data-structures',
+    title: 'Linear Data Structures',
+    category: 'datastructures',
+    description: 'Master LIFO stacks, FIFO queues, circular ring buffers, and singly/doubly linked lists.',
+    difficulty: 'Beginner',
+    diffColor: '#34d399',
+    timeEst: '30 mins',
+    icon: '📦',
+    algorithms: ['stack', 'queue', 'linked-list', 'doubly-linked-list', 'circular-queue'],
+  },
+  {
+    id: 'advanced-data-structures',
+    title: 'Priority Heaps & Hash Tables',
+    category: 'datastructures',
+    description: 'Master binary min-heaps with sift-up/down and hash tables with separate chaining collisions.',
+    difficulty: 'Intermediate',
+    diffColor: '#f59e0b',
+    timeEst: '35 mins',
+    icon: '⚡',
+    algorithms: ['binary-heap', 'hash-table'],
   },
 ];
 
@@ -63,6 +105,22 @@ function calculateOperations(n) {
     { name: 'O(n²)', label: 'Quadratic', ops: n * n, class: 'bad' },
   ];
 }
+
+const CATEGORY_ICONS = {
+  sorting: '📊',
+  searching: '🔍',
+  datastructures: '📦',
+  graphs: '🕸️',
+  trees: '🌳',
+};
+
+const CATEGORY_COLORS = {
+  sorting:        '#818cf8',
+  searching:      '#38bdf8',
+  datastructures: '#f43f5e',
+  graphs:         '#10b981',
+  trees:          '#a78bfa',
+};
 
 export default function HomePage({ onSelectAlgo }) {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -81,7 +139,7 @@ export default function HomePage({ onSelectAlgo }) {
     clearInterval(heroTimerRef.current);
     setHeroSorting(false);
     setHeroActiveIdx({ i: -1, j: -1 });
-    setHeroArray(Array.from({ length: 10 }, () => Math.floor(Math.random() * 85) + 15));
+    setHeroArray(Array.from({ length: 10 }, () => Math.floor(Math.random() * 80) + 20));
   };
 
   const runHeroBubbleSort = () => {
@@ -142,31 +200,50 @@ export default function HomePage({ onSelectAlgo }) {
 
   return (
     <div className="home-container">
-      {/* ── 1. Platform Hero with Live Interactive Mini-Sandbox ── */}
+      {/* ── 1. Creative Hero Section with Interactive Sandbox ── */}
       <section className="creative-hero-grid">
         <div className="platform-hero">
           <div className="hero-badge-pill">
-            <span>Interactive DSA Learning Platform</span>
+            <span className="hero-pulse-dot" />
+            <span>Interactive DSA Visualizer & Learning Engine</span>
           </div>
 
           <h1 className="platform-hero-title">
-            Master Data Structures & Algorithms <br />
+            Master Algorithms <br />
             <span className="hero-gradient-text">Through Visual Execution</span>
           </h1>
 
           <p className="platform-hero-sub">
-            Bridge the gap between theoretical pseudocode and practical implementation.
-            Observe pointer states, variable mutations, and synchronized code execution across 5 programming languages.
+            Observe pointer mutations, real-time swapping trajectories, and synchronized code execution line-by-line across 5 programming languages.
           </p>
+
+          <div className="platform-stats-strip">
+            <div className="stat-pill">
+              <span className="stat-num">{ALGORITHMS.length}</span>
+              <span className="stat-lbl">Algorithms</span>
+            </div>
+            <div className="stat-pill">
+              <span className="stat-num">5</span>
+              <span className="stat-lbl">Languages</span>
+            </div>
+            <div className="stat-pill">
+              <span className="stat-num">O(1) → O(n²)</span>
+              <span className="stat-lbl">Complexities</span>
+            </div>
+            <div className="stat-pill">
+              <span className="stat-num">Step-by-Step</span>
+              <span className="stat-lbl">Execution</span>
+            </div>
+          </div>
 
           <div className="platform-hero-actions">
             <button className="btn btn-primary btn-lg" onClick={() => onSelectAlgo('bubble-sort')}>
-              <PlayIcon size={13} />
-              <span>Start Learning Track</span>
+              <PlayIcon size={14} />
+              <span>Start Visualizer</span>
             </button>
             <button className="btn btn-secondary btn-lg" onClick={() => setActiveTab('matrix')}>
-              <span>View Big-O Matrix</span>
-              <ArrowRightIcon size={13} />
+              <span>Big-O Matrix</span>
+              <ArrowRightIcon size={14} />
             </button>
           </div>
         </div>
@@ -174,13 +251,16 @@ export default function HomePage({ onSelectAlgo }) {
         {/* ── Live Hero Interactive Sandbox ── */}
         <div className="hero-sandbox-card">
           <div className="sandbox-header">
-            <span className="sandbox-label">Live Interactive Sandbox</span>
+            <div className="sandbox-title-group">
+              <span className="sandbox-live-dot" />
+              <span className="sandbox-label">Live Interactive Sandbox</span>
+            </div>
             <div className="sandbox-controls">
               <button className="btn btn-sm btn-icon" onClick={shuffleHero} title="Randomize Array">
-                <ShuffleIcon size={12} />
+                <ShuffleIcon size={13} />
               </button>
               <button className="btn btn-sm btn-primary" onClick={runHeroBubbleSort}>
-                {heroSorting ? <PauseIcon size={11} /> : <PlayIcon size={11} />}
+                {heroSorting ? <PauseIcon size={12} /> : <PlayIcon size={12} />}
                 <span>{heroSorting ? 'Pause' : 'Sort'}</span>
               </button>
             </div>
@@ -202,41 +282,56 @@ export default function HomePage({ onSelectAlgo }) {
           </div>
 
           <div className="sandbox-footer">
-            <span className="sandbox-note">Live Bubble Sort • O(n²) Step Engine</span>
+            <span className="sandbox-note">Bubble Sort • Adjacent Comparison</span>
             <button className="btn-link" onClick={() => onSelectAlgo('bubble-sort')}>
-              Open Full Debugger →
+              Open Debugger →
             </button>
           </div>
         </div>
       </section>
 
       {/* ── 2. Platform Navigation View Tabs ── */}
-      <div className="platform-view-tabs">
-        <button
-          className={`platform-tab ${activeTab === 'tracks' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tracks')}
-        >
-          Curriculum Tracks (5)
-        </button>
-        <button
-          className={`platform-tab ${activeTab === 'catalog' ? 'active' : ''}`}
-          onClick={() => setActiveTab('catalog')}
-        >
-          Algorithm Directory ({ALGORITHMS.length})
-        </button>
-        <button
-          className={`platform-tab ${activeTab === 'matrix' ? 'active' : ''}`}
-          onClick={() => setActiveTab('matrix')}
-        >
-          Big-O Complexity Matrix
-        </button>
-        <button
-          className={`platform-tab ${activeTab === 'growth' ? 'active' : ''}`}
-          onClick={() => setActiveTab('growth')}
-        >
-          Big-O Growth Calculator
-        </button>
+      <div className="platform-view-tabs-wrapper">
+        <div className="platform-view-tabs">
+          <button
+            className={`platform-tab ${activeTab === 'tracks' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tracks')}
+          >
+            📚 Curriculum Tracks ({LEARNING_TRACKS.length})
+          </button>
+          <button
+            className={`platform-tab ${activeTab === 'catalog' ? 'active' : ''}`}
+            onClick={() => setActiveTab('catalog')}
+          >
+            ⚡ Algorithm Directory ({ALGORITHMS.length})
+          </button>
+          <button
+            className={`platform-tab ${activeTab === 'duel' ? 'active' : ''}`}
+            onClick={() => setActiveTab('duel')}
+          >
+            ⚔️ Algorithm Battle Arena
+          </button>
+          <button
+            className={`platform-tab ${activeTab === 'matrix' ? 'active' : ''}`}
+            onClick={() => setActiveTab('matrix')}
+          >
+            📊 Big-O Matrix
+          </button>
+          <button
+            className={`platform-tab ${activeTab === 'growth' ? 'active' : ''}`}
+            onClick={() => setActiveTab('growth')}
+          >
+            📈 Growth Calculator
+          </button>
+        </div>
       </div>
+
+      {/* ── View: Algorithm Battle Arena ── */}
+      {activeTab === 'duel' && (
+        <section className="duel-arena-section">
+          <AlgorithmDuel />
+        </section>
+      )}
 
       {/* ── 3. View A: Structured Learning Tracks ── */}
       {activeTab === 'tracks' && (
@@ -253,11 +348,14 @@ export default function HomePage({ onSelectAlgo }) {
               const trackAlgos = track.algorithms.map(slug => ALGORITHMS.find(a => a.slug === slug)).filter(Boolean);
               return (
                 <div key={track.id} className="track-card">
-                  <div className="track-card-header">
-                    <span className="track-step-num">Track {idx + 1}</span>
-                    <span className="track-difficulty" style={{ color: track.diffColor, borderColor: `${track.diffColor}44` }}>
-                      {track.difficulty}
-                    </span>
+                  <div className="track-card-top-bar">
+                    <div className="track-icon-badge">{track.icon}</div>
+                    <div className="track-meta-badges">
+                      <span className="track-step-pill">Track {idx + 1}</span>
+                      <span className="track-difficulty" style={{ color: track.diffColor, borderColor: `${track.diffColor}44`, background: `${track.diffColor}15` }}>
+                        {track.difficulty}
+                      </span>
+                    </div>
                   </div>
 
                   <h3 className="track-title">{track.title}</h3>
@@ -272,20 +370,23 @@ export default function HomePage({ onSelectAlgo }) {
                         onClick={() => onSelectAlgo(algo.slug)}
                         title={`Visualize ${algo.name}`}
                       >
-                        <span className="module-name">{algo.name}</span>
+                        <div className="track-module-title-group">
+                          <span className="track-module-glyph">{getAlgoIcon(algo.slug, 15)}</span>
+                          <span className="module-name">{algo.name}</span>
+                        </div>
                         <span className="module-comp">{algo.timeComplexity.average}</span>
                       </div>
                     ))}
                   </div>
 
                   <div className="track-card-footer">
-                    <span className="track-time-est">Est: {track.timeEst}</span>
+                    <span className="track-time-est">⏱️ {track.timeEst}</span>
                     <button
-                      className="btn btn-sm btn-primary"
+                      className="btn btn-sm btn-primary track-start-btn"
                       onClick={() => onSelectAlgo(trackAlgos[0]?.slug || 'bubble-sort')}
                     >
                       <span>Start Track</span>
-                      <ArrowRightIcon size={11} />
+                      <ArrowRightIcon size={12} />
                     </button>
                   </div>
                 </div>
@@ -314,14 +415,15 @@ export default function HomePage({ onSelectAlgo }) {
                     className={`category-tab ${activeCategory === key ? 'active' : ''}`}
                     onClick={() => setActiveCategory(key)}
                   >
-                    {cat.label} ({count})
+                    <span>{CATEGORY_ICONS[key] || '📁'}</span>
+                    <span>{cat.label} ({count})</span>
                   </button>
                 );
               })}
             </div>
 
             <div className="search-box-compact">
-              <SearchIcon size={13} className="search-icon" />
+              <SearchIcon size={14} className="search-icon" />
               <input
                 type="text"
                 className="search-input"
@@ -339,13 +441,15 @@ export default function HomePage({ onSelectAlgo }) {
             {filteredAlgos.length === 0 ? (
               <div className="no-results-compact">
                 <p>No algorithms found matching "{searchQuery}"</p>
-                <button className="btn btn-sm" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
+                <button className="btn btn-sm btn-secondary" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
                   Clear Search
                 </button>
               </div>
             ) : (
               filteredAlgos.map(algo => {
                 const catLabel = CATEGORIES[algo.category]?.label || algo.category;
+                const catColor = CATEGORY_COLORS[algo.category] || '#3b82f6';
+
                 return (
                   <div
                     key={algo.slug}
@@ -353,8 +457,13 @@ export default function HomePage({ onSelectAlgo }) {
                     onClick={() => onSelectAlgo(algo.slug)}
                   >
                     <div className="compact-card-top">
-                      <span className="compact-card-name">{algo.name}</span>
-                      <span className="compact-card-cat">{catLabel}</span>
+                      <div className="compact-card-title-group">
+                        <span className="compact-card-glyph">{getAlgoIcon(algo.slug, 17)}</span>
+                        <span className="compact-card-name">{algo.name}</span>
+                      </div>
+                      <span className="compact-card-cat" style={{ color: catColor, borderColor: `${catColor}33`, background: `${catColor}12` }}>
+                        {catLabel}
+                      </span>
                     </div>
 
                     <p className="compact-card-desc">{algo.description}</p>
@@ -365,7 +474,7 @@ export default function HomePage({ onSelectAlgo }) {
                         <span className="tag-space">Space {algo.spaceComplexity}</span>
                       </div>
                       <span className="compact-arrow">
-                        <ArrowRightIcon size={12} />
+                        <ArrowRightIcon size={13} />
                       </span>
                     </div>
                   </div>
@@ -403,10 +512,15 @@ export default function HomePage({ onSelectAlgo }) {
               <tbody>
                 {ALGORITHMS.map(algo => {
                   const catLabel = CATEGORIES[algo.category]?.label || algo.category;
+                  const catColor = CATEGORY_COLORS[algo.category] || '#3b82f6';
                   return (
                     <tr key={algo.slug} className="matrix-row">
                       <td className="matrix-algo-name">{algo.name}</td>
-                      <td><span className="matrix-cat-tag">{catLabel}</span></td>
+                      <td>
+                        <span className="matrix-cat-tag" style={{ color: catColor, borderColor: `${catColor}33` }}>
+                          {catLabel}
+                        </span>
+                      </td>
                       <td className="matrix-code-cell">{algo.timeComplexity.best}</td>
                       <td className="matrix-code-cell font-highlight">{algo.timeComplexity.average}</td>
                       <td className="matrix-code-cell">{algo.timeComplexity.worst}</td>
@@ -481,21 +595,26 @@ export default function HomePage({ onSelectAlgo }) {
       <section className="lang-showcase-section">
         <div className="lang-showcase-card">
           <div className="lang-showcase-content">
-            <span className="hero-compact-badge">Multi-Language Code Engine</span>
+            <div className="hero-compact-badge">Multi-Language Code Engine</div>
             <h3 className="showcase-title">Study in Your Preferred Programming Language</h3>
             <p className="showcase-desc">
               Whether you are preparing for coding interviews in Python, competitive programming in C++, or systems coursework in C/Java, AlgoViz synchronizes execution across all five language targets.
             </p>
             <div className="lang-pills-row">
-              {['Python', 'C', 'C++', 'Java', 'JavaScript'].map(lang => (
-                <span
-                  key={lang}
-                  className={`lang-select-chip ${selectedLang.toLowerCase() === lang.toLowerCase() ? 'active' : ''}`}
-                  onClick={() => setSelectedLang(lang.toLowerCase())}
-                >
-                  {lang}
-                </span>
-              ))}
+              {LANG_OPTIONS.map(l => {
+                const Icon = l.icon;
+                const isActive = selectedLang.toLowerCase() === l.id.toLowerCase();
+                return (
+                  <span
+                    key={l.id}
+                    className={`lang-select-chip ${isActive ? 'active' : ''}`}
+                    onClick={() => setSelectedLang(l.id)}
+                  >
+                    <Icon size={15} />
+                    <span>{l.label}</span>
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>

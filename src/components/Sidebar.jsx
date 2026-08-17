@@ -1,6 +1,5 @@
-// src/components/Sidebar.jsx — Clean, minimalist sidebar navigation
-
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
+import { getAlgoIcon } from './Icons.jsx';
 
 export default function Sidebar({ currentSlug, onSelect }) {
   const grouped = Object.entries(CATEGORIES).map(([catKey, cat]) => ({
@@ -24,6 +23,7 @@ export default function Sidebar({ currentSlug, onSelect }) {
                 onClick={() => onSelect(algo.slug)}
               >
                 <span className="sidebar-item-name">
+                  <span className="sidebar-algo-glyph">{getAlgoIcon(algo.slug, 15)}</span>
                   <span>{algo.name}</span>
                 </span>
                 <span className="sidebar-item-complexity">

@@ -5,6 +5,7 @@ import { getAlgorithm, generateRandomArray, parseCustomArray } from '../data/alg
 import ArrayVisualizer  from '../visualizers/ArrayVisualizer.jsx';
 import GraphVisualizer  from '../visualizers/GraphVisualizer.jsx';
 import TreeVisualizer   from '../visualizers/TreeVisualizer.jsx';
+import DataStructureVisualizer from '../visualizers/DataStructureVisualizer.jsx';
 import Controls         from '../components/Controls.jsx';
 import CodePanel        from '../components/CodePanel.jsx';
 import InfoPanel        from '../components/InfoPanel.jsx';
@@ -69,16 +70,18 @@ export default function AlgorithmPage({ slug }) {
   const buildInputData = useCallback((arr, target) => {
     if (!algo) return null;
     const cat = algo.category;
-    if (cat === 'sorting')   return [...arr];
-    if (cat === 'searching') return { array: [...arr], target: parseInt(target) || arr[3] || arr[0] };
-    if (cat === 'graphs')    return slug === 'dijkstra' ? DIJKSTRA_GRAPH : BFS_GRAPH;
-    if (cat === 'trees')     return { values: [50, 30, 70, 20, 40, 60, 80], searchVal: 40 };
+    if (cat === 'sorting')        return [...arr];
+    if (cat === 'searching')      return { array: [...arr], target: parseInt(target) || arr[3] || arr[0] };
+    if (cat === 'datastructures') return arr.slice(0, 4);
+    if (cat === 'graphs')         return slug === 'dijkstra' ? DIJKSTRA_GRAPH : BFS_GRAPH;
+    if (cat === 'trees')          return { values: [50, 30, 70, 20, 40, 60, 80], searchVal: 40 };
     return null;
   }, [algo, slug]);
 
   useEffect(() => {
     if (!algo) return;
-    const arr = generateRandomArray(arraySize);
+    const count = algo.category === 'datastructures' ? 3 : arraySize;
+    const arr = generateRandomArray(count);
     setInputArray(arr);
     setCustomInput('');
     setSearchTarget('');
@@ -89,14 +92,14 @@ export default function AlgorithmPage({ slug }) {
   const stepper = useStepper(algo?.module?.generate, inputData);
 
   const handleRandomize = useCallback((size) => {
-    const n = size || arraySize;
+    const n = size || (algo?.category === 'datastructures' ? 3 : arraySize);
     const arr = generateRandomArray(n);
     setInputArray(arr);
     const data = buildInputData(arr, searchTarget);
     setInputData(data);
     stepper.buildFrames(data);
     stepper.reset();
-  }, [arraySize, searchTarget, buildInputData, stepper]);
+  }, [arraySize, searchTarget, buildInputData, stepper, algo]);
 
   const handleApplyCustom = useCallback(() => {
     const arr = parseCustomArray(customInput);
@@ -145,6 +148,7 @@ export default function AlgorithmPage({ slug }) {
         <div className="visualizer-area">
           {cat === 'sorting' && <ArrayVisualizer frame={frame} type="sorting" />}
           {cat === 'searching' && <ArrayVisualizer frame={frame} type="searching" />}
+          {cat === 'datastructures' && <DataStructureVisualizer frame={frame} type={slug} />}
           {cat === 'graphs' && (
             <GraphVisualizer
               frame={frame}

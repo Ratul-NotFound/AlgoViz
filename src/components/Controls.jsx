@@ -72,7 +72,7 @@ export default function Controls({
       </div>
 
       {/* ── Row 2: Array & Data Configuration ── */}
-      {(type === 'sorting' || type === 'searching') && (
+      {(type === 'sorting' || type === 'searching' || type === 'datastructures') && (
         <div className="controls-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
           {type === 'sorting' && (
             <div className="size-control">

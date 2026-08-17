@@ -1,35 +1,35 @@
 // src/components/CodePanel.jsx — Clean, professional multi-language code inspector
 
 import { useState, useEffect, useRef } from 'react';
-import { CopyIcon, CheckIcon } from './Icons.jsx';
+import { CopyIcon, CheckIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon } from './Icons.jsx';
 
 const LANGUAGES = [
-  { id: 'python', label: 'Python' },
-  { id: 'c',      label: 'C' },
-  { id: 'cpp',    label: 'C++' },
-  { id: 'java',   label: 'Java' },
-  { id: 'js',     label: 'JavaScript' },
+  { id: 'python', label: 'Python',     icon: PythonIcon },
+  { id: 'c',      label: 'C',          icon: CIcon },
+  { id: 'cpp',    label: 'C++',        icon: CppIcon },
+  { id: 'java',   label: 'Java',       icon: JavaIcon },
+  { id: 'js',     label: 'JavaScript', icon: JSIcon },
 ];
 
 function tokenize(line) {
-  if (!line) return [{ text: ' ', color: 'var(--text-code)' }];
+  if (!line) return [{ text: ' ', cls: 'tok-plain' }];
 
   const tokens = [];
   let rem = line;
 
   const rules = [
-    { re: /^(\/\/.*|#.*)/, color: '#64748b' }, // comment
-    { re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/, color: '#a5d6a7' }, // string
+    { re: /^(\/\/.*|#.*)/, cls: 'tok-comment' }, // comment
+    { re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/, cls: 'tok-string' }, // string
     {
-      re: /^(def|class|return|if|else|elif|for|while|in|not|and|or|True|False|None|void|int|float|double|bool|char|struct|const|static|new|this|self|null|NULL|nullptr|public|private|function|let|const|var|typeof)\b/,
-      color: '#f472b6', // keyword
+      re: /^(def|class|return|if|else|elif|for|while|in|not|and|or|True|False|None|void|int|float|double|bool|char|struct|const|static|new|this|self|null|NULL|nullptr|public|private|function|let|const|var|typeof|import|from|as|include)\b/,
+      cls: 'tok-keyword',
     },
-    { re: /^(vector|list|set|map|queue|stack|List|Set|Map|Queue|Stack|Arrays|Math|Node)\b/, color: '#38bdf8' }, // type
-    { re: /^([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/, color: '#60a5fa' }, // function
-    { re: /^(\d+\.?\d*|\.\d+)/, color: '#fbbf24' }, // number
-    { re: /^([+\-*/<>=!&|^%~?:]+|={1,3}|!=|<=|>=|->|=>)/, color: '#94a3b8' }, // op
-    { re: /^[^"'#/a-zA-Z0-9+\-*/<>=!&|^%~?:]+/, color: 'var(--text-code)' },
-    { re: /^./, color: 'var(--text-code)' },
+    { re: /^(vector|list|set|map|queue|stack|List|Set|Map|Queue|Stack|Arrays|Math|Node|heapq)\b/, cls: 'tok-type' }, // type
+    { re: /^([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/, cls: 'tok-fn' }, // function
+    { re: /^(\d+\.?\d*|\.\d+)/, cls: 'tok-number' }, // number
+    { re: /^([+\-*/<>=!&|^%~?:]+|={1,3}|!=|<=|>=|->|=>)/, cls: 'tok-op' }, // op
+    { re: /^[^"'#/a-zA-Z0-9+\-*/<>=!&|^%~?:]+/, cls: 'tok-plain' },
+    { re: /^./, cls: 'tok-plain' },
   ];
 
   while (rem.length > 0) {
@@ -37,14 +37,14 @@ function tokenize(line) {
     for (const rule of rules) {
       const m = rem.match(rule.re);
       if (m) {
-        tokens.push({ text: m[0], color: rule.color });
+        tokens.push({ text: m[0], cls: rule.cls });
         rem = rem.slice(m[0].length);
         matched = true;
         break;
       }
     }
     if (!matched) {
-      tokens.push({ text: rem[0], color: 'var(--text-code)' });
+      tokens.push({ text: rem[0], cls: 'tok-plain' });
       rem = rem.slice(1);
     }
   }
@@ -75,15 +75,21 @@ export default function CodePanel({ code, activeLine, title }) {
     <div className="code-panel">
       {/* ── Language Tabs ── */}
       <div className="code-panel-tabs">
-        {LANGUAGES.map(l => (
-          <div
-            key={l.id}
-            className={`lang-tab ${lang === l.id ? 'active' : ''}`}
-            onClick={() => setLang(l.id)}
-          >
-            {l.label}
-          </div>
-        ))}
+        {LANGUAGES.map(l => {
+          const Icon = l.icon;
+          const isActive = lang === l.id;
+          return (
+            <button
+              key={l.id}
+              className={`lang-tab ${isActive ? 'active' : ''}`}
+              onClick={() => setLang(l.id)}
+              type="button"
+            >
+              <Icon size={14} />
+              <span>{l.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── Editor Toolbar ── */}
@@ -120,7 +126,7 @@ export default function CodePanel({ code, activeLine, title }) {
               <span className="code-line-number">{i + 1}</span>
               <code className="code-content">
                 {tokens.map((t, ti) => (
-                  <span key={ti} style={{ color: t.color }}>{t.text}</span>
+                  <span key={ti} className={`code-tok ${t.cls}`}>{t.text}</span>
                 ))}
               </code>
             </div>

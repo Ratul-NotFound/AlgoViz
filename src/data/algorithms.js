@@ -12,6 +12,13 @@ import * as bfs           from '../algorithms/graphs/bfs.js';
 import * as dfs           from '../algorithms/graphs/dfs.js';
 import * as dijkstra      from '../algorithms/graphs/dijkstra.js';
 import * as bst           from '../algorithms/trees/bst.js';
+import * as stack            from '../algorithms/datastructures/stack.js';
+import * as queue            from '../algorithms/datastructures/queue.js';
+import * as linkedList       from '../algorithms/datastructures/linkedList.js';
+import * as doublyLinkedList from '../algorithms/datastructures/doublyLinkedList.js';
+import * as circularQueue    from '../algorithms/datastructures/circularQueue.js';
+import * as binaryHeap       from '../algorithms/datastructures/binaryHeap.js';
+import * as hashTable        from '../algorithms/datastructures/hashTable.js';
 
 export const ALGORITHMS = [
   // Sorting
@@ -24,6 +31,14 @@ export const ALGORITHMS = [
   // Searching
   { ...linearSearch.metadata,  module: linearSearch  },
   { ...binarySearch.metadata,  module: binarySearch  },
+  // Data Structures
+  { ...stack.metadata,            module: stack            },
+  { ...queue.metadata,            module: queue            },
+  { ...linkedList.metadata,       module: linkedList       },
+  { ...doublyLinkedList.metadata, module: doublyLinkedList },
+  { ...circularQueue.metadata,    module: circularQueue    },
+  { ...binaryHeap.metadata,       module: binaryHeap       },
+  { ...hashTable.metadata,        module: hashTable        },
   // Graphs
   { ...bfs.metadata,           module: bfs           },
   { ...dfs.metadata,           module: dfs           },
@@ -33,10 +48,11 @@ export const ALGORITHMS = [
 ];
 
 export const CATEGORIES = {
-  sorting:   { label: 'Sorting' },
-  searching: { label: 'Searching' },
-  graphs:    { label: 'Graph Algorithms' },
-  trees:     { label: 'Tree Structures' },
+  sorting:        { label: 'Sorting' },
+  searching:      { label: 'Searching' },
+  datastructures: { label: 'Data Structures' },
+  graphs:         { label: 'Graph Algorithms' },
+  trees:          { label: 'Tree Structures' },
 };
 
 export function getAlgorithm(slug) {
