@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { playNodeVisitSound, playEdgeSound, playCompleteFanfare } from '../utils/sound.js';
 
 function getGraphBanner(frame, type) {
   if (!frame) return { label: 'IDLE', color: 'neutral', text: 'Select start node and press Play' };
@@ -15,12 +16,12 @@ function getGraphBanner(frame, type) {
   }
   if (frame.current) {
     return {
-      label: '🔍 VISITING',
+      label: '● VISITING',
       color: 'current',
-      text: frame.message || `Currently visiting Node ${frame.current}`,
+      text: frame.message || `Visiting node "${frame.current}"`,
     };
   }
-  return { label: '🔄 RUNNING', color: 'neutral', text: frame.message || 'Executing traversal step…' };
+  return { label: '◈ GRAPH', color: 'neutral', text: frame.message || 'Processing graph step…' };
 }
 
 function getNodeStyles(nodeId, frame, isStart) {
@@ -75,6 +76,18 @@ export default function GraphVisualizer({ frame, graph, type = 'bfs' }) {
   const { nodes, edges, start } = graph;
   const isDijkstra = type === 'dijkstra';
   const banner = getGraphBanner(frame, type);
+
+  // Audio Sonification synchronized on each frame
+  useEffect(() => {
+    if (!frame) return;
+    if (frame.current) {
+      playNodeVisitSound(frame.current);
+    } else if (frame.activeEdge) {
+      playEdgeSound();
+    } else if (frame.message && (frame.message.toLowerCase().includes('complete') || frame.message.includes('✅') || frame.message.toLowerCase().includes('finish'))) {
+      playCompleteFanfare();
+    }
+  }, [frame]);
 
   return (
     <div className="graph-viz-container">

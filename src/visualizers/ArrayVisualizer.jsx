@@ -143,20 +143,23 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
     } else {
       setCmpGeometry(null);
     }
+  }, [isSwap, isCmp, pA, pB, array, dim]);
 
-    // Audio Sonification on Swaps, Comparisons & Completion
-    if (frame) {
-      if (isSwap && pA != null && pB != null) {
-        playSwapSound(array[pA] || 50, array[pB] || 50, maxVal);
-      } else if (isCmp && pA != null) {
-        playComparisonSound(array[pA] || 50, maxVal);
-      } else if (frame.found != null) {
-        playActionSound('found');
-      } else if (frame.message && (frame.message.toLowerCase().includes('complete') || frame.message.includes('✅') || frame.message.toLowerCase().includes('finished'))) {
-        playCompleteFanfare();
-      }
+  // Audio Sonification on Every Step Frame (Sorting & Searching)
+  useEffect(() => {
+    if (!frame) return;
+    if (isSwap && pA != null && pB != null) {
+      playSwapSound(array[pA] || 50, array[pB] || 50, maxVal);
+    } else if (isCmp && pA != null) {
+      playComparisonSound(array[pA] || 50, maxVal);
+    } else if (frame.current != null) {
+      playComparisonSound(array[frame.current] || 50, maxVal);
+    } else if (frame.found != null) {
+      playActionSound('found');
+    } else if (frame.message && (frame.message.toLowerCase().includes('complete') || frame.message.includes('✅') || frame.message.toLowerCase().includes('finished'))) {
+      playCompleteFanfare();
     }
-  }, [frame, isSwap, isCmp, pA, pB, array, dim, maxVal]);
+  }, [frame]);
 
   if (!frame) return (
     <div className="avz-empty">

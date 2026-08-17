@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { playNote, playActionSound, playCompleteFanfare } from '../utils/sound.js';
 
 const NODE_R = 24;
 const LEVEL_H = 75;
@@ -95,6 +96,20 @@ export default function TreeVisualizer({ frame }) {
   const inorder = getInorderTraversal(root);
   const banner = getTreeBanner(frame);
   const currentNode = nodes.find(n => n.id === frame.currentNodeId);
+
+  // Audio Sonification synchronized on each frame
+  useEffect(() => {
+    if (!frame) return;
+    if (frame.message?.includes('Found') || frame.message?.includes('🎯')) {
+      playActionSound('found');
+    } else if (frame.message?.includes('Insert') || frame.message?.includes('attach')) {
+      playActionSound('insert');
+    } else if (currentNode) {
+      playNote(currentNode.val || 50, 100, 'sine', 0.05);
+    } else if (frame.message && (frame.message.toLowerCase().includes('complete') || frame.message.includes('✅') || frame.message.toLowerCase().includes('finish'))) {
+      playCompleteFanfare();
+    }
+  }, [frame]);
 
   return (
     <div className="tree-viz-container">

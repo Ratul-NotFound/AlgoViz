@@ -46,7 +46,8 @@ export function playNote(value, maxVal = 100, waveType = 'sine', duration = 0.06
     const gain = ctx.createGain();
 
     // Map value linearly to musical frequency 220Hz (A3) .. 1320Hz (E6)
-    const normalized = Math.max(0, Math.min(1, (Number(value) || 30) / (Number(maxVal) || 100)));
+    const valNum = typeof value === 'number' ? value : (parseInt(value, 10) || 50);
+    const normalized = Math.max(0, Math.min(1, valNum / (Number(maxVal) || 100)));
     const freq = 220 + normalized * 1100;
 
     osc.type = waveType; // 'sine' | 'triangle' | 'square' | 'sawtooth'
@@ -82,10 +83,36 @@ export function playComparisonSound(val, maxVal = 100) {
  */
 export function playSwapSound(valA, valB, maxVal = 100) {
   if (isSoundMuted) return;
-  playNote(valA, maxVal, 'triangle', 0.06, 0.08);
+  playNote(valA, maxVal, 'triangle', 0.055, 0.07);
   setTimeout(() => {
-    playNote(valB, maxVal, 'triangle', 0.06, 0.08);
-  }, 35);
+    playNote(valB, maxVal, 'triangle', 0.055, 0.07);
+  }, 30);
+}
+
+/**
+ * Swap chime for duel and sorting algorithms
+ */
+export function playSwapChime() {
+  if (isSoundMuted) return;
+  playNote(70, 100, 'triangle', 0.06, 0.07);
+}
+
+/**
+ * Node visit tone for Graphs (BFS, DFS, Dijkstra)
+ */
+export function playNodeVisitSound(nodeId = 'A') {
+  if (isSoundMuted) return;
+  const charCode = String(nodeId).charCodeAt(0) || 65;
+  const noteVal = 30 + ((charCode - 65) % 10) * 8;
+  playNote(noteVal, 100, 'sine', 0.06, 0.07);
+}
+
+/**
+ * Edge relaxation / neighbor inspection sound
+ */
+export function playEdgeSound() {
+  if (isSoundMuted) return;
+  playNote(45, 100, 'triangle', 0.04, 0.05);
 }
 
 /**
@@ -112,14 +139,6 @@ export function playActionSound(action = 'insert') {
   } catch (e) {
     // Ignore
   }
-}
-
-/**
- * Swap chime for duel and sorting algorithms
- */
-export function playSwapChime() {
-  if (isSoundMuted) return;
-  playNote(70, 100, 'triangle', 0.07, 0.08);
 }
 
 /**

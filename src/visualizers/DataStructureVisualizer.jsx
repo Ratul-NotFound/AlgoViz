@@ -37,9 +37,9 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
     message = '',
   } = frame || {};
 
-  // Audio cues
+  // Audio cues — strictly synchronized on each step frame
   useEffect(() => {
-    if (!action || action === 'idle') return;
+    if (!frame || !action || action === 'idle') return;
     if (
       action.startsWith('push') ||
       action.startsWith('enqueue') ||
@@ -52,7 +52,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
     } else if (action === 'peek' || action === 'traverse' || action === 'lookup' || action === 'collision') {
       playChimeSound();
     }
-  }, [action, items.length, nodes.length, heap.length]);
+  }, [frame]);
 
   if (!frame) {
     return (
@@ -105,14 +105,6 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
         </div>
 
         <div className="ds-action-text">{message || 'Step through the animation to inspect memory operations'}</div>
-
-        <button
-          className="ds-sound-toggle-btn"
-          onClick={handleToggleSound}
-          title={muted ? 'Enable Sound FX' : 'Mute Sound FX'}
-        >
-          {muted ? '🔇 Sound: Off' : '🔊 Sound: On'}
-        </button>
       </div>
 
       {/* ── 2. Live Pointer & Variable Dashboard ── */}

@@ -3241,12 +3241,190 @@ body {
     border-bottom: 1px solid var(--border) !important;
   }
 
-  /* Visualizer on mobile: fixed bounded height */
+  /* Visualizer on mobile: responsive auto-scaling with touch momentum */
   .visualizer-area {
-    height: 300px !important;
-    min-height: 260px !important;
+    min-height: 280px !important;
+    height: auto !important;
+    max-height: 480px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
     flex-shrink: 0 !important;
-    overflow: hidden !important;
+  }
+
+  .ds-root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+  }
+
+  .ds-viewport {
+    padding: 10px 6px !important;
+    min-height: 240px !important;
+    overflow: visible !important;
+  }
+
+  /* ── Circular Queue on Mobile ── */
+  .ds-clean-cqueue-stage {
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .cqueue-equation-card {
+    padding: 6px 8px !important;
+    gap: 4px !important;
+    max-width: 100% !important;
+  }
+
+  .eq-title {
+    font-size: 9px !important;
+  }
+
+  .eq-body {
+    gap: 6px !important;
+  }
+
+  .eq-pill {
+    padding: 2px 6px !important;
+    font-size: 9.5px !important;
+  }
+
+  .cqueue-radial-assembly {
+    width: 230px !important;
+    height: 230px !important;
+    transform: scale(0.66) !important;
+    transform-origin: center center !important;
+    margin: -40px auto !important;
+  }
+
+  .cqueue-linear-strip-wrapper {
+    padding: 8px 6px !important;
+    width: 100% !important;
+    background: var(--bg-card) !important;
+    border-radius: 8px !important;
+  }
+
+  .strip-title {
+    font-size: 9px !important;
+  }
+
+  .strip-subtitle {
+    font-size: 8.5px !important;
+    display: none !important;
+  }
+
+  .cqueue-linear-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 3px !important;
+    width: 100% !important;
+  }
+
+  .cqueue-linear-cell {
+    min-width: 0 !important;
+    padding: 4px 2px !important;
+    border-radius: 4px !important;
+  }
+
+  .linear-cell-header {
+    font-size: 7px !important;
+    gap: 2px !important;
+  }
+
+  .cell-tag {
+    font-size: 6.5px !important;
+    padding: 1px 2px !important;
+  }
+
+  .linear-cell-val {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+  }
+
+  .linear-wrap-cable {
+    margin-top: 2px !important;
+  }
+
+  .wrap-cable-label {
+    font-size: 7.5px !important;
+  }
+
+  /* ── Stack on Mobile ── */
+  .ds-clean-stack-stage {
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .stack-glass-column {
+    width: 180px !important;
+  }
+
+  .stack-aperture-guide {
+    max-width: 180px !important;
+  }
+
+  /* ── Queue on Mobile ── */
+  .ds-clean-queue-stage {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* ── Linked Lists on Mobile ── */
+  .ds-clean-ll-stage,
+  .ds-clean-dll-stage {
+    width: 100% !important;
+  }
+
+  .ll-track-wrapper,
+  .dll-track-wrapper {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 12px 6px !important;
+  }
+
+  /* ── Binary Heap on Mobile ── */
+  .ds-clean-heap-stage {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* ── Hash Table on Mobile ── */
+  .ds-clean-hash-stage {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* ── Graph & Tree Visualizers on Mobile ── */
+  .graph-viz-container,
+  .tree-viz-container {
+    min-height: 260px !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .graph-canvas-wrapper,
+  .tree-canvas-wrapper {
+    min-height: 220px !important;
+    padding: 4px !important;
+  }
+
+  .graph-structure-panel,
+  .tree-structure-panel {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+
+  .structure-card {
+    min-width: 100px !important;
+    padding: 6px 8px !important;
+  }
+
+  .structure-card.order-card {
+    min-width: 140px !important;
   }
 
   .avz-root {
