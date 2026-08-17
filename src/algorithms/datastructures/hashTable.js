@@ -1,7 +1,7 @@
 // src/algorithms/datastructures/hashTable.js — Hash Table (Collision Resolution with Chaining)
 
 export const metadata = {
-  name: 'Hash Table (Chaining)',
+  name: 'Hash Table',
   category: 'datastructures',
   slug: 'hash-table',
   timeComplexity: { best: 'O(1)', average: 'O(1)', worst: 'O(n)' },

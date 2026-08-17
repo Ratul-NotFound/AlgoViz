@@ -1,7 +1,7 @@
 // src/algorithms/datastructures/binaryHeap.js — Min Binary Heap & Priority Queue
 
 export const metadata = {
-  name: 'Binary Heap (Min-Heap)',
+  name: 'Binary Min-Heap',
   category: 'datastructures',
   slug: 'binary-heap',
   timeComplexity: { best: 'O(1)', average: 'O(log n)', worst: 'O(log n)' },
