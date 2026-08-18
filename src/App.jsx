@@ -28,9 +28,9 @@ export default function App() {
   const [soundOn, setSoundOn] = useState(isAudioEnabled());
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('algoviz-theme') || 'dark';
+      return localStorage.getItem('algoviz-theme') || 'light';
     }
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {

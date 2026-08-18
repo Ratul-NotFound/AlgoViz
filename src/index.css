@@ -8,7 +8,77 @@
 /* ─────────────────────────────────────────
    Design Tokens — Premium Engineering Standard
 ───────────────────────────────────────── */
-:root {
+:root,
+[data-theme="light"] {
+  /* Surface Layers — Crisp Porcelain & Snow */
+  --bg-app:         #f8fafc;
+  --bg-sidebar:     #ffffff;
+  --bg-card:        #ffffff;
+  --bg-elevated:    #f1f5f9;
+  --bg-hover:       #e2e8f0;
+  --bg-input:       #f8fafc;
+  --bg-code:        #f1f5f9;
+
+  /* Hairline Borders */
+  --border:         rgba(15, 23, 42, 0.1);
+  --border-subtle:  rgba(15, 23, 42, 0.05);
+  --border-hover:   rgba(15, 23, 42, 0.2);
+  --border-active:  #0284c7;
+
+  /* Brand & Accents */
+  --primary:        #0284c7;
+  --primary-hover:  #0369a1;
+  --primary-subtle: rgba(2, 132, 199, 0.1);
+  --accent-indigo:  #4f46e5;
+  --accent-cyan:    #0284c7;
+
+  --success:        #10b981;
+  --success-subtle: rgba(16, 185, 129, 0.12);
+
+  --danger:         #ef4444;
+  --danger-subtle:  rgba(239, 68, 68, 0.12);
+
+  --warning:        #f59e0b;
+  --warning-subtle: rgba(245, 158, 11, 0.12);
+
+  --info:           #0284c7;
+  --info-subtle:    rgba(2, 132, 199, 0.12);
+
+  /* Typography */
+  --text-main:      #0f172a;
+  --text-muted:     #475569;
+  --text-dim:       #64748b;
+  --text-code:      #0f172a;
+
+  /* Bar Palette */
+  --bar-default:    #94a3b8;
+  --bar-comparing:  #0284c7;
+  --bar-swapping:   #7c3aed;
+  --bar-sorted:     #059669;
+  --bar-pivot:      #d97706;
+  --bar-found:      #0284c7;
+  --bar-current:    #7c3aed;
+
+  /* Dimensions */
+  --sidebar-w:      240px;
+  --header-h:       52px;
+  --radius-xs:      4px;
+  --radius-sm:      6px;
+  --radius-md:      8px;
+  --radius-lg:      10px;
+
+  /* Fonts */
+  --font-sans:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:      'JetBrains Mono', monospace;
+
+  /* Motion */
+  --ease:           120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────
+   Dark Theme Design Tokens
+───────────────────────────────────────── */
+[data-theme="dark"] {
   /* Surface Layers — Crisp Obsidian & Slate Charcoal */
   --bg-app:         #090d16;
   --bg-sidebar:     #0c121e;
@@ -57,62 +127,6 @@
   --bar-pivot:      #8b5cf6;
   --bar-found:      #10b981;
   --bar-current:    #3b82f6;
-
-  /* Dimensions */
-  --sidebar-w:      240px;
-  --header-h:       52px;
-  --radius-xs:      4px;
-  --radius-sm:      6px;
-  --radius-md:      8px;
-  --radius-lg:      10px;
-
-  /* Fonts */
-  --font-sans:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono:      'JetBrains Mono', monospace;
-
-  /* Motion */
-  --ease:           120ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ─────────────────────────────────────────
-   Light Theme Design Tokens
-───────────────────────────────────────── */
-[data-theme="light"] {
-  /* Surface Layers — Crisp Porcelain & Snow */
-  --bg-app:         #f8fafc;
-  --bg-sidebar:     #ffffff;
-  --bg-card:        #ffffff;
-  --bg-elevated:    #f1f5f9;
-  --bg-hover:       #e2e8f0;
-  --bg-input:       #f8fafc;
-  --bg-code:        #f1f5f9;
-
-  /* Hairline Borders */
-  --border:         rgba(15, 23, 42, 0.1);
-  --border-subtle:  rgba(15, 23, 42, 0.05);
-  --border-active:  #0284c7;
-
-  /* Brand & Accents */
-  --primary:        #0284c7;
-  --primary-hover:  #0369a1;
-  --primary-subtle: rgba(2, 132, 199, 0.1);
-  --accent-indigo:  #4f46e5;
-  --accent-cyan:    #0284c7;
-
-  /* Typography */
-  --text-main:      #0f172a;
-  --text-muted:     #475569;
-  --text-dim:       #64748b;
-  --text-code:      #0f172a;
-
-  /* Bar Palette */
-  --bar-default:    #94a3b8;
-  --bar-comparing:  #0284c7;
-  --bar-swapping:   #7c3aed;
-  --bar-sorted:     #059669;
-  --bar-pivot:      #d97706;
-  --bar-found:      #0284c7;
-  --bar-current:    #7c3aed;
 }
 
 /* ─────────────────────────────────────────
