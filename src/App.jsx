@@ -1,14 +1,28 @@
-// src/App.jsx — Clean, minimalist navigation and app shell
-
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar       from './components/Sidebar.jsx';
 import HomePage      from './pages/HomePage.jsx';
 import AlgorithmPage from './pages/AlgorithmPage.jsx';
+import { ALGORITHMS } from './data/algorithms.js';
 import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon, AlgoFlowXLogo } from './components/Icons.jsx';
 import { isAudioEnabled, toggleSound } from './utils/sound.js';
 
+function getInitialSlug() {
+  if (typeof window === 'undefined') return null;
+  const hash = window.location.hash.replace(/^#\/?/, '').trim();
+  if (hash) {
+    const matched = ALGORITHMS.find(a => a.slug === hash);
+    if (matched) return matched.slug;
+  }
+  const saved = localStorage.getItem('algoviz-current-algo');
+  if (saved) {
+    const matched = ALGORITHMS.find(a => a.slug === saved);
+    if (matched) return matched.slug;
+  }
+  return null;
+}
+
 export default function App() {
-  const [currentSlug, setCurrentSlug] = useState(null);
+  const [currentSlug, setCurrentSlug] = useState(getInitialSlug);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1024 : false);
   const [soundOn, setSoundOn] = useState(isAudioEnabled());
@@ -23,6 +37,41 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('algoviz-theme', theme);
   }, [theme]);
+
+  // Synchronize URL hash & localStorage whenever currentSlug changes
+  useEffect(() => {
+    if (currentSlug) {
+      window.location.hash = `#/${currentSlug}`;
+      localStorage.setItem('algoviz-current-algo', currentSlug);
+    } else {
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      localStorage.removeItem('algoviz-current-algo');
+    }
+  }, [currentSlug]);
+
+  // Listen to browser Back / Forward navigation (hashchange & popstate)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (hash) {
+        const matched = ALGORITHMS.find(a => a.slug === hash);
+        if (matched) {
+          setCurrentSlug(matched.slug);
+          return;
+        }
+      }
+      setCurrentSlug(null);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+    };
+  }, []);
 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
@@ -64,7 +113,15 @@ export default function App() {
           <MenuIcon size={18} />
         </button>
 
-        <a className="header-logo" href="#" onClick={() => { setCurrentSlug(null); setSidebarOpen(false); }}>
+        <a
+          className="header-logo"
+          href="#/"
+          onClick={(e) => {
+            e.preventDefault();
+            setCurrentSlug(null);
+            setSidebarOpen(false);
+          }}
+        >
           <AlgoFlowXLogo size={32} />
           <div className="header-logo-text">AlgoFlow<span className="logo-x-accent">X</span></div>
         </a>
