@@ -76,7 +76,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
     };
   };
 
-  const getSlotAngle = (idx, total = 6) => {
+  const getSlotAngle = (idx, total = (capacity || slots.length || 6)) => {
     return (idx * (360 / total)) - 90;
   };
 
@@ -796,79 +796,137 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
         )}
 
         {/* ========================================================
-            6. BINARY HEAP (Dual Representation: Array + Tree)
+            6. BINARY HEAP (Dual Representation: Array + SVG Connected Tree)
             ======================================================== */}
         {type === 'binary-heap' && (
           <div className="ds-clean-heap-stage">
-            {/* Top: Contiguous Array View */}
+            {/* Top: Contiguous Array Representation */}
             <div className="heap-array-section">
-              <div className="section-title-tag">ARRAY REPRESENTATION</div>
-              <div className="heap-array-strip">
-                {heap.map((val, idx) => {
-                  const isRoot = idx === 0;
-                  const isHighlighted = highlightIndices.includes(idx);
-                  const isSwapping = swapIndices.includes(idx);
+              <div className="heap-array-header">
+                <span className="section-title-tag">CONTIGUOUS ARRAY REPRESENTATION</span>
+                <span className="heap-formula-tag font-mono">parent(i) = (i-1)//2 • left = 2i+1 • right = 2i+2</span>
+              </div>
 
-                  return (
-                    <motion.div
-                      key={idx}
-                      layout
-                      className={`heap-cell-box ${isRoot ? 'cell-is-root' : ''} ${isHighlighted ? 'cell-highlighted' : ''} ${isSwapping ? 'cell-swapping' : ''}`}
-                    >
-                      <span className="heap-cell-idx">[{idx}]</span>
-                      <span className="heap-cell-val">{val}</span>
-                      {isRoot && <span className="heap-root-tag">MIN ROOT</span>}
-                    </motion.div>
-                  );
-                })}
+              <div className="heap-array-strip">
+                {heap.length === 0 ? (
+                  <div className="ds-stage-empty-state">
+                    <span className="empty-title">Heap is Empty</span>
+                    <span className="empty-sub">Push elements to build the Min-Heap</span>
+                  </div>
+                ) : (
+                  heap.map((val, idx) => {
+                    const isRoot = idx === 0;
+                    const isHighlighted = highlightIndices.includes(idx);
+                    const isSwapping = swapIndices.includes(idx);
+
+                    return (
+                      <motion.div
+                        key={idx}
+                        layout
+                        className={`heap-cell-box ${isRoot ? 'cell-is-root' : ''} ${isHighlighted ? 'cell-highlighted' : ''} ${isSwapping ? 'cell-swapping' : ''}`}
+                      >
+                        <span className="heap-cell-idx">[{idx}]</span>
+                        <span className="heap-cell-val font-mono">{val}</span>
+                        {isRoot && <span className="heap-root-tag">MIN ROOT</span>}
+                      </motion.div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
-            {/* Bottom: Visual Binary Tree */}
+            {/* Bottom: Visual Binary Tree Canvas with Dynamic SVG Connecting Branches */}
             <div className="heap-tree-section">
-              <div className="section-title-tag">BINARY TREE HIERARCHY (Min-Heap Property: Parent ≤ Children)</div>
-              <div className="heap-tree-levels">
-                {/* Level 0: Root */}
-                {heap.length > 0 && (
-                  <div className="tree-level level-0">
-                    <div className={`tree-node-circle ${highlightIndices.includes(0) ? 'node-highlight' : ''}`}>
-                      <span className="node-idx-sub">[0]</span>
-                      <span className="node-val">{heap[0]}</span>
+              <div className="heap-tree-header">
+                <span className="section-title-tag">COMPLETE BINARY TREE HIERARCHY (Min-Heap Property: Parent ≤ Children)</span>
+                <span className="heap-property-pill">ROOT = MINIMUM (O(1) PEEK)</span>
+              </div>
+
+              <div className="heap-tree-canvas-wrapper">
+                {heap.length === 0 ? (
+                  <div className="ds-stage-empty-state">
+                    <span className="empty-icon">🌳</span>
+                    <span className="empty-title">Empty Min-Heap Tree</span>
+                    <span className="empty-sub">Step through execution to see nodes bubble up via Sift-Up</span>
+                  </div>
+                ) : (
+                  <div className="heap-tree-stage-canvas">
+                    {/* SVG Connecting Branch Lines */}
+                    <svg className="heap-tree-svg-branches" viewBox="0 0 700 280">
+                      {heap.map((_, idx) => {
+                        if (idx === 0) return null;
+                        const parentIdx = Math.floor((idx - 1) / 2);
+
+                        // Coordinates calculation
+                        const getPos = (i) => {
+                          const level = Math.floor(Math.log2(i + 1));
+                          const count = Math.pow(2, level);
+                          const pos = i - (count - 1);
+                          const y = 36 + level * 72;
+                          const sectionWidth = 700 / count;
+                          const x = sectionWidth * (pos + 0.5);
+                          return { x, y };
+                        };
+
+                        const pPos = getPos(parentIdx);
+                        const cPos = getPos(idx);
+
+                        const isBranchActive =
+                          (highlightIndices.includes(idx) && highlightIndices.includes(parentIdx)) ||
+                          (swapIndices.includes(idx) && swapIndices.includes(parentIdx));
+
+                        return (
+                          <g key={`branch-${idx}`}>
+                            <line
+                              x1={pPos.x}
+                              y1={pPos.y}
+                              x2={cPos.x}
+                              y2={cPos.y}
+                              stroke={isBranchActive ? '#38bdf8' : 'rgba(255, 255, 255, 0.18)'}
+                              strokeWidth={isBranchActive ? '3' : '1.8'}
+                              strokeDasharray={isBranchActive ? 'none' : '3 3'}
+                            />
+                          </g>
+                        );
+                      })}
+                    </svg>
+
+                    {/* Dynamic Tree Node Discs */}
+                    <div className="heap-tree-nodes-layer">
+                      {heap.map((val, idx) => {
+                        const level = Math.floor(Math.log2(idx + 1));
+                        const count = Math.pow(2, level);
+                        const pos = idx - (count - 1);
+                        const y = 36 + level * 72;
+                        const sectionWidth = 700 / count;
+                        const x = sectionWidth * (pos + 0.5);
+
+                        const isRoot = idx === 0;
+                        const isHighlighted = highlightIndices.includes(idx);
+                        const isSwapping = swapIndices.includes(idx);
+
+                        return (
+                          <motion.div
+                            key={idx}
+                            layout
+                            className={`tree-node-circle ${isRoot ? 'node-is-root' : ''} ${isHighlighted ? 'node-highlight' : ''} ${isSwapping ? 'node-swapping' : ''}`}
+                            style={{
+                              left: `${x}px`,
+                              top: `${y}px`,
+                              transform: 'translate(-50%, -50%)',
+                              position: 'absolute',
+                            }}
+                            initial={{ scale: 0.6, opacity: 0 }}
+                            animate={{ scale: isSwapping ? 1.15 : isHighlighted ? 1.08 : 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 350, damping: 20 }}
+                          >
+                            <span className="node-idx-sub">[{idx}]</span>
+                            <span className="node-val font-mono">{val}</span>
+                            {isRoot && <span className="tree-root-crown">MIN ROOT</span>}
+                          </motion.div>
+                        );
+                      })}
                     </div>
-                  </div>
-                )}
-
-                {/* Level 1 */}
-                {heap.length > 1 && (
-                  <div className="tree-level level-1">
-                    {[1, 2].map(idx => (
-                      idx < heap.length ? (
-                        <div
-                          key={idx}
-                          className={`tree-node-circle ${highlightIndices.includes(idx) ? 'node-highlight' : ''}`}
-                        >
-                          <span className="node-idx-sub">[{idx}]</span>
-                          <span className="node-val">{heap[idx]}</span>
-                        </div>
-                      ) : null
-                    ))}
-                  </div>
-                )}
-
-                {/* Level 2 */}
-                {heap.length > 3 && (
-                  <div className="tree-level level-2">
-                    {[3, 4, 5, 6].map(idx => (
-                      idx < heap.length ? (
-                        <div
-                          key={idx}
-                          className={`tree-node-circle ${highlightIndices.includes(idx) ? 'node-highlight' : ''}`}
-                        >
-                          <span className="node-idx-sub">[{idx}]</span>
-                          <span className="node-val">{heap[idx]}</span>
-                        </div>
-                      ) : null
-                    ))}
                   </div>
                 )}
               </div>

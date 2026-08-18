@@ -121,142 +121,101 @@ export const CODE = {
 };
 
 export function* generate(input) {
-  let initialVals = [15, 38, 62];
+  let vals = [15, 38, 62, 85, 99];
   if (Array.isArray(input) && input.length > 0) {
-    initialVals = input.slice(0, 4);
+    vals = [...input];
   } else if (input?.array && Array.isArray(input.array) && input.array.length > 0) {
-    initialVals = input.array.slice(0, 4);
+    vals = [...input.array];
   }
 
   let idCounter = 1;
-  const stack = initialVals.map(v => ({ id: `s-${idCounter++}`, val: v }));
+  const stack = [];
 
-  // 1. Initial State
+  // 1. Initial State: Dispenser well ready
   yield {
     type: 'stack',
     items: [...stack],
-    topIndex: stack.length - 1,
+    topIndex: -1,
     incomingItem: null,
     poppingItem: null,
     action: 'idle',
-    message: `Initial Stack: Contains ${stack.length} elements. TOP is pointing at element ${stack[stack.length - 1]?.val} (Index: ${stack.length - 1}).`,
+    message: `Initial Stack: Empty dispenser well (TOP = -1). Preparing to push ${vals.length} element(s).`,
     codeLine: { python: 2, c: 7, cpp: 4, java: 2, js: 2 },
   };
 
-  // Step 1: PUSH 85
-  const pushVal1 = 85;
-  const pushItem1 = { id: `s-${idCounter++}`, val: pushVal1 };
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: pushVal1,
-    poppingItem: null,
-    action: 'push_ready',
-    message: `PUSH(${pushVal1}) Step 1/2: Preparing to push ${pushVal1} into the top opening...`,
-    codeLine: { python: 5, c: 9, cpp: 6, java: 4, js: 6 },
-  };
+  // Step: PUSH every single value from the custom array
+  for (let i = 0; i < vals.length; i++) {
+    const pushVal = vals[i];
+    const pushItem = { id: `s-${idCounter++}`, val: pushVal };
 
-  stack.push(pushItem1);
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: null,
-    action: 'push_done',
-    message: `PUSH(${pushVal1}) Step 2/2: ${pushVal1} has dropped onto TOP! TOP pointer updated to Index ${stack.length - 1}. Stack height = ${stack.length}.`,
-    codeLine: { python: 6, c: 11, cpp: 6, java: 5, js: 7 },
-  };
+    yield {
+      type: 'stack',
+      items: [...stack],
+      topIndex: stack.length - 1,
+      incomingItem: pushVal,
+      poppingItem: null,
+      action: 'push_ready',
+      message: `PUSH(${pushVal}) [${i + 1}/${vals.length}]: Preparing to push element ${pushVal} into top of stack...`,
+      codeLine: { python: 5, c: 9, cpp: 6, java: 4, js: 6 },
+    };
 
-  // Step 2: PEEK
-  const topVal = stack[stack.length - 1]?.val;
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: null,
-    action: 'peek',
-    message: `PEEK(): Inspecting TOP element without removing it. Current TOP value is ${topVal} at Index ${stack.length - 1}.`,
-    codeLine: { python: 14, c: 16, cpp: 11, java: 12, js: 15 },
-  };
+    stack.push(pushItem);
+    yield {
+      type: 'stack',
+      items: [...stack],
+      topIndex: stack.length - 1,
+      incomingItem: null,
+      poppingItem: null,
+      action: 'push_done',
+      message: `PUSH(${pushVal}) [${i + 1}/${vals.length}]: Element ${pushVal} placed on TOP! TOP index = ${stack.length - 1}. Stack height = ${stack.length}.`,
+      codeLine: { python: 6, c: 11, cpp: 6, java: 5, js: 7 },
+    };
+  }
 
-  // Step 3: PUSH 99
-  const pushVal2 = 99;
-  const pushItem2 = { id: `s-${idCounter++}`, val: pushVal2 };
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: pushVal2,
-    poppingItem: null,
-    action: 'push_ready',
-    message: `PUSH(${pushVal2}) Step 1/2: Pushing new item ${pushVal2} onto TOP...`,
-    codeLine: { python: 5, c: 9, cpp: 6, java: 4, js: 6 },
-  };
+  // PEEK: Inspect the top element
+  if (stack.length > 0) {
+    const topVal = stack[stack.length - 1]?.val;
+    yield {
+      type: 'stack',
+      items: [...stack],
+      topIndex: stack.length - 1,
+      incomingItem: null,
+      poppingItem: null,
+      action: 'peek',
+      message: `PEEK(): Inspecting TOP element without removing it. Current TOP is ${topVal} at Index ${stack.length - 1}.`,
+      codeLine: { python: 14, c: 16, cpp: 11, java: 12, js: 15 },
+    };
+  }
 
-  stack.push(pushItem2);
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: null,
-    action: 'push_done',
-    message: `PUSH(${pushVal2}) Step 2/2: Placed ${pushVal2} on TOP. Stack height = ${stack.length}.`,
-    codeLine: { python: 6, c: 11, cpp: 6, java: 5, js: 7 },
-  };
+  // POP: Demonstrate LIFO by popping elements from top
+  const popCount = Math.max(1, Math.min(2, Math.floor(stack.length / 2)));
+  for (let i = 0; i < popCount; i++) {
+    const popItem = stack[stack.length - 1];
+    yield {
+      type: 'stack',
+      items: [...stack],
+      topIndex: stack.length - 1,
+      incomingItem: null,
+      poppingItem: popItem?.val,
+      action: 'pop_ready',
+      message: `POP() [${i + 1}/${popCount}]: Extracting TOP element ${popItem?.val} (Last-In, First-Out principle)...`,
+      codeLine: { python: 9, c: 15, cpp: 7, java: 8, js: 10 },
+    };
 
-  // Step 4: POP (LIFO - Removes 99)
-  const popItem1 = stack[stack.length - 1];
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: popItem1?.val,
-    action: 'pop_ready',
-    message: `POP() Step 1/2: Preparing to extract TOP element ${popItem1?.val} (Last In, First Out principle)...`,
-    codeLine: { python: 9, c: 15, cpp: 7, java: 8, js: 10 },
-  };
-
-  stack.pop();
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: null,
-    action: 'pop_done',
-    message: `POP() Step 2/2: Removed ${popItem1?.val} from TOP. TOP pointer drops down to ${stack[stack.length - 1]?.val} (Index: ${stack.length - 1}).`,
-    codeLine: { python: 10, c: 17, cpp: 9, java: 9, js: 12 },
-  };
-
-  // Step 5: POP (Removes 85)
-  const popItem2 = stack[stack.length - 1];
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: popItem2?.val,
-    action: 'pop_ready',
-    message: `POP() Step 1/2: Next item on top is ${popItem2?.val}. Extracting it from the stack...`,
-    codeLine: { python: 9, c: 15, cpp: 7, java: 8, js: 10 },
-  };
-
-  stack.pop();
-  yield {
-    type: 'stack',
-    items: [...stack],
-    topIndex: stack.length - 1,
-    incomingItem: null,
-    poppingItem: null,
-    action: 'pop_done',
-    message: `POP() Step 2/2: Removed ${popItem2?.val}. Current TOP is now ${stack[stack.length - 1]?.val} (Index: ${stack.length - 1}).`,
-    codeLine: { python: 10, c: 17, cpp: 9, java: 9, js: 12 },
-  };
+    stack.pop();
+    yield {
+      type: 'stack',
+      items: [...stack],
+      topIndex: stack.length - 1,
+      incomingItem: null,
+      poppingItem: null,
+      action: 'pop_done',
+      message: stack.length > 0
+        ? `POP() [${i + 1}/${popCount}]: Removed ${popItem?.val} from TOP. New TOP is ${stack[stack.length - 1]?.val} (Index: ${stack.length - 1}). Stack size = ${stack.length}.`
+        : `POP() [${i + 1}/${popCount}]: Removed ${popItem?.val}. Stack is now empty.`,
+      codeLine: { python: 10, c: 17, cpp: 9, java: 9, js: 12 },
+    };
+  }
 
   // Final Summary
   yield {
@@ -266,7 +225,7 @@ export function* generate(input) {
     incomingItem: null,
     poppingItem: null,
     action: 'complete',
-    message: `Stack Demonstration Finished! The stack obeys LIFO: The last element pushed is always the first one popped.`,
+    message: `Stack Demonstration Complete! Total ${vals.length} custom element(s) processed. Stack fully obeys LIFO.`,
     codeLine: { python: 17, c: 17, cpp: 12, java: 15, js: 19 },
   };
 }

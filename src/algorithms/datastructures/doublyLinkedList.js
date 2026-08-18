@@ -121,100 +121,99 @@ export const CODE = {
 };
 
 export function* generate(input) {
-  let initial = [24, 48, 72];
+  let vals = [24, 48, 72, 12, 95];
   if (Array.isArray(input) && input.length > 0) {
-    initial = input.slice(0, 4);
+    vals = [...input];
   } else if (input?.array && Array.isArray(input.array) && input.array.length > 0) {
-    initial = input.array.slice(0, 4);
+    vals = [...input.array];
   }
 
   let idCounter = 1;
-  let nodes = initial.map(val => ({
-    id: `dll-${idCounter++}`,
-    data: val,
-  }));
+  let nodes = [];
 
   // 1. Initial State
   yield {
     type: 'doubly-linked-list',
-    nodes: [...nodes],
-    headId: nodes[0]?.id,
-    tailId: nodes[nodes.length - 1]?.id,
+    nodes: [],
+    headId: null,
+    tailId: null,
     activeNodeId: null,
     traversingId: null,
     direction: 'forward',
     action: 'idle',
-    message: `Initialized Doubly Linked List with ${nodes.length} nodes. HEAD = ${nodes[0]?.data}, TAIL = ${nodes[nodes.length - 1]?.data}. Each node has bidirectional ⇄ pointers.`,
+    message: `Initialized empty Doubly Linked List (HEAD = null, TAIL = null). Preparing to construct bidirectional chain with ${vals.length} custom node(s).`,
     codeLine: { python: 7, c: 7, cpp: 8, java: 6, js: 8 },
   };
 
-  // 2. Insert at Head (Prepend 12)
-  const headVal = 12;
-  const newHead = { id: `dll-${idCounter++}`, data: headVal };
-  nodes = [newHead, ...nodes];
+  // First node: insert as head
+  const firstNode = { id: `dll-${idCounter++}`, data: vals[0] };
+  nodes = [firstNode];
   yield {
     type: 'doubly-linked-list',
     nodes: [...nodes],
-    headId: newHead.id,
-    tailId: nodes[nodes.length - 1]?.id,
-    activeNodeId: newHead.id,
+    headId: firstNode.id,
+    tailId: firstNode.id,
+    activeNodeId: firstNode.id,
     traversingId: null,
     direction: 'forward',
     action: 'insert_head',
-    message: `INSERT_HEAD(${headVal}): Created node [${headVal}], wired .next ➔ old HEAD, wired old HEAD.prev ➔ [${headVal}], updated HEAD pointer (O(1)).`,
+    message: `INSERT_HEAD(${vals[0]}): Created root node [${vals[0]}]. HEAD and TAIL both point to this node.`,
     codeLine: { python: 12, c: 12, cpp: 13, java: 9, js: 12 },
   };
 
-  // 3. Forward Traversal (HEAD ➔ TAIL)
+  // Insert remaining nodes sequentially with .prev and .next links
+  for (let i = 1; i < vals.length; i++) {
+    const val = vals[i];
+    const newNode = { id: `dll-${idCounter++}`, data: val };
+    nodes = [...nodes, newNode];
+
+    yield {
+      type: 'doubly-linked-list',
+      nodes: [...nodes],
+      headId: nodes[0].id,
+      tailId: newNode.id,
+      activeNodeId: newNode.id,
+      traversingId: null,
+      direction: 'forward',
+      action: 'insert_tail',
+      message: `INSERT_TAIL(${val}) [${i + 1}/${vals.length}]: Created [${val}], linked old TAIL.next ➔ [${val}], wired [${val}].prev ➔ old TAIL. TAIL updated.`,
+      codeLine: { python: 20, c: 16, cpp: 14, java: 11, js: 15 },
+    };
+  }
+
+  // Forward Traversal (HEAD ➔ TAIL)
   for (let i = 0; i < nodes.length; i++) {
     yield {
       type: 'doubly-linked-list',
       nodes: [...nodes],
-      headId: nodes[0]?.id,
-      tailId: nodes[nodes.length - 1]?.id,
+      headId: nodes[0].id,
+      tailId: nodes[nodes.length - 1].id,
       activeNodeId: null,
       traversingId: nodes[i].id,
       direction: 'forward',
       action: 'traverse',
-      message: `FORWARD TRAVERSAL ➔: Visiting node [${nodes[i].data}] at index ${i} by following .next pointers.`,
+      message: `FORWARD TRAVERSAL ➔ [${i + 1}/${nodes.length}]: Visiting node [${nodes[i].data}] by following .next pointer ➔`,
       codeLine: { python: 17, c: 15, cpp: 13, java: 11, js: 15 },
     };
   }
 
-  // 4. Insert at Tail (Append 95)
-  const tailVal = 95;
-  const newTail = { id: `dll-${idCounter++}`, data: tailVal };
-  nodes = [...nodes, newTail];
-  yield {
-    type: 'doubly-linked-list',
-    nodes: [...nodes],
-    headId: nodes[0]?.id,
-    tailId: newTail.id,
-    activeNodeId: newTail.id,
-    traversingId: null,
-    direction: 'backward',
-    action: 'insert_tail',
-    message: `INSERT_TAIL(${tailVal}): Created node [${tailVal}], wired old TAIL.next ➔ [${tailVal}], wired [${tailVal}].prev ➔ old TAIL, updated TAIL pointer (O(1)).`,
-    codeLine: { python: 20, c: 16, cpp: 14, java: 11, js: 15 },
-  };
-
-  // 5. Backward Traversal (TAIL ➔ HEAD)
+  // Backward Traversal (TAIL ➔ HEAD)
   for (let i = nodes.length - 1; i >= 0; i--) {
     yield {
       type: 'doubly-linked-list',
       nodes: [...nodes],
-      headId: nodes[0]?.id,
-      tailId: nodes[nodes.length - 1]?.id,
+      headId: nodes[0].id,
+      tailId: nodes[nodes.length - 1].id,
       activeNodeId: null,
       traversingId: nodes[i].id,
       direction: 'backward',
       action: 'traverse',
-      message: `BACKWARD TRAVERSAL ⬅: Visiting node [${nodes[i].data}] at index ${i} by following .prev pointers backward from TAIL.`,
+      message: `BACKWARD TRAVERSAL ⬅ [${nodes.length - i}/${nodes.length}]: Visiting node [${nodes[i].data}] by following .prev pointer ⬅`,
       codeLine: { python: 25, c: 16, cpp: 14, java: 11, js: 15 },
     };
   }
 
-  // 6. Complete
+  // Complete
   yield {
     type: 'doubly-linked-list',
     nodes: [...nodes],
@@ -224,7 +223,7 @@ export function* generate(input) {
     traversingId: null,
     direction: 'forward',
     action: 'complete',
-    message: `Doubly Linked List demonstration complete. Both .prev and .next links are fully intact.`,
-    codeLine: { python: 26, c: 17, cpp: 14, java: 12, js: 16 },
+    message: `Doubly Linked List demonstration complete. All ${nodes.length} node(s) verified with bidirectional ⇄ pointers.`,
+    codeLine: { python: 27, c: 18, cpp: 16, java: 13, js: 17 },
   };
 }

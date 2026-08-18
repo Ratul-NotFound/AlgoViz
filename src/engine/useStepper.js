@@ -17,6 +17,7 @@ export function useStepper(generatorFn, initialData) {
   // Build all frames from the generator upfront
   const buildFrames = useCallback((data) => {
     if (!generatorFn || !data) return;
+    if (intervalRef.current) clearInterval(intervalRef.current);
     const gen = generatorFn(data);
     const allFrames = [];
     let result = gen.next();

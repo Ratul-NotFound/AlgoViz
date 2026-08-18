@@ -123,162 +123,117 @@ export const CODE = {
 };
 
 export function* generate(input) {
-  let initialVals = [21, 45, 78];
+  let vals = [21, 45, 78, 92, 64];
   if (Array.isArray(input) && input.length > 0) {
-    initialVals = input.slice(0, 4);
+    vals = [...input];
   } else if (input?.array && Array.isArray(input.array) && input.array.length > 0) {
-    initialVals = input.array.slice(0, 4);
+    vals = [...input.array];
   }
 
   let idCounter = 1;
-  const queue = initialVals.map(v => ({ id: `q-${idCounter++}`, val: v }));
+  const queue = [];
 
-  // 1. Initial State
+  // Initial State: Empty service lane
   yield {
     type: 'queue',
     items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
+    frontIndex: -1,
+    rearIndex: -1,
     incomingItem: null,
     leavingItem: null,
     action: 'idle',
-    message: `Initial Queue: Contains ${queue.length} elements. FRONT is ${queue[0]?.val} (Index: 0), REAR is ${queue[queue.length - 1]?.val} (Index: ${queue.length - 1}).`,
+    message: `Initial Queue: Empty service lane. Preparing to enqueue ${vals.length} element(s).`,
     codeLine: { python: 4, c: 6, cpp: 4, java: 2, js: 2 },
   };
 
-  // Step 1: ENQUEUE 92 at REAR
-  const enqVal1 = 92;
-  const enqItem1 = { id: `q-${idCounter++}`, val: enqVal1 };
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: enqVal1,
-    leavingItem: null,
-    action: 'enqueue_ready',
-    message: `ENQUEUE(${enqVal1}) Step 1/2: Customer ${enqVal1} arrives at the REAR intake gate...`,
-    codeLine: { python: 7, c: 9, cpp: 6, java: 4, js: 6 },
-  };
+  // Enqueue EVERY custom element at REAR
+  for (let i = 0; i < vals.length; i++) {
+    const enqVal = vals[i];
+    const enqItem = { id: `q-${idCounter++}`, val: enqVal };
 
-  queue.push(enqItem1);
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: null,
-    action: 'enqueue_done',
-    message: `ENQUEUE(${enqVal1}) Step 2/2: ${enqVal1} joined line at REAR (Index: ${queue.length - 1}). Queue size = ${queue.length}.`,
-    codeLine: { python: 8, c: 11, cpp: 6, java: 5, js: 7 },
-  };
+    yield {
+      type: 'queue',
+      items: [...queue],
+      frontIndex: queue.length > 0 ? 0 : -1,
+      rearIndex: queue.length > 0 ? queue.length - 1 : -1,
+      incomingItem: enqVal,
+      leavingItem: null,
+      action: 'enqueue_ready',
+      message: `ENQUEUE(${enqVal}) [${i + 1}/${vals.length}]: Element ${enqVal} arrives at REAR intake gate...`,
+      codeLine: { python: 7, c: 9, cpp: 6, java: 4, js: 6 },
+    };
 
-  // Step 2: PEEK at FRONT
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: null,
-    action: 'peek',
-    message: `PEEK(): Inspecting FRONT element ${queue[0]?.val} (first customer in line to be served).`,
-    codeLine: { python: 15, c: 15, cpp: 13, java: 13, js: 15 },
-  };
+    queue.push(enqItem);
+    yield {
+      type: 'queue',
+      items: [...queue],
+      frontIndex: 0,
+      rearIndex: queue.length - 1,
+      incomingItem: null,
+      leavingItem: null,
+      action: 'enqueue_done',
+      message: `ENQUEUE(${enqVal}) [${i + 1}/${vals.length}]: ${enqVal} joined line at REAR (Index: ${queue.length - 1}). Queue length = ${queue.length}.`,
+      codeLine: { python: 8, c: 11, cpp: 6, java: 5, js: 7 },
+    };
+  }
 
-  // Step 3: DEQUEUE from FRONT (FIFO - Removes 21)
-  const deqItem1 = queue[0];
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: deqItem1?.val,
-    action: 'dequeue_ready',
-    message: `DEQUEUE() Step 1/2: Preparing to discharge FRONT element ${deqItem1?.val} (First-In, First-Out)...`,
-    codeLine: { python: 10, c: 15, cpp: 7, java: 8, js: 10 },
-  };
+  // PEEK at FRONT
+  if (queue.length > 0) {
+    yield {
+      type: 'queue',
+      items: [...queue],
+      frontIndex: 0,
+      rearIndex: queue.length - 1,
+      incomingItem: null,
+      leavingItem: null,
+      action: 'peek',
+      message: `PEEK(): Inspecting FRONT element ${queue[0]?.val} (first in line to be served).`,
+      codeLine: { python: 15, c: 15, cpp: 13, java: 13, js: 15 },
+    };
+  }
 
-  queue.shift();
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: null,
-    action: 'dequeue_done',
-    message: `DEQUEUE() Step 2/2: Discharged ${deqItem1?.val} from FRONT. Remaining customers advance smoothly. New FRONT is ${queue[0]?.val} (Index: 0).`,
-    codeLine: { python: 12, c: 17, cpp: 9, java: 9, js: 12 },
-  };
+  // DEQUEUE demonstration (FIFO - discharge from FRONT)
+  const deqCount = Math.max(1, Math.min(2, Math.floor(queue.length / 2)));
+  for (let i = 0; i < deqCount; i++) {
+    const deqItem = queue[0];
+    yield {
+      type: 'queue',
+      items: [...queue],
+      frontIndex: 0,
+      rearIndex: queue.length - 1,
+      incomingItem: null,
+      leavingItem: deqItem?.val,
+      action: 'dequeue_ready',
+      message: `DEQUEUE() [${i + 1}/${deqCount}]: Discharging FRONT element ${deqItem?.val} (FIFO principle)...`,
+      codeLine: { python: 10, c: 15, cpp: 7, java: 8, js: 10 },
+    };
 
-  // Step 4: ENQUEUE 64 at REAR
-  const enqVal2 = 64;
-  const enqItem2 = { id: `q-${idCounter++}`, val: enqVal2 };
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: enqVal2,
-    leavingItem: null,
-    action: 'enqueue_ready',
-    message: `ENQUEUE(${enqVal2}) Step 1/2: New customer ${enqVal2} arrives at REAR...`,
-    codeLine: { python: 7, c: 9, cpp: 6, java: 4, js: 6 },
-  };
-
-  queue.push(enqItem2);
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: null,
-    action: 'enqueue_done',
-    message: `ENQUEUE(${enqVal2}) Step 2/2: ${enqVal2} joins at REAR. Total queue length = ${queue.length}.`,
-    codeLine: { python: 8, c: 11, cpp: 6, java: 5, js: 7 },
-  };
-
-  // Step 5: DEQUEUE from FRONT (Removes 45)
-  const deqItem2 = queue[0];
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: deqItem2?.val,
-    action: 'dequeue_ready',
-    message: `DEQUEUE() Step 1/2: Serving and discharging FRONT customer ${deqItem2?.val}...`,
-    codeLine: { python: 10, c: 15, cpp: 7, java: 8, js: 10 },
-  };
-
-  queue.shift();
-  yield {
-    type: 'queue',
-    items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
-    incomingItem: null,
-    leavingItem: null,
-    action: 'dequeue_done',
-    message: `DEQUEUE() Step 2/2: Discharged ${deqItem2?.val}. New FRONT customer is ${queue[0]?.val}.`,
-    codeLine: { python: 12, c: 17, cpp: 9, java: 9, js: 12 },
-  };
+    queue.shift();
+    yield {
+      type: 'queue',
+      items: [...queue],
+      frontIndex: queue.length > 0 ? 0 : -1,
+      rearIndex: queue.length > 0 ? queue.length - 1 : -1,
+      incomingItem: null,
+      leavingItem: null,
+      action: 'dequeue_done',
+      message: queue.length > 0
+        ? `DEQUEUE() [${i + 1}/${deqCount}]: Discharged ${deqItem?.val} from FRONT. New FRONT is ${queue[0]?.val}. Queue length = ${queue.length}.`
+        : `DEQUEUE() [${i + 1}/${deqCount}]: Discharged ${deqItem?.val}. Queue is now empty.`,
+      codeLine: { python: 12, c: 17, cpp: 9, java: 9, js: 12 },
+    };
+  }
 
   // Final Summary
   yield {
     type: 'queue',
     items: [...queue],
-    frontIndex: 0,
-    rearIndex: queue.length - 1,
+    frontIndex: queue.length > 0 ? 0 : -1,
+    rearIndex: queue.length > 0 ? queue.length - 1 : -1,
     incomingItem: null,
     leavingItem: null,
     action: 'complete',
-    message: `Queue Demonstration Complete! The FIFO structure ensures fair first-come, first-served order.`,
+    message: `Queue Demonstration Complete! Total ${vals.length} custom element(s) processed. FIFO order preserved.`,
     codeLine: { python: 18, c: 18, cpp: 14, java: 16, js: 19 },
   };
 }

@@ -73,11 +73,18 @@ export default function AlgorithmPage({ slug }) {
   const buildInputData = useCallback((arr, target) => {
     if (!algo) return null;
     const cat = algo.category;
+    const targetVal = target !== '' && target != null && !isNaN(parseInt(target, 10))
+      ? parseInt(target, 10)
+      : (arr[3] ?? arr[0] ?? 40);
+
     if (cat === 'sorting')        return [...arr];
-    if (cat === 'searching')      return { array: [...arr], target: parseInt(target) || arr[3] || arr[0] };
-    if (cat === 'datastructures') return arr.slice(0, 4);
+    if (cat === 'searching')      return { array: [...arr], target: targetVal };
+    if (cat === 'datastructures') return arr.length > 0 ? [...arr] : [15, 38, 62, 85];
     if (cat === 'graphs')         return slug === 'dijkstra' ? DIJKSTRA_GRAPH : BFS_GRAPH;
-    if (cat === 'trees')          return { values: [50, 30, 70, 20, 40, 60, 80], searchVal: 40 };
+    if (cat === 'trees')          return {
+      values: arr.length > 0 ? [...arr] : [50, 30, 70, 20, 40, 60, 80],
+      searchVal: target !== '' && target != null && !isNaN(parseInt(target, 10)) ? parseInt(target, 10) : (arr[2] ?? 40),
+    };
     return null;
   }, [algo, slug]);
 
@@ -108,7 +115,7 @@ export default function AlgorithmPage({ slug }) {
 
   const handleApplyCustom = useCallback(() => {
     const arr = parseCustomArray(customInput);
-    if (arr.length < 2) return;
+    if (!arr || arr.length === 0) return;
     setInputArray(arr);
     setArraySize(arr.length);
     const data = buildInputData(arr, searchTarget);

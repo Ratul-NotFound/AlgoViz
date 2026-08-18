@@ -113,44 +113,58 @@ export const CODE = {
 };
 
 export function* generate(input) {
-  let initialVals = [14, 28, 56];
-  if (Array.isArray(input)) {
-    initialVals = input.slice(0, 5);
-  } else if (input?.array && Array.isArray(input.array)) {
-    initialVals = input.array.slice(0, 5);
+  let vals = [14, 28, 56, 82, 99];
+  if (Array.isArray(input) && input.length > 0) {
+    vals = [...input];
+  } else if (input?.array && Array.isArray(input.array) && input.array.length > 0) {
+    vals = [...input.array];
   }
 
-  let nodes = initialVals.map((val, i) => ({
-    id: `node-${i}`,
-    data: val,
-  }));
+  let idCounter = 1;
+  let nodes = [];
 
+  // 1. Initial State: Empty List
   yield {
     type: 'linked-list',
-    nodes: [...nodes],
+    nodes: [],
     activeNodeId: null,
     traversingId: null,
     action: 'idle',
-    message: `Initialized Singly Linked List with ${nodes.length} nodes. HEAD points to Node ${nodes[0]?.data ?? 'null'}.`,
+    message: `Initialized empty Singly Linked List (HEAD = null). Preparing to construct chain with ${vals.length} custom node(s).`,
     codeLine: { python: 7, c: 5, cpp: 8, java: 7, js: 9 },
   };
 
-  // Demo operations: Insert Head -> Traverse -> Append -> Traverse -> Search
-  // 1. Insert Head
-  const newHeadVal = 82;
-  const newHeadNode = { id: `node-h1`, data: newHeadVal };
+  // Step 1: Insert first node as HEAD
+  const firstNode = { id: `node-${idCounter++}`, data: vals[0] };
+  nodes = [firstNode];
   yield {
     type: 'linked-list',
-    nodes: [newHeadNode, ...nodes],
-    activeNodeId: newHeadNode.id,
+    nodes: [...nodes],
+    activeNodeId: firstNode.id,
     traversingId: null,
     action: 'insert_head',
-    message: `INSERT_HEAD(${newHeadVal}): Created new node [${newHeadVal}], pointed .next ➔ current HEAD, updated HEAD pointer.`,
+    message: `INSERT_HEAD(${vals[0]}): Created root node [${vals[0]}]. HEAD pointer now references this node.`,
     codeLine: { python: 10, c: 13, cpp: 10, java: 10, js: 12 },
   };
-  nodes = [newHeadNode, ...nodes];
 
-  // 2. Traversal
+  // Step 2..N: Append remaining custom elements one by one
+  for (let i = 1; i < vals.length; i++) {
+    const val = vals[i];
+    const newNode = { id: `node-${idCounter++}`, data: val };
+    nodes = [...nodes, newNode];
+
+    yield {
+      type: 'linked-list',
+      nodes: [...nodes],
+      activeNodeId: newNode.id,
+      traversingId: null,
+      action: 'append',
+      message: `APPEND(${val}) [${i + 1}/${vals.length}]: Created node [${val}] and linked previous node .next ➔ [${val}].`,
+      codeLine: { python: 15, c: 13, cpp: 10, java: 10, js: 12 },
+    };
+  }
+
+  // Traversal: Walk through every node from HEAD to TAIL (pointing to NULL)
   for (let i = 0; i < nodes.length; i++) {
     yield {
       type: 'linked-list',
@@ -158,32 +172,19 @@ export function* generate(input) {
       activeNodeId: null,
       traversingId: nodes[i].id,
       action: 'traverse',
-      message: `TRAVERSE: Visiting node at index ${i} with value ${nodes[i].data}. Following .next pointer ➔`,
+      message: `TRAVERSE [Node ${i + 1}/${nodes.length}]: Visiting node [${nodes[i].data}] at 0x${(1024 + i * 32).toString(16).toUpperCase()}. Following .next pointer ➔`,
       codeLine: { python: 21, c: 13, cpp: 11, java: 11, js: 14 },
     };
   }
 
-  // 3. Append to Tail
-  const tailVal = 99;
-  const tailNode = { id: `node-t1`, data: tailVal };
-  yield {
-    type: 'linked-list',
-    nodes: [...nodes, tailNode],
-    activeNodeId: tailNode.id,
-    traversingId: null,
-    action: 'append',
-    message: `APPEND(${tailVal}): Traversed to end of chain and linked last node .next ➔ [${tailVal}].`,
-    codeLine: { python: 15, c: 13, cpp: 10, java: 10, js: 12 },
-  };
-  nodes = [...nodes, tailNode];
-
+  // Complete
   yield {
     type: 'linked-list',
     nodes: [...nodes],
     activeNodeId: null,
     traversingId: null,
     action: 'complete',
-    message: `Linked List operations completed. Total length: ${nodes.length} nodes ending at NULL.`,
+    message: `Singly Linked List demonstration complete. All ${nodes.length} custom node(s) chained sequentially ending at NULL.`,
     codeLine: { python: 23, c: 16, cpp: 13, java: 13, js: 16 },
   };
 }

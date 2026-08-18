@@ -64,9 +64,11 @@ export function generateRandomArray(size = 15, min = 5, max = 100) {
 }
 
 export function parseCustomArray(str) {
-  return str
-    .split(/[,\s]+/)
-    .map(s => parseInt(s.trim()))
-    .filter(n => !isNaN(n))
-    .slice(0, 50);
+  if (!str || typeof str !== 'string') return [];
+  const matches = str.match(/-?\d+/g);
+  if (!matches) return [];
+  return matches
+    .map(s => parseInt(s, 10))
+    .filter(n => !isNaN(n) && n >= 0)
+    .slice(0, 40);
 }

@@ -71,46 +71,65 @@ export default function Controls({
         </div>
       </div>
 
-      {/* ── Row 2: Array & Data Configuration ── */}
-      {(type === 'sorting' || type === 'searching' || type === 'datastructures') && (
+      {(type === 'sorting' || type === 'searching' || type === 'datastructures' || type === 'trees') && (
         <div className="controls-row controls-row-config">
-          {type === 'sorting' && (
-            <div className="size-control">
-              <span>Size:</span>
-              <input
-                type="range"
-                className="slider"
-                min={5} max={35} step={1}
-                value={arraySize}
-                onChange={e => {
-                  const val = parseInt(e.target.value);
-                  setArraySize(val);
-                  onRandomize && onRandomize(val);
-                }}
-              />
-              <span className="control-val-badge">{arraySize}</span>
-            </div>
-          )}
+          <div className="size-control">
+            <span>Size:</span>
+            <input
+              type="range"
+              className="slider"
+              min={type === 'datastructures' ? 2 : type === 'trees' ? 3 : 5}
+              max={type === 'datastructures' ? 10 : type === 'trees' ? 15 : 35}
+              step={1}
+              value={arraySize}
+              onChange={e => {
+                const val = parseInt(e.target.value);
+                setArraySize(val);
+                onRandomize && onRandomize(val);
+              }}
+            />
+            <span className="control-val-badge">{arraySize}</span>
+          </div>
 
           <div className="config-inputs">
             <input
               className="custom-input"
-              placeholder="Custom elements (e.g. 50, 20, 80, 10, 40)"
+              placeholder={
+                type === 'searching'
+                  ? 'Custom array (e.g. 10, 20, 30, 40, 50)'
+                  : type === 'trees'
+                  ? 'Node values (e.g. 50, 30, 70, 20, 40)'
+                  : 'Custom elements (e.g. 50, 20, 80, 10, 40)'
+              }
               value={customInput}
               onChange={e => setCustomInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  onApplyCustom();
+                }
+              }}
             />
-            {type === 'searching' && (
+            {(type === 'searching' || type === 'trees') && (
               <input
                 className="target-input"
-                placeholder="Target"
+                placeholder={type === 'trees' ? 'Search value' : 'Target'}
                 type="number"
                 value={searchTarget}
                 onChange={e => setSearchTarget(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onApplyCustom();
+                  }
+                }}
               />
             )}
             <div className="config-buttons-group">
-              <button className="btn btn-action" onClick={onApplyCustom}>Apply</button>
-              <button className="btn btn-action btn-random" onClick={onRandomize}>
+              <button className="btn btn-action" onClick={onApplyCustom} title="Apply custom array (or press Enter)">
+                Apply
+              </button>
+              <button className="btn btn-action btn-random" onClick={onRandomize} title="Generate random array">
                 <ShuffleIcon size={15} />
                 <span>Random</span>
               </button>

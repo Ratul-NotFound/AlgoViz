@@ -104,11 +104,7 @@ export default function Sidebar({ currentSlug, onSelect, onClose }) {
               <span className="dev-online-beacon" />
             </div>
             <div className="dev-meta">
-              <div className="dev-name-row">
-                <span className="dev-name">Ratul</span>
-                <span className="dev-badge-role">Developer</span>
-              </div>
-              <span className="dev-portfolio-tag">mh-ratul.vercel.app ↗</span>
+              <span className="dev-name">Ratul</span>
             </div>
           </a>
 

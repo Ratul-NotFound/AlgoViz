@@ -100,19 +100,19 @@ export const CODE = {
 };
 
 export function* generate(input) {
-  const CAPACITY = 6;
+  let vals = [32, 58, 76, 89, 44, 17];
+  if (Array.isArray(input) && input.length > 0) {
+    vals = [...input];
+  } else if (input?.array && Array.isArray(input.array) && input.array.length > 0) {
+    vals = [...input.array];
+  }
+
+  const CAPACITY = Math.max(6, vals.length <= 5 ? 6 : vals.length);
   const slots = new Array(CAPACITY).fill(null);
   let front = -1;
   let rear = -1;
 
-  // Initial seed elements: [32, 58, 76]
-  slots[0] = 32;
-  slots[1] = 58;
-  slots[2] = 76;
-  front = 0;
-  rear = 2;
-
-  // 1. Initial State
+  // 1. Initial State: Empty Ring Buffer
   yield {
     type: 'circular-queue',
     slots: [...slots],
@@ -120,86 +120,79 @@ export function* generate(input) {
     rear,
     capacity: CAPACITY,
     action: 'idle',
-    message: `Initialized Circular Queue (Ring Buffer) of capacity ${CAPACITY}. FRONT at slot ${front} (value: ${slots[front]}), REAR at slot ${rear} (value: ${slots[rear]}).`,
+    message: `Initialized Circular Queue (Ring Buffer) of capacity ${CAPACITY}. Ready to process ${vals.length} custom element(s).`,
     codeLine: { python: 2, c: 6, cpp: 6, java: 2, js: 2 },
   };
 
-  // Step 1: Enqueue 89 at slot 3
-  const v1 = 89;
-  rear = (rear + 1) % CAPACITY;
-  slots[rear] = v1;
-  yield {
-    type: 'circular-queue',
-    slots: [...slots],
-    front,
-    rear,
-    capacity: CAPACITY,
-    action: 'enqueue',
-    message: `ENQUEUE(${v1}): rear = (2 + 1) % 6 = 3. Placed ${v1} into slot [3].`,
-    codeLine: { python: 8, c: 9, cpp: 9, java: 6, js: 9 },
-  };
+  // Phase 1: Enqueue first batch of custom elements
+  const initialBatchCount = Math.min(vals.length, Math.max(2, CAPACITY - 2));
+  for (let i = 0; i < initialBatchCount; i++) {
+    const val = vals[i];
+    if (front === -1) front = 0;
+    rear = (rear + 1) % CAPACITY;
+    slots[rear] = val;
 
-  // Step 2: Dequeue from FRONT (slot 0)
-  const deq1 = slots[front];
-  slots[front] = null;
-  front = (front + 1) % CAPACITY;
-  yield {
-    type: 'circular-queue',
-    slots: [...slots],
-    front,
-    rear,
-    capacity: CAPACITY,
-    action: 'dequeue',
-    message: `DEQUEUE(): Discharged ${deq1} from slot [0]. front moved forward: (0 + 1) % 6 = 1. New FRONT is slot [1] (${slots[front]}). Slot [0] is now free for wrap-around reuse!`,
-    codeLine: { python: 15, c: 11, cpp: 11, java: 9, js: 12 },
-  };
+    yield {
+      type: 'circular-queue',
+      slots: [...slots],
+      front,
+      rear,
+      capacity: CAPACITY,
+      action: 'enqueue',
+      message: `ENQUEUE(${val}) [${i + 1}/${vals.length}]: rear = (${(rear - 1 + CAPACITY) % CAPACITY} + 1) % ${CAPACITY} = ${rear}. Placed ${val} into slot [${rear}].`,
+      codeLine: { python: 8, c: 9, cpp: 9, java: 6, js: 9 },
+    };
+  }
 
-  // Step 3: Enqueue 44 at slot 4
-  const v2 = 44;
-  rear = (rear + 1) % CAPACITY;
-  slots[rear] = v2;
-  yield {
-    type: 'circular-queue',
-    slots: [...slots],
-    front,
-    rear,
-    capacity: CAPACITY,
-    action: 'enqueue',
-    message: `ENQUEUE(${v2}): rear = (3 + 1) % 6 = 4. Placed ${v2} into slot [4].`,
-    codeLine: { python: 8, c: 9, cpp: 9, java: 6, js: 9 },
-  };
+  // Phase 2: Dequeue 1 or 2 elements from FRONT to create open slots for wrap-around
+  const deqCount = Math.min(2, Math.max(1, Math.floor(initialBatchCount / 2)));
+  for (let i = 0; i < deqCount; i++) {
+    const deqVal = slots[front];
+    slots[front] = null;
+    const oldFront = front;
+    if (front === rear) {
+      front = -1;
+      rear = -1;
+    } else {
+      front = (front + 1) % CAPACITY;
+    }
 
-  // Step 4: Enqueue 91 at slot 5 (End of array)
-  const v3 = 91;
-  rear = (rear + 1) % CAPACITY;
-  slots[rear] = v3;
-  yield {
-    type: 'circular-queue',
-    slots: [...slots],
-    front,
-    rear,
-    capacity: CAPACITY,
-    action: 'enqueue',
-    message: `ENQUEUE(${v3}): rear = (4 + 1) % 6 = 5. Placed ${v3} into slot [5] (End of array).`,
-    codeLine: { python: 8, c: 9, cpp: 9, java: 6, js: 9 },
-  };
+    yield {
+      type: 'circular-queue',
+      slots: [...slots],
+      front,
+      rear,
+      capacity: CAPACITY,
+      action: 'dequeue',
+      message: `DEQUEUE(): Discharged ${deqVal} from slot [${oldFront}]. front = (${oldFront} + 1) % ${CAPACITY} = ${front}. Slot [${oldFront}] is now free for wrap-around reuse!`,
+      codeLine: { python: 15, c: 11, cpp: 11, java: 9, js: 12 },
+    };
+  }
 
-  // Step 5: WRAP-AROUND ENQUEUE! (Slot 0 reuse)
-  const v4 = 17;
-  rear = (rear + 1) % CAPACITY; // (5 + 1) % 6 = 0!
-  slots[rear] = v4;
-  yield {
-    type: 'circular-queue',
-    slots: [...slots],
-    front,
-    rear,
-    capacity: CAPACITY,
-    action: 'enqueue',
-    message: `WRAP-AROUND ENQUEUE(${v4}): rear = (5 + 1) % 6 = 0! Wrapped around from tail to head and reused vacated slot [0]!`,
-    codeLine: { python: 11, c: 10, cpp: 10, java: 8, js: 11 },
-  };
+  // Phase 3: Enqueue remaining custom elements (triggering modulo wrap-around into vacated slots)
+  for (let i = initialBatchCount; i < vals.length; i++) {
+    const val = vals[i];
+    const oldRear = rear;
+    if (front === -1) front = 0;
+    rear = (rear + 1) % CAPACITY;
+    slots[rear] = val;
 
-  // Step 6: Complete
+    const isWrap = rear < oldRear;
+    yield {
+      type: 'circular-queue',
+      slots: [...slots],
+      front,
+      rear,
+      capacity: CAPACITY,
+      action: 'enqueue',
+      message: isWrap
+        ? `WRAP-AROUND ENQUEUE(${val}) [${i + 1}/${vals.length}]: rear = (${oldRear} + 1) % ${CAPACITY} = ${rear}! Wrapped around and reused vacated slot [${rear}]!`
+        : `ENQUEUE(${val}) [${i + 1}/${vals.length}]: rear = (${oldRear} + 1) % ${CAPACITY} = ${rear}. Placed ${val} into slot [${rear}].`,
+      codeLine: { python: isWrap ? 11 : 8, c: 10, cpp: 10, java: 8, js: 11 },
+    };
+  }
+
+  // Complete
   yield {
     type: 'circular-queue',
     slots: [...slots],
