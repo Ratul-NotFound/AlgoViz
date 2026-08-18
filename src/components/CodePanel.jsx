@@ -55,13 +55,29 @@ export default function CodePanel({ code, activeLine, title }) {
   const [lang, setLang] = useState('python');
   const [copied, setCopied] = useState(false);
   const activeLineRef = useRef(null);
+  const codeBodyRef = useRef(null);
 
   const currentCode = code?.[lang] || [];
   const activeIdx = activeLine?.[lang] ?? -1;
 
   useEffect(() => {
-    if (activeLineRef.current) {
-      activeLineRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (activeLineRef.current && codeBodyRef.current) {
+      const container = codeBodyRef.current;
+      const line = activeLineRef.current;
+      const containerTop = container.scrollTop;
+      const containerHeight = container.clientHeight;
+      const lineTop = line.offsetTop;
+      const lineHeight = line.offsetHeight;
+
+      // Scroll strictly within the code editor container without affecting page/window scroll
+      if (lineTop < containerTop) {
+        container.scrollTo({ top: Math.max(0, lineTop - 10), behavior: 'smooth' });
+      } else if (lineTop + lineHeight > containerTop + containerHeight) {
+        container.scrollTo({
+          top: lineTop + lineHeight - containerHeight + 20,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [activeIdx]);
 
@@ -113,7 +129,7 @@ export default function CodePanel({ code, activeLine, title }) {
       </div>
 
       {/* ── Code Gutter & Content ── */}
-      <div className="code-body">
+      <div className="code-body" ref={codeBodyRef}>
         {currentCode.map((line, i) => {
           const isActive = i === activeIdx;
           const tokens = tokenize(line);

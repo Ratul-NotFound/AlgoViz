@@ -4,7 +4,7 @@ import React from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { getAlgoIcon, AlgoFlowXLogo } from './Icons.jsx';
 
-export default function Sidebar({ currentSlug, onSelect }) {
+export default function Sidebar({ currentSlug, onSelect, onClose }) {
   const grouped = Object.entries(CATEGORIES).map(([catKey, cat]) => ({
     ...cat,
     key: catKey,
@@ -14,17 +14,42 @@ export default function Sidebar({ currentSlug, onSelect }) {
   return (
     <aside className="sidebar">
       {/* Top Sidebar Brand Header */}
-      <div className="sidebar-brand" onClick={() => onSelect(null)} role="button" tabIndex={0} title="AlgoFlowX Home">
-        <div className="sidebar-brand-logo">
-          <AlgoFlowXLogo size={26} />
-        </div>
-        <div className="sidebar-brand-info">
-          <div className="sidebar-brand-title">
-            <span>AlgoFlow</span>
-            <span className="logo-x-accent">X</span>
+      <div className="sidebar-brand">
+        <div
+          className="sidebar-brand-left"
+          onClick={() => onSelect(null)}
+          role="button"
+          tabIndex={0}
+          title="AlgoFlowX Home"
+        >
+          <div className="sidebar-brand-logo">
+            <AlgoFlowXLogo size={26} />
           </div>
-          <span className="sidebar-brand-badge">DSA Visualizer</span>
+          <div className="sidebar-brand-info">
+            <div className="sidebar-brand-title">
+              <span>AlgoFlow</span>
+              <span className="logo-x-accent">X</span>
+            </div>
+            <span className="sidebar-brand-badge">DSA Visualizer</span>
+          </div>
         </div>
+        {onClose && (
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            aria-label="Close sidebar"
+            title="Close menu"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Scrollable Algorithm Navigation */}

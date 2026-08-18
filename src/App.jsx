@@ -159,7 +159,11 @@ export default function App() {
         onClick={() => setSidebarOpen(false)}
       />
       <div className={`sidebar-drawer ${sidebarOpen ? 'open' : ''}`}>
-        <Sidebar currentSlug={currentSlug} onSelect={handleSelectAlgo} />
+        <Sidebar
+          currentSlug={currentSlug}
+          onSelect={handleSelectAlgo}
+          onClose={() => setSidebarOpen(false)}
+        />
       </div>
 
       {/* ── Main Content ── */}
