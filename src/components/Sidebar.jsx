@@ -140,7 +140,7 @@ export default function Sidebar({ currentSlug, onSelect, onClose }) {
 
             {/* Portfolio Website */}
             <a
-              href="https://mh-ratul.vercel.app/"
+              href="https://ratul-dev.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="dev-social-btn dev-social-portfolio"
