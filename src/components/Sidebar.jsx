@@ -2,9 +2,12 @@
 
 import React from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
-import { getAlgoIcon, AlgoFlowXLogo } from './Icons.jsx';
+import { getAlgoIcon, AlgoFlowXLogo, BookmarkIcon } from './Icons.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Sidebar({ currentSlug, onSelect, onClose }) {
+  const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
+
   const grouped = Object.entries(CATEGORIES).map(([catKey, cat]) => ({
     ...cat,
     key: catKey,
@@ -60,21 +63,40 @@ export default function Sidebar({ currentSlug, onSelect, onClose }) {
               {group.label}
             </div>
             <div className="sidebar-items">
-              {group.items.map(algo => (
-                <div
-                  key={algo.slug}
-                  className={`sidebar-item ${currentSlug === algo.slug ? 'active' : ''}`}
-                  onClick={() => onSelect(algo.slug)}
-                >
-                  <span className="sidebar-item-name">
-                    <span className="sidebar-algo-glyph">{getAlgoIcon(algo.slug, 15)}</span>
-                    <span>{algo.name}</span>
-                  </span>
-                  <span className="sidebar-item-complexity">
-                    {algo.timeComplexity.average}
-                  </span>
-                </div>
-              ))}
+              {group.items.map(algo => {
+                const bookmarked = isBookmarked(algo.slug);
+                const completed = isCompleted(algo.slug);
+
+                return (
+                  <div
+                    key={algo.slug}
+                    className={`sidebar-item ${currentSlug === algo.slug ? 'active' : ''} ${completed ? 'item-completed' : ''}`}
+                    onClick={() => onSelect(algo.slug)}
+                  >
+                    <span className="sidebar-item-name">
+                      <span className="sidebar-algo-glyph">{getAlgoIcon(algo.slug, 15)}</span>
+                      <span>{algo.name}</span>
+                    </span>
+                    <div className="sidebar-item-meta">
+                      <span className="sidebar-item-complexity">
+                        {algo.timeComplexity.average}
+                      </span>
+                      <button
+                        type="button"
+                        className={`sidebar-star-btn ${bookmarked ? 'star-active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(algo.slug);
+                        }}
+                        title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
+                        aria-label="Bookmark"
+                      >
+                        <BookmarkIcon size={12} filled={bookmarked} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}

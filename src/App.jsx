@@ -3,8 +3,11 @@ import Sidebar       from './components/Sidebar.jsx';
 import HomePage      from './pages/HomePage.jsx';
 import AlgorithmPage from './pages/AlgorithmPage.jsx';
 import { ALGORITHMS } from './data/algorithms.js';
-import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon, AlgoFlowXLogo } from './components/Icons.jsx';
+import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon, AlgoFlowXLogo, GoogleIcon } from './components/Icons.jsx';
 import { isAudioEnabled, toggleSound } from './utils/sound.js';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import AuthModal from './components/AuthModal.jsx';
+import UserAvatarMenu from './components/UserAvatarMenu.jsx';
 
 function getInitialSlug() {
   if (typeof window === 'undefined') return null;
@@ -21,7 +24,7 @@ function getInitialSlug() {
   return null;
 }
 
-export default function App() {
+function AppContent() {
   const [currentSlug, setCurrentSlug] = useState(getInitialSlug);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1024 : false);
@@ -32,6 +35,8 @@ export default function App() {
     }
     return 'light';
   });
+
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -135,6 +140,22 @@ export default function App() {
 
         <div className="header-spacer" />
 
+        {/* Google Sign In / User Profile Avatar */}
+        {isAuthenticated ? (
+          <UserAvatarMenu onSelectAlgo={handleSelectAlgo} />
+        ) : (
+          <button
+            type="button"
+            className="header-signin-btn"
+            onClick={openAuthModal}
+            title="Sign in with Google to sync progress & bookmarks"
+            aria-label="Sign in with Google"
+          >
+            <GoogleIcon size={14} />
+            <span>Sign In</span>
+          </button>
+        )}
+
         {/* Theme Toggle Button */}
         <button
           className="header-theme-pill"
@@ -230,6 +251,17 @@ export default function App() {
           : <HomePage onSelectAlgo={handleSelectAlgo} />
         }
       </main>
+
+      {/* ── Global Google Auth Modal ── */}
+      <AuthModal />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

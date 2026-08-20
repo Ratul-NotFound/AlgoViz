@@ -70,7 +70,15 @@ Whether you are preparing for technical coding interviews or studying for univer
 
 ---
 
-### 6. 📱 Responsive, Mobile-First Interface
+### 6. 🔐 Google One Tap & Google Sign-In Authentication
+* Powered by official **Google Identity Services (GIS)**.
+* **Google One Tap verification**: Instant one-tap sign-in prompt on page load without redirects.
+* **Cloud Session Sync**: Synchronize learning progress, track mastered algorithms ($X/19$ checklist), and save personal algorithm bookmarks.
+* **Instant Demo Mode**: Built-in fallback allowing developers and visitors to test all member features with zero setup.
+
+---
+
+### 7. 📱 Responsive, Mobile-First Interface
 * Optimized for phones, tablets, and wide desktop displays.
 * Touch momentum scrolling for node trains and memory arrays.
 * 2-column dynamic mobile curriculum cards.
@@ -133,12 +141,22 @@ Whether you are preparing for technical coding interviews or studying for univer
    npm install
    ```
 
-3. **Start the local development server**:
+3. **(Optional) Configure Google OAuth Client ID**:
+   ```bash
+   cp .env.example .env
+   ```
+   Add your Google OAuth 2.0 Client ID in `.env`:
+   ```env
+   VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   ```
+   *(If omitted, AlgoFlowX automatically operates in instant dev/demo mode!)*
+
+4. **Start the local development server**:
    ```bash
    npm run dev
    ```
 
-4. **Open in browser**:
+5. **Open in browser**:
    Navigate to [http://localhost:5173](http://localhost:5173) in your browser.
 
 ### Production Build

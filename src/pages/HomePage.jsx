@@ -3,8 +3,10 @@ import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import AlgorithmDuel from '../components/AlgorithmDuel.jsx';
 import {
   SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon,
-  PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, getAlgoIcon
+  PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, getAlgoIcon,
+  BookmarkIcon, CheckCircleIcon
 } from '../components/Icons.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const LANG_OPTIONS = [
   { id: 'python', label: 'Python', icon: PythonIcon, ext: 'py' },
@@ -129,6 +131,7 @@ function getComplexityColor(comp = '') {
 }
 
 export default function HomePage({ onSelectAlgo }) {
+  const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'tracks' | 'duel' | 'matrix' | 'growth'
@@ -539,20 +542,36 @@ export default function HomePage({ onSelectAlgo }) {
             ) : (
               filteredAlgos.map(algo => {
                 const catLabel = CATEGORIES[algo.category]?.label || algo.category;
+                const bookmarked = isBookmarked(algo.slug);
+                const completed = isCompleted(algo.slug);
 
                 return (
                   <div
                     key={algo.slug}
-                    className="algo-card"
+                    className={`algo-card ${completed ? 'card-completed' : ''}`}
                     onClick={() => onSelectAlgo(algo.slug)}
                   >
                     <div className="card-top-bar">
                       <div className="card-icon-badge">
                         {getAlgoIcon(algo.slug, 15)}
                       </div>
-                      <span className="card-complexity-pill font-mono">
-                        {algo.timeComplexity.average}
-                      </span>
+                      <div className="card-top-right">
+                        <span className="card-complexity-pill font-mono">
+                          {algo.timeComplexity.average}
+                        </span>
+                        <button
+                          type="button"
+                          className={`card-bookmark-btn ${bookmarked ? 'star-active' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleBookmark(algo.slug);
+                          }}
+                          title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
+                          aria-label="Bookmark"
+                        >
+                          <BookmarkIcon size={13} filled={bookmarked} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="card-body">
