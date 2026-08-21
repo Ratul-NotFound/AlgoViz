@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Environment variables & local configs
+.env
+.env.local
+.env.*.local
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -23,3 +29,6 @@ dist-ssr
 *.sln
 *.sw?
 setup-git.*
+
+# Local Antigravity Agents & Skills
+.agents/
