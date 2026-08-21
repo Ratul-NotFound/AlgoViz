@@ -75,23 +75,24 @@ export function parseJwtCredential(token) {
   }
 }
 
+const DEFAULT_GOOGLE_CLIENT_ID = '38255739556-oforkmkbij62j65tiabp2pj14r93886c.apps.googleusercontent.com';
+
 /**
- * Checks if a real custom Google Client ID is configured in .env.
+ * Checks if a real custom Google Client ID is configured in .env or default fallback.
  */
 export function hasCustomGoogleClientId() {
-  const envId = import.meta.env?.VITE_GOOGLE_CLIENT_ID;
-  return Boolean(envId && envId.trim() && envId !== 'your-google-client-id.apps.googleusercontent.com');
+  return Boolean(getGoogleClientId());
 }
 
 /**
- * Get Google Client ID from environment variables.
+ * Get Google Client ID from environment variables or default fallback.
  */
 export function getGoogleClientId() {
   const envId = import.meta.env?.VITE_GOOGLE_CLIENT_ID;
-  if (hasCustomGoogleClientId()) {
+  if (envId && envId.trim() && envId !== 'your-google-client-id.apps.googleusercontent.com') {
     return envId.trim();
   }
-  return null;
+  return DEFAULT_GOOGLE_CLIENT_ID;
 }
 
 /**
@@ -120,6 +121,7 @@ export async function initGoogleOneTap({ onCredentialResponse, promptParentId = 
       },
       auto_select: false,
       cancel_on_tap_outside: false,
+      use_fedcm_for_prompt: true,
     };
 
     if (promptParentId && document.getElementById(promptParentId)) {
@@ -128,20 +130,12 @@ export async function initGoogleOneTap({ onCredentialResponse, promptParentId = 
 
     googleId.initialize(config);
 
-    // Prompt Google One Tap popup
-    googleId.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        // One tap not displayed (e.g. opt-out or suppressed by browser)
-      } else if (notification.isSkippedMoment()) {
-        // One tap skipped
-      } else if (notification.isDismissedMoment()) {
-        // One tap dismissed
-      }
-    });
+    // Prompt Google One Tap popup gracefully
+    googleId.prompt();
 
     return true;
   } catch (e) {
-    console.warn('[GoogleAuth] One Tap initialization error:', e);
+    // Graceful fallback if One Tap is blocked or FedCM is suppressed by browser settings
     return false;
   }
 }
