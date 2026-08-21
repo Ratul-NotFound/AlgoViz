@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ALGORITHMS } from '../data/algorithms.js';
 import { PlayIcon, PauseIcon, ShuffleIcon, ResetIcon, getAlgoIcon } from './Icons.jsx';
 import { playNote, playSwapChime, playCompleteFanfare } from '../utils/sound.js';
+import { useAuth } from '../context/useAuth.js';
 
 // Algorithms available for Duel
 const DUEL_ALGOS = [
@@ -43,6 +44,7 @@ function formatPhaseMessage(msg) {
 }
 
 export default function AlgorithmDuel() {
+  const { isAuthenticated, openAuthModal } = useAuth();
   const [algoA, setAlgoA] = useState('bubble-sort');
   const [algoB, setAlgoB] = useState('quick-sort');
   const [dataPreset, setDataPreset] = useState('random');
@@ -122,6 +124,10 @@ export default function AlgorithmDuel() {
   };
 
   const handleStartPause = () => {
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
     if (isRunning) {
       clearInterval(timerRef.current);
       setIsRunning(false);
@@ -304,9 +310,10 @@ export default function AlgorithmDuel() {
             <button
               className={`btn btn-primary duel-play-btn ${isRunning ? 'running' : ''}`}
               onClick={handleStartPause}
+              title={!isAuthenticated ? 'Sign in with Google to start algorithm race' : 'Start Race'}
             >
               {isRunning ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
-              <span>{isRunning ? 'Pause Race' : 'Start Algorithm Race!'}</span>
+              <span>{isRunning ? 'Pause Race' : !isAuthenticated ? 'Start Race (Sign In)' : 'Start Algorithm Race!'}</span>
             </button>
           </div>
         </div>

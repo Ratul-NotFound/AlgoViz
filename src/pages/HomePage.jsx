@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
+import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
 import AlgorithmDuel from '../components/AlgorithmDuel.jsx';
 import {
   SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon,
@@ -130,13 +131,22 @@ function getComplexityColor(comp = '') {
   return '#8b5cf6';
 }
 
-export default function HomePage({ onSelectAlgo }) {
-  const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
+export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal, initialTab = 'catalog' }) {
+  const { isBookmarked, toggleBookmark, isCompleted, isAuthenticated, openAuthModal } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'tracks' | 'duel' | 'matrix' | 'growth'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'catalog' | 'academy-preview' | 'duel' | 'matrix'
+  const [showAllAlgos, setShowAllAlgos] = useState(false);
+  const [expandedCourse, setExpandedCourse] = useState('c'); // 'c' | 'python' | 'java' | 'cpp' | null
+  const [expandedModule, setExpandedModule] = useState('module-1'); // moduleId or null for 2-tier disclosure
   const [selectedLang, setSelectedLang] = useState('python');
   const [sliderN, setSliderN] = useState(64);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   // ── Hero Interactive DSA Console State ──
   const [heroMode, setHeroMode] = useState('quick'); // 'quick' | 'bubble' | 'binary'
@@ -287,75 +297,72 @@ export default function HomePage({ onSelectAlgo }) {
     });
   }, [activeCategory, searchQuery]);
 
+  const displayedAlgos = useMemo(() => {
+    if (searchQuery || activeCategory !== 'all' || showAllAlgos) {
+      return filteredAlgos;
+    }
+    return filteredAlgos.slice(0, 8);
+  }, [filteredAlgos, searchQuery, activeCategory, showAllAlgos]);
+
   const complexityResults = useMemo(() => calculateOperations(sliderN), [sliderN]);
 
   return (
     <div className="home-layout">
-      {/* ── 1. Clean Minimal Hero Workbench ── */}
+      {/* ── 1. World-Class Hero Section ── */}
       <section className="hero-workbench">
-        {/* Left: Authoritative Value Proposition */}
+        {/* Left: Value Proposition */}
         <div className="hero-content">
-          <div className="hero-eyebrow">
-            <span className="eyebrow-dot" />
-            <span className="eyebrow-text">ALGOFLOWX • INTERACTIVE DSA PLATFORM</span>
+          <div className="hero-badge-pill">
+            <span className="badge-glow-dot" />
+            <span className="badge-pill-text">🎓 C Academy (23 Chapters) &bull; 40+ Interactive Visualizers</span>
           </div>
 
           <h1 className="hero-title">
-            Visualize Data Structures &amp; Algorithms
+            Learn Coding &amp; Master Algorithms Through <span className="hero-highlight-text">Interactive Visuals</span>.
           </h1>
 
           <p className="hero-description">
-            Step into memory execution. Trace pointer mutations, debug recursion frame-by-frame, and inspect synchronized multi-language source code across 19 interactive engines.
+            The easy way to learn programming and data structures. Start C coding from scratch with simple visual guides, run real code in your browser, and watch every algorithm step-by-step.
           </p>
-
-          {/* Quick Launch Chips */}
-          <div className="hero-chips-bar">
-            <span className="chips-label">POPULAR:</span>
-            <div className="chips-list">
-              {FEATURED_CHIPS.map(chip => (
-                <button
-                  key={chip.slug}
-                  className="chip-btn"
-                  onClick={() => onSelectAlgo(chip.slug)}
-                >
-                  <span className="chip-name">{chip.name}</span>
-                  <span className="chip-comp font-mono">{chip.comp}</span>
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Primary Action Buttons */}
           <div className="hero-actions">
-            <button className="btn-hero-primary" onClick={() => onSelectAlgo('quick-sort')}>
+            <button
+              className="btn-hero-academy"
+              onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
+            >
+              🎓 Start Learning C (23 Chapters) &rarr;
+            </button>
+            <button
+              className="btn-hero-primary"
+              onClick={() => {
+                setActiveTab('catalog');
+                const el = document.querySelector('.platform-nav-bar') || document.querySelector('.catalog-header-bar');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            >
               <PlayIcon size={14} />
-              <span>Launch Studio</span>
-            </button>
-            <button className="btn-hero-secondary" onClick={() => setActiveTab('duel')}>
-              <span>⚔️ Battle Arena</span>
-            </button>
-            <button className="btn-hero-ghost" onClick={() => setActiveTab('matrix')}>
-              <span>Complexity Matrix →</span>
+              <span>Explore 40+ Visualizers</span>
             </button>
           </div>
 
-          {/* Clean Metric Grid */}
-          <div className="hero-metrics-grid">
-            <div className="metric-box">
-              <span className="metric-val font-mono">19</span>
-              <span className="metric-lbl">Visualizers</span>
+          {/* Clean Quick Features Pill List */}
+          <div className="hero-simple-highlights">
+            <div className="simple-highlight-pill">
+              <span className="pill-check">✓</span>
+              <span>100% Free &amp; Open Access</span>
             </div>
-            <div className="metric-box">
-              <span className="metric-val font-mono">5</span>
-              <span className="metric-lbl">Languages</span>
+            <div className="simple-highlight-pill">
+              <span className="pill-check">✓</span>
+              <span>230 Practice Quizzes &amp; Labs</span>
             </div>
-            <div className="metric-box">
-              <span className="metric-val font-mono">O(1)→O(n²)</span>
-              <span className="metric-lbl">Complexity</span>
+            <div className="simple-highlight-pill">
+              <span className="pill-check">✓</span>
+              <span>In-Browser C Compiler &amp; Sandbox</span>
             </div>
-            <div className="metric-box">
-              <span className="metric-val font-mono">100%</span>
-              <span className="metric-lbl">Custom Data</span>
+            <div className="simple-highlight-pill">
+              <span className="pill-check">✓</span>
+              <span>Free Certificate of Completion</span>
             </div>
           </div>
         </div>
@@ -374,27 +381,35 @@ export default function HomePage({ onSelectAlgo }) {
                 className={`s-tab ${heroMode === 'quick' ? 'active' : ''}`}
                 onClick={() => handleSwitchHeroMode('quick')}
               >
-                Quick
+                Quick Sort
               </button>
               <button
                 className={`s-tab ${heroMode === 'bubble' ? 'active' : ''}`}
                 onClick={() => handleSwitchHeroMode('bubble')}
               >
-                Bubble
+                Bubble Sort
               </button>
               <button
                 className={`s-tab ${heroMode === 'binary' ? 'active' : ''}`}
                 onClick={() => handleSwitchHeroMode('binary')}
               >
-                Binary
+                Binary Search
               </button>
             </div>
 
             <div className="sandbox-btns">
-              <button className="s-btn-icon" onClick={shuffleHero} title="Shuffle Data">
+              <button
+                className="s-btn-icon"
+                onClick={shuffleHero}
+                title="Shuffle Data"
+              >
                 <ShuffleIcon size={12} />
               </button>
-              <button className="s-btn-play" onClick={runHeroAnimation}>
+              <button
+                className="s-btn-play"
+                onClick={runHeroAnimation}
+                title="Run / Pause Animation"
+              >
                 {heroSorting ? <PauseIcon size={11} /> : <PlayIcon size={11} />}
                 <span>{heroSorting ? 'Pause' : 'Run'}</span>
               </button>
@@ -442,388 +457,964 @@ export default function HomePage({ onSelectAlgo }) {
         </div>
       </section>
 
-      {/* ── 2. Segmented Navigation Bar ── */}
-      <nav className="platform-nav-bar">
-        <div className="nav-segments">
-          <button
-            className={`nav-segment ${activeTab === 'catalog' ? 'active' : ''}`}
-            onClick={() => setActiveTab('catalog')}
-          >
-            <span>Algorithm Directory</span>
-            <span className="seg-badge">{ALGORITHMS.length}</span>
-          </button>
-          <button
-            className={`nav-segment ${activeTab === 'tracks' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tracks')}
-          >
-            <span>Curriculum Tracks</span>
-            <span className="seg-badge">{LEARNING_TRACKS.length}</span>
-          </button>
-          <button
-            className={`nav-segment ${activeTab === 'duel' ? 'active' : ''}`}
-            onClick={() => setActiveTab('duel')}
-          >
-            <span>⚔️ Battle Arena</span>
-            <span className="seg-live">LIVE RACE</span>
-          </button>
-          <button
-            className={`nav-segment ${activeTab === 'matrix' ? 'active' : ''}`}
-            onClick={() => setActiveTab('matrix')}
-          >
-            <span>Big-O Matrix</span>
-          </button>
-          <button
-            className={`nav-segment ${activeTab === 'growth' ? 'active' : ''}`}
-            onClick={() => setActiveTab('growth')}
-          >
-            <span>Growth Curves</span>
-          </button>
+      {/* ── 2. Dual-Mission Gateways (Choose Your Path) ── */}
+      <section className="dual-flagship-section">
+        <div className="flagship-card card-learn-c" onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}>
+          <div className="flagship-top-header">
+            <span className="flagship-badge badge-c-learn">🎓 C ACADEMY</span>
+            <span className="flagship-pill-ch font-mono">23 CHAPTERS • 230 QUIZZES &amp; LABS</span>
+          </div>
+          <h2 className="flagship-title">C Programming Academy</h2>
+          <p className="flagship-desc">
+            Learn pointers, memory layout, structs, and how computers store data with clear visual examples and an in-browser C compiler.
+          </p>
+
+          <div className="flagship-code-snippet font-mono">
+            <span className="c-kw">int</span> *ptr = &amp;val; <span className="c-cm">/* 0x7ffd14 ➔ 42 */</span>
+          </div>
+
+          <div className="flagship-feature-pills">
+            <span className="feat-pill">📦 23 Visual Chapters</span>
+            <span className="feat-pill">💻 In-Browser Compiler</span>
+            <span className="feat-pill">🎓 Gold Certificate</span>
+          </div>
+
+          <div className="flagship-action-row">
+            <button className="btn-flagship-c">
+              <span>Start Chapter 1</span>
+              <ArrowRightIcon size={12} />
+            </button>
+            <span className="flagship-meta-text">100% Free &amp; Interactive</span>
+          </div>
         </div>
-      </nav>
 
-      {/* ── 3. View: Battle Arena ── */}
-      {activeTab === 'duel' && (
-        <section className="section-block">
-          <AlgorithmDuel />
-        </section>
-      )}
+        <div
+          className="flagship-card card-dsa-studio"
+          onClick={() => {
+            setActiveTab('catalog');
+            const el = document.querySelector('.platform-nav-bar') || document.querySelector('.catalog-header-bar');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        >
+          <div className="flagship-top-header">
+            <span className="flagship-badge badge-dsa-engine">⚡ DSA STUDIO</span>
+            <span className="flagship-pill-dsa font-mono">40+ ALGORITHMS • SPEED RACE</span>
+          </div>
+          <h2 className="flagship-title">Data Structures &amp; Algorithm Visualizer</h2>
+          <p className="flagship-desc">
+            Watch sorting, searching, trees, and graphs execute step-by-step with real data and Big-O analytics.
+          </p>
 
-      {/* ── 4. View: Algorithm Directory ── */}
-      {activeTab === 'catalog' && (
-        <section className="section-block">
-          <div className="catalog-header-bar">
-            {/* Category Filter Pills */}
-            <div className="cat-filter-pills">
+          <div className="flagship-duel-snippet font-mono">
+            <span className="f-good">Quick: O(n log n) ⚡</span> <span className="f-vs">vs</span> <span className="f-bad">Bubble: O(n²)</span>
+          </div>
+
+          <div className="flagship-feature-pills">
+            <span className="feat-pill">📊 Step Playback</span>
+            <span className="feat-pill">⚔️ Speed Race</span>
+            <span className="feat-pill">🌐 5 Languages</span>
+          </div>
+
+          <div className="flagship-action-row">
+            <button className="btn-flagship-dsa">
+              <span>Explore Visualizers</span>
+              <ArrowRightIcon size={12} />
+            </button>
+            <span className="flagship-meta-text">40+ Algorithms Available</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          SECTION 1: ⚡ DSA VISUALIZER (1. VISUALIZATIONS | 2. BATTLE ARENA | 3. BIG-O)
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className="section-block algo-studio-section" id="visualizers-section">
+        <div className="section-header-row">
+          <div className="section-header-left">
+            <span className="section-eyebrow font-mono">⚡ DSA VISUALIZER</span>
+            <h2 className="section-main-title">DSA Visualizer</h2>
+            <p className="section-main-sub">
+              Watch algorithms run step-by-step, see variables change in real-time, and race algorithms head-to-head.
+            </p>
+          </div>
+        </div>
+
+        {/* 3 Creative Interactive Flagship Cards with Direct In-Card Unfolding Drawers */}
+        <div className="courses-hub-grid dsa-hub-grid">
+          {/* Card 1: ⚡ Visualizations (19) */}
+          <div
+            className={`course-card dsa-flagship-card card-visualizers ${activeTab === 'catalog' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => setActiveTab(curr => curr === 'catalog' ? null : 'catalog')}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-live font-mono">● {ALGORITHMS.length} ALGORITHMS</span>
+              <span className="course-badge-ch font-mono">SORT • SEARCH • GRAPH • TREE • DP</span>
+            </div>
+            
+            <div className="flagship-title-row">
+              <div className="flagship-icon-badge icon-green">⚡</div>
+              <h3 className="course-card-title">Interactive Visualizations</h3>
+            </div>
+
+            <p className="course-card-desc">
+              Step through Sorting, Searching, Trees, Graphs, and Dynamic Programming with live step-by-step animation.
+            </p>
+
+            {/* Creative Micro Visual Graphic Preview */}
+            <div className="card-mini-preview preview-bars">
+              <div className="mini-bar" style={{ height: '35%', background: '#3b82f6' }} />
+              <div className="mini-bar active-bar" style={{ height: '70%', background: '#10b981' }} />
+              <div className="mini-bar" style={{ height: '45%', background: '#3b82f6' }} />
+              <div className="mini-bar active-bar-swap" style={{ height: '90%', background: '#f59e0b' }} />
+              <div className="mini-bar" style={{ height: '60%', background: '#3b82f6' }} />
+              <span className="mini-preview-tag font-mono">Step-by-Step Tracing</span>
+            </div>
+
+            <div className="course-card-footer">
               <button
-                className={`filter-pill ${activeCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setActiveCategory('all')}
+                type="button"
+                className="btn-course-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('catalog');
+                }}
               >
-                All ({ALGORITHMS.length})
+                <span>⚡ Explore Visualizers</span>
+                <ArrowRightIcon size={12} />
               </button>
-              {Object.entries(CATEGORIES).map(([key, cat]) => {
-                const count = ALGORITHMS.filter(a => a.category === key).length;
-                return (
-                  <button
-                    key={key}
-                    className={`filter-pill ${activeCategory === key ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(key)}
-                  >
-                    <span>{cat.label} ({count})</span>
-                  </button>
-                );
-              })}
+              <span className="course-click-hint font-mono">
+                {activeTab === 'catalog' ? '▲ Close Visualizers' : `▼ Open Visualizers (${ALGORITHMS.length})`}
+              </span>
             </div>
 
-            {/* Clean Search Input */}
-            <div className="search-wrapper">
-              <SearchIcon size={14} className="search-ico" />
-              <input
-                type="text"
-                className="search-field"
-                placeholder="Search algorithms (e.g. quick, O(log n), queue)..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button className="search-x" onClick={() => setSearchQuery('')}>✕</button>
-              )}
-            </div>
-          </div>
-
-          {/* Cards Grid */}
-          <div className="algo-cards-grid">
-            {filteredAlgos.length === 0 ? (
-              <div className="empty-results">
-                <p>No algorithms match "{searchQuery}"</p>
-                <button className="btn-hero-secondary" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
-                  Reset Filters
-                </button>
-              </div>
-            ) : (
-              filteredAlgos.map(algo => {
-                const catLabel = CATEGORIES[algo.category]?.label || algo.category;
-                const bookmarked = isBookmarked(algo.slug);
-                const completed = isCompleted(algo.slug);
-
-                return (
-                  <div
-                    key={algo.slug}
-                    className={`algo-card ${completed ? 'card-completed' : ''}`}
-                    onClick={() => onSelectAlgo(algo.slug)}
-                  >
-                    <div className="card-top-bar">
-                      <div className="card-icon-badge">
-                        {getAlgoIcon(algo.slug, 15)}
-                      </div>
-                      <div className="card-top-right">
-                        <span className="card-complexity-pill font-mono">
-                          {algo.timeComplexity.average}
-                        </span>
-                        <button
-                          type="button"
-                          className={`card-bookmark-btn ${bookmarked ? 'star-active' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleBookmark(algo.slug);
-                          }}
-                          title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
-                          aria-label="Bookmark"
-                        >
-                          <BookmarkIcon size={13} filled={bookmarked} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="card-body">
-                      <h3 className="card-title">{algo.name}</h3>
-                      <span className="card-cat-label font-mono">{catLabel}</span>
-                      <p className="card-desc">{algo.description}</p>
-                    </div>
-
-                    <div className="card-footer-row">
-                      <span className="card-space-pill font-mono">Space {algo.spaceComplexity}</span>
-                      <span className="card-action-trigger">
-                        <span className="trigger-label">Visualize</span>
-                        <span className="trigger-arrow-box">
-                          <ArrowRightIcon size={11} className="trigger-arrow" />
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* ── 5. View: Curriculum Tracks ── */}
-      {activeTab === 'tracks' && (
-        <section className="section-block">
-          <div className="block-title-row">
-            <h2 className="block-heading">Curriculum Tracks</h2>
-            <p className="block-sub">Structured sequential learning pathways for semester exams and technical interview prep.</p>
-          </div>
-
-          <div className="tracks-grid-layout">
-            {LEARNING_TRACKS.map(track => {
-              const trackAlgos = track.algorithms.map(slug => ALGORITHMS.find(a => a.slug === slug)).filter(Boolean);
-              return (
-                <div key={track.id} className="track-box">
-                  <div className="track-header-row">
-                    <span className="track-num font-mono">{track.trackNum}</span>
-                    <span className="track-diff-pill" style={{ color: track.diffColor, borderColor: `${track.diffColor}44`, background: `${track.diffColor}12` }}>
-                      {track.difficulty}
-                    </span>
-                  </div>
-
-                  <h3 className="track-box-title">{track.title}</h3>
-                  <p className="track-box-desc">{track.description}</p>
-
-                  <div className="track-items-list">
-                    {trackAlgos.map(algo => (
-                      <div
-                        key={algo.slug}
-                        className="track-algo-row"
-                        onClick={() => onSelectAlgo(algo.slug)}
-                      >
-                        <div className="algo-row-left">
-                          <span className="algo-glyph">{getAlgoIcon(algo.slug, 13)}</span>
-                          <span className="algo-name">{algo.name}</span>
-                        </div>
-                        <span className="algo-comp font-mono">{algo.timeComplexity.average}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="track-footer-row">
-                    <span className="track-time font-mono">⏱ {track.timeEst}</span>
+            {/* Direct In-Card Unfolded Drawer: Visualizations Catalog */}
+            {activeTab === 'catalog' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="catalog-header-bar">
+                  {/* Horizontally Scrollable Category Filter Pills */}
+                  <div className="cat-filter-pills">
                     <button
-                      className="track-start-action"
-                      onClick={() => onSelectAlgo(trackAlgos[0]?.slug || 'bubble-sort')}
+                      className={`filter-pill ${activeCategory === 'all' ? 'active' : ''}`}
+                      onClick={() => setActiveCategory('all')}
                     >
-                      <span>Start Track</span>
-                      <ArrowRightIcon size={11} />
+                      All ({ALGORITHMS.length})
                     </button>
+                    {Object.entries(CATEGORIES).map(([key, cat]) => {
+                      const count = ALGORITHMS.filter(a => a.category === key).length;
+                      return (
+                        <button
+                          key={key}
+                          className={`filter-pill ${activeCategory === key ? 'active' : ''}`}
+                          onClick={() => setActiveCategory(key)}
+                        >
+                          <span>{cat.label} ({count})</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Clean Search Input */}
+                  <div className="search-wrapper">
+                    <SearchIcon size={14} className="search-ico" />
+                    <input
+                      type="text"
+                      className="search-field"
+                      placeholder="Search algorithms (e.g. quick, O(log n))..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                    />
+                    {searchQuery && (
+                      <button className="search-x" onClick={() => setSearchQuery('')}>✕</button>
+                    )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
-      {/* ── 6. View: Big-O Matrix ── */}
-      {activeTab === 'matrix' && (
-        <section className="section-block">
-          <div className="block-title-row">
-            <h2 className="block-heading">Complexity Matrix</h2>
-            <p className="block-sub">Comprehensive theoretical bounds and auxiliary space constraints for all 19 modules.</p>
-          </div>
+                {/* Creative Compact Algorithm Showcase Grid */}
+                <div className="algo-cards-grid creative-micro-grid">
+                  {displayedAlgos.length === 0 ? (
+                    <div className="empty-results">
+                      <p>No algorithms match "{searchQuery}"</p>
+                      <button className="btn-hero-secondary" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
+                        Reset Filters
+                      </button>
+                    </div>
+                  ) : (
+                    displayedAlgos.map(algo => {
+                      const catLabel = CATEGORIES[algo.category]?.label || algo.category;
+                      const bookmarked = isBookmarked(algo.slug);
+                      const completed = isCompleted(algo.slug);
+                      const timeColor = getComplexityColor(algo.timeComplexity.average);
 
-          <div className="matrix-table-wrap">
-            <table className="clean-table">
-              <thead>
-                <tr>
-                  <th>Algorithm</th>
-                  <th>Category</th>
-                  <th>Best Time</th>
-                  <th>Average Time</th>
-                  <th>Worst Time</th>
-                  <th>Space</th>
-                  <th>Stability</th>
-                  <th style={{ textAlign: 'right' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ALGORITHMS.map(algo => {
-                  const catLabel = CATEGORIES[algo.category]?.label || algo.category;
-                  const catColor = CATEGORY_COLORS[algo.category] || '#3b82f6';
-                  return (
-                    <tr key={algo.slug}>
-                      <td className="tbl-name">{algo.name}</td>
-                      <td>
-                        <span className="tbl-cat" style={{ color: catColor, borderColor: `${catColor}33` }}>
-                          {catLabel}
-                        </span>
-                      </td>
-                      <td className="tbl-code font-mono">{algo.timeComplexity.best}</td>
-                      <td className="tbl-code tbl-highlight font-mono">{algo.timeComplexity.average}</td>
-                      <td className="tbl-code font-mono">{algo.timeComplexity.worst}</td>
-                      <td className="tbl-code font-mono">{algo.spaceComplexity}</td>
-                      <td>
-                        {algo.stable !== undefined ? (
-                          <span className={`tbl-status ${algo.stable ? 'is-stable' : 'is-unstable'}`}>
-                            {algo.stable ? 'Stable' : 'Unstable'}
-                          </span>
-                        ) : (
-                          <span className="tbl-status is-na">N/A</span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          className="btn-tbl-launch"
+                      return (
+                        <div
+                          key={algo.slug}
+                          className={`micro-algo-tile cat-tile-${algo.category} ${completed ? 'tile-completed' : ''}`}
                           onClick={() => onSelectAlgo(algo.slug)}
                         >
-                          Launch Studio →
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+                          {/* Top Row: Icon + Name + Category + Bookmark */}
+                          <div className="micro-tile-top">
+                            <div className="micro-tile-identity">
+                              <div className="micro-tile-icon">
+                                {getAlgoIcon(algo.slug, 15)}
+                              </div>
+                              <div className="micro-tile-names">
+                                <h4 className="micro-tile-title">{algo.name}</h4>
+                                <span className="micro-tile-cat font-mono">{catLabel}</span>
+                              </div>
+                            </div>
 
-      {/* ── 7. View: Growth Curves ── */}
-      {activeTab === 'growth' && (
-        <section className="section-block">
-          <div className="block-title-row">
-            <h2 className="block-heading">Big-O Scalability Calculator</h2>
-            <p className="block-sub">Adjust problem scale (N) to observe operation count divergence across time complexities.</p>
+                            <div className="micro-tile-actions">
+                              <button
+                                type="button"
+                                className={`micro-bookmark-btn ${bookmarked ? 'star-active' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleBookmark(algo.slug);
+                                }}
+                                title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
+                                aria-label="Bookmark"
+                              >
+                                <BookmarkIcon size={12} filled={bookmarked} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Middle: Micro Metrics Capsule Bar */}
+                          <div className="micro-metrics-capsule">
+                            <span className="micro-metric-pill font-mono" style={{ color: timeColor }}>
+                              <span className="metric-dot" style={{ background: timeColor }} />
+                              {algo.timeComplexity.average}
+                            </span>
+                            <span className="micro-metric-pill font-mono metric-space">
+                              💾 {algo.spaceComplexity}
+                            </span>
+                            {algo.stable && (
+                              <span className="micro-metric-pill font-mono metric-stable">
+                                ✓ Stable
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Bottom: Fast Micro-Hint + Launch CTA */}
+                          <div className="micro-tile-footer">
+                            <span className="micro-insight-text font-mono">
+                              {algo.stable ? 'Preserves order' : 'In-place partition'}
+                            </span>
+                            <span className="micro-launch-pill">
+                              <span>Visualizer</span>
+                              <ArrowRightIcon size={10} className="micro-arrow-icon" />
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Show More / Progressive Disclosure Trigger */}
+                {activeCategory === 'all' && !searchQuery && filteredAlgos.length > 8 && (
+                  <div className="show-more-row">
+                    <button
+                      type="button"
+                      className="btn-show-more font-mono"
+                      onClick={() => setShowAllAlgos(prev => !prev)}
+                    >
+                      <span>{showAllAlgos ? '▲ Show Top 8 Featured' : `▼ Show All ${ALGORITHMS.length} Algorithms (+${ALGORITHMS.length - 8} more)`}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="growth-box">
-            <div className="slider-row">
-              <span className="slider-lbl">Scale (N = {sliderN}):</span>
-              <input
-                type="range"
-                min={4}
-                max={1024}
-                step={4}
-                value={sliderN}
-                onChange={e => setSliderN(parseInt(e.target.value))}
-                className="slider-range"
-              />
-              <span className="slider-val font-mono">{sliderN} items</span>
+          {/* Card 2: ⚔️ Battle Arena */}
+          <div
+            className={`course-card dsa-flagship-card card-duel ${activeTab === 'duel' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => setActiveTab(curr => curr === 'duel' ? null : 'duel')}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-soon font-mono">● LIVE DUEL</span>
+              <span className="course-badge-py font-mono">SIDE-BY-SIDE SPEED RACE</span>
             </div>
 
-            <div className="growth-cards-row">
-              {complexityResults.map(item => (
-                <div key={item.name} className="growth-stat-card">
-                  <span className="growth-bound font-mono">{item.name}</span>
-                  <span className="growth-name">{item.label}</span>
-                  <div className={`growth-count font-mono ${item.class}`}>
-                    {item.ops.toLocaleString()} ops
+            <div className="flagship-title-row">
+              <div className="flagship-icon-badge icon-amber">⚔️</div>
+              <h3 className="course-card-title">Algorithm Battle Arena</h3>
+            </div>
+
+            <p className="course-card-desc">
+              Race QuickSort, MergeSort, BubbleSort, and HeapSort against each other to see which is faster in real-time.
+            </p>
+
+            {/* Creative Micro Visual Graphic Preview */}
+            <div className="card-mini-preview preview-duel">
+              <div className="mini-duel-lane">
+                <span className="lane-tag font-mono">MergeSort</span>
+                <div className="lane-progress"><div className="lane-bar-fill fill-blue" style={{ width: '85%' }} /></div>
+                <span className="lane-time font-mono">1.2ms</span>
+              </div>
+              <div className="mini-duel-lane">
+                <span className="lane-tag font-mono">QuickSort</span>
+                <div className="lane-progress"><div className="lane-bar-fill fill-amber" style={{ width: '100%' }} /></div>
+                <span className="lane-time font-mono">0.8ms 🏆</span>
+              </div>
+            </div>
+
+            <div className="course-card-footer">
+              <button
+                type="button"
+                className="btn-course-launch btn-course-py-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('duel');
+                }}
+              >
+                <span>⚔️ Launch Arena</span>
+                <ArrowRightIcon size={12} />
+              </button>
+              <span className="course-click-hint font-mono">
+                {activeTab === 'duel' ? '▲ Close Arena' : '▼ Open Race Arena'}
+              </span>
+            </div>
+
+            {/* Direct In-Card Unfolded Drawer: Battle Arena */}
+            {activeTab === 'duel' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="duel-content-block">
+                  <AlgorithmDuel />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card 3: 📈 Big-O Matrix */}
+          <div
+            className={`course-card dsa-flagship-card card-matrix ${activeTab === 'matrix' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => setActiveTab(curr => curr === 'matrix' ? null : 'matrix')}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-dev font-mono">● COMPLEXITY CHART</span>
+              <span className="course-badge-java font-mono">LIVE SPEED CALCULATOR</span>
+            </div>
+
+            <div className="flagship-title-row">
+              <div className="flagship-icon-badge icon-blue">📈</div>
+              <h3 className="course-card-title">Big-O Complexity Matrix</h3>
+            </div>
+
+            <p className="course-card-desc">
+              Quick reference guide for Best, Average, and Worst speeds, plus a live calculator to see how input size affects speed.
+            </p>
+
+            {/* Creative Micro Visual Graphic Preview */}
+            <div className="card-mini-preview preview-matrix">
+              <span className="comp-dot-tag font-mono comp-green">O(1)</span>
+              <span className="comp-dot-arrow font-mono">→</span>
+              <span className="comp-dot-tag font-mono comp-cyan">O(log n)</span>
+              <span className="comp-dot-arrow font-mono">→</span>
+              <span className="comp-dot-tag font-mono comp-yellow">O(n)</span>
+              <span className="comp-dot-arrow font-mono">→</span>
+              <span className="comp-dot-tag font-mono comp-red">O(n²)</span>
+            </div>
+
+            <div className="course-card-footer">
+              <button
+                type="button"
+                className="btn-course-launch btn-course-java-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('matrix');
+                }}
+              >
+                <span>📈 Open Matrix</span>
+                <ArrowRightIcon size={12} />
+              </button>
+              <span className="course-click-hint font-mono">
+                {activeTab === 'matrix' ? '▲ Close Matrix' : '▼ Open Complexity Table'}
+              </span>
+            </div>
+
+            {/* Direct In-Card Unfolded Drawer: Big-O Matrix */}
+            {activeTab === 'matrix' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="matrix-content-block">
+                  {/* Dynamic Scalability Calculator */}
+                  <div className="scalability-calc-card">
+                    <div className="calc-header-row">
+                      <div className="calc-left">
+                        <span className="calc-badge font-mono">⚡ LIVE SPEED CALCULATOR</span>
+                        <h4 className="calc-title">Big-O Speed &amp; Steps Calculator</h4>
+                        <p className="calc-sub">Move the slider to see how the number of steps grows as you add more items.</p>
+                      </div>
+                      <div className="slider-control-box">
+                        <div className="slider-label-row">
+                          <span className="s-label font-mono">Input Size (N):</span>
+                          <span className="s-val font-mono font-bold">{sliderN} items</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="4"
+                          max="1024"
+                          step="4"
+                          value={sliderN}
+                          onChange={(e) => setSliderN(Number(e.target.value))}
+                          className="complexity-slider"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="calc-bars-grid">
+                      {Object.entries(complexityResults).map(([key, data]) => (
+                        <div key={key} className="calc-stat-pill">
+                          <div className="c-head">
+                            <span className="c-name">{data.label}</span>
+                            <span className="c-notation font-mono" style={{ color: data.color }}>{data.notation}</span>
+                          </div>
+                          <span className="c-ops font-mono">{data.opsFormatted} steps</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Matrix Table */}
+                  <div className="matrix-table-card">
+                    <div className="matrix-table-wrap">
+                      <table className="matrix-table">
+                        <thead>
+                          <tr>
+                            <th className="col-algo">Algorithm</th>
+                            <th className="col-cat">Category</th>
+                            <th className="col-best">Best Time</th>
+                            <th className="col-avg">Average Time</th>
+                            <th className="col-worst">Worst Time</th>
+                            <th className="col-space">Space</th>
+                            <th className="col-stable">Stable</th>
+                            <th className="col-action">Launch</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ALGORITHMS.map(algo => (
+                            <tr key={algo.slug} onClick={() => onSelectAlgo(algo.slug)} className="bigo-matrix-row matrix-row">
+                              <td className="col-algo font-bold font-mono matrix-name-cell">
+                                {algo.name}
+                              </td>
+                              <td className="col-cat">
+                                <span className="matrix-cat-pill font-mono">{CATEGORIES[algo.category]?.label || algo.category}</span>
+                              </td>
+                              <td className="col-best">
+                                <span className="complexity-badge font-mono" style={{ color: getComplexityColor(algo.timeComplexity.best) }}>
+                                  {algo.timeComplexity.best}
+                                </span>
+                              </td>
+                              <td className="col-avg">
+                                <span className="complexity-badge font-mono" style={{ color: getComplexityColor(algo.timeComplexity.average) }}>
+                                  {algo.timeComplexity.average}
+                                </span>
+                              </td>
+                              <td className="col-worst">
+                                <span className="complexity-badge font-mono" style={{ color: getComplexityColor(algo.timeComplexity.worst) }}>
+                                  {algo.timeComplexity.worst}
+                                </span>
+                              </td>
+                              <td className="col-space">
+                                <span className="matrix-space-pill font-mono">{algo.spaceComplexity}</span>
+                              </td>
+                              <td className="col-stable">
+                                <span className={`matrix-stable-pill ${algo.stable ? 'is-stable' : 'is-unstable'}`}>
+                                  {algo.stable ? '✓ Yes' : '✕ No'}
+                                </span>
+                              </td>
+                              <td className="col-action">
+                                <button className="matrix-action-btn" onClick={(e) => { e.stopPropagation(); onSelectAlgo(algo.slug); }}>
+                                  <span>Run</span>
+                                  <ArrowRightIcon size={10} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── 8. Feature Spotlight Bento Grid ── */}
-      <section className="spotlight-bento-grid">
-        <div className="bento-feature-box" onClick={() => setActiveTab('duel')}>
-          <div className="bento-box-top">
-            <span className="bento-tag tag-blue">⚔️ PERFORMANCE RACE</span>
-            <span className="bento-open-arrow">Open ➔</span>
-          </div>
-          <h4 className="bento-box-title">Algorithm Battle Arena</h4>
-          <p className="bento-box-sub">
-            Race two algorithms side-by-side on identical arrays to see O(n log n) vs O(n²) performance.
-          </p>
-          <div className="bento-duel-bars">
-            <div className="d-lane">
-              <div className="d-lane-head">
-                <span>Bubble Sort</span>
-                <span className="d-bad font-mono">O(n²)</span>
               </div>
-              <div className="d-track"><div className="d-fill fill-bad" style={{ width: '38%' }} /></div>
-            </div>
-            <div className="d-lane">
-              <div className="d-lane-head">
-                <span>Quick Sort</span>
-                <span className="d-good font-mono">O(n log n)</span>
-              </div>
-              <div className="d-track"><div className="d-fill fill-good" style={{ width: '92%' }} /></div>
-            </div>
+            )}
           </div>
         </div>
+      </section>
 
-        <div className="bento-feature-box">
-          <div className="bento-box-top">
-            <span className="bento-tag tag-blue">⚡ 5 LANGUAGE STEPPERS</span>
-            <div className="bento-lang-row">
-              {LANG_OPTIONS.map(l => (
-                <span
-                  key={l.id}
-                  className={`b-lang-pill ${selectedLang === l.id ? 'active' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); setSelectedLang(l.id); }}
-                >
-                  {l.label}
-                </span>
-              ))}
-            </div>
+      {/* ══════════════════════════════════════════════════════════════════
+          SECTION 2: 🎓 CODING ACADEMY (C, PYTHON, JAVA, C++)
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className="section-block coding-academy-section" id="academy-section">
+        <div className="section-header-row">
+          <div className="section-header-left">
+            <span className="section-eyebrow eyebrow-green font-mono">🎓 CODING ACADEMY</span>
+            <h2 className="section-main-title">Coding Academy</h2>
+            <p className="section-main-sub">
+              Learn programming step-by-step from beginner to advanced with interactive lessons, in-browser code practice, and quizzes.
+            </p>
           </div>
-          <h4 className="bento-box-title">Synchronized Code Steppers</h4>
-          <p className="bento-box-sub">
-            Line-by-line synchronized execution in Python, C, C++, Java, and JavaScript.
-          </p>
-          <div className="bento-code-box font-mono">
-            <span className="c-kw">def</span> <span className="c-fn">quick_sort</span>(arr, low, high):<br />
-            &nbsp;&nbsp;<span className="c-kw">if</span> low &lt; high:<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;p = partition(arr, low, high) <span className="c-active"># ◀ CURRENT</span>
-          </div>
+          <button
+            type="button"
+            className="btn btn-primary btn-md"
+            onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
+          >
+            🎓 Start Learning C (Chapter 1) &rarr;
+          </button>
         </div>
 
-        <div className="bento-feature-box">
-          <div className="bento-box-top">
-            <span className="bento-tag tag-green">📦 DATA STRUCTURES</span>
+        {/* Multi-Language Available Courses Grid with Direct In-Card Drawers */}
+        <div className="courses-hub-grid multi-lang-grid">
+          {/* 1. C Master Academy */}
+          <div
+            className={`course-card course-card-c ${expandedCourse === 'c' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => setExpandedCourse(curr => curr === 'c' ? null : 'c')}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-live font-mono">● LIVE &amp; FREE</span>
+              <span className="course-badge-ch font-mono">23 CHAPTERS • 230 QUIZZES</span>
+            </div>
+            <h3 className="course-card-title">C Programming Academy</h3>
+            <p className="course-card-desc">
+              Learn pointers, memory layout, structs, and dynamic memory with visual guides and a free certificate.
+            </p>
+            <div className="course-card-footer">
+              <button
+                type="button"
+                className="btn-course-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenLearnC && onOpenLearnC('hello-world-intro');
+                }}
+              >
+                <span>Start Course</span>
+                <ArrowRightIcon size={12} />
+              </button>
+              <span className="course-click-hint font-mono">
+                {expandedCourse === 'c' ? '▲ Close Details' : '▼ View Syllabus & Chapters'}
+              </span>
+            </div>
+
+            {/* Direct In-Card Unfolded Drawer for C */}
+            {expandedCourse === 'c' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="drawer-quick-banner">
+                  <div className="banner-left">
+                    <span className="banner-badge font-mono">11 CORE MODULES • 23 CHAPTERS</span>
+                    <h4 className="banner-title">C Programming Course Outline</h4>
+                    <p className="banner-sub">Select any module below to see its chapters, practice quizzes, and interactive code exercises.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
+                  >
+                    <span>🎓 Open Chapter 1</span>
+                    <ArrowRightIcon size={12} />
+                  </button>
+                </div>
+
+                <div className="roadmap-modules-grid">
+                  {C_MODULES.map((mod, mIdx) => {
+                    const lessonsInMod = C_LESSONS.filter(l => l.moduleId === mod.id);
+                    const isModOpen = expandedModule === mod.id;
+                    return (
+                      <div
+                        key={mod.id}
+                        className={`roadmap-module-card ${isModOpen ? 'module-open' : 'module-collapsed'}`}
+                      >
+                        <div
+                          className="rm-mod-header cursor-pointer"
+                          onClick={() => setExpandedModule(curr => curr === mod.id ? null : mod.id)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="rm-header-left">
+                            <span className="rm-mod-num font-mono">MODULE {mIdx + 1}</span>
+                            <h5 className="rm-mod-title">{mod.name.replace(/^Module \d+:\s*/, '')}</h5>
+                            <p className="rm-mod-desc">{mod.desc}</p>
+                          </div>
+                          <div className="rm-header-right">
+                            <span className="mod-count-pill font-mono">
+                              {lessonsInMod.length} Chapters
+                            </span>
+                            <span className="mod-toggle-arrow font-mono">
+                              {isModOpen ? '▲' : '▼'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isModOpen && (
+                          <div className="rm-lessons-list animated-lessons">
+                            {lessonsInMod.map(lesson => (
+                              <div
+                                key={lesson.slug}
+                                className="rm-lesson-row"
+                                onClick={() => onOpenLearnC && onOpenLearnC(lesson.slug)}
+                                role="button"
+                                tabIndex={0}
+                              >
+                                <span className="rm-ch-num font-mono">{String(lesson.chapter).padStart(2, '0')}</span>
+                                <div className="rm-ch-info">
+                                  <span className="rm-ch-title">{lesson.title.replace(/^Chapter \d+:\s*/, '')}</span>
+                                  <span className="rm-ch-sub">{lesson.subtitle}</span>
+                                </div>
+                                <span className="rm-ch-meta font-mono">⏱ {lesson.readTime}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-          <h4 className="bento-box-title">Pointer Memory Models</h4>
-          <p className="bento-box-sub">
-            Inspect contiguous buffers, circular ring buffers, min-heaps, and linked list chains.
+
+          {/* 2. Python 3 Masterclass */}
+          <div
+            className={`course-card course-card-python ${expandedCourse === 'python' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => {
+              setExpandedCourse(curr => curr === 'python' ? null : 'python');
+              setExpandedModule('py-mod-1');
+            }}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-soon font-mono">● PREVIEW READY</span>
+              <span className="course-badge-py font-mono">12 MODULES</span>
+            </div>
+            <h3 className="course-card-title">Python 3 Masterclass</h3>
+            <p className="course-card-desc">
+              Learn Python basics, object-oriented programming, data structures, and solve coding problems directly in your browser.
+            </p>
+            <div className="course-card-footer">
+              <button
+                type="button"
+                className="btn-course-launch btn-course-py-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenPythonModal && onOpenPythonModal();
+                }}
+              >
+                <span>Start Course</span>
+                <ArrowRightIcon size={12} />
+              </button>
+              <span className="course-click-hint font-mono">
+                {expandedCourse === 'python' ? '▲ Close Details' : '▼ View Syllabus & Modules'}
+              </span>
+            </div>
+
+            {/* Direct In-Card Unfolded Drawer for Python */}
+            {expandedCourse === 'python' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="drawer-quick-banner">
+                  <div className="banner-left">
+                    <span className="banner-badge font-mono">12 PYTHON MODULES</span>
+                    <h4 className="banner-title">Python 3 Course Outline</h4>
+                    <p className="banner-sub">Select any module below to see topics and practice exercises.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm btn-course-py-launch"
+                    onClick={() => onOpenPythonModal && onOpenPythonModal()}
+                  >
+                    <span>🐍 Preview Syllabus</span>
+                    <ArrowRightIcon size={12} />
+                  </button>
+                </div>
+
+                <div className="roadmap-modules-grid">
+                  <div className={`roadmap-module-card ${expandedModule === 'py-mod-1' ? 'module-open' : 'module-collapsed'}`}>
+                    <div
+                      className="rm-mod-header cursor-pointer"
+                      onClick={() => setExpandedModule(curr => curr === 'py-mod-1' ? null : 'py-mod-1')}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="rm-header-left">
+                        <span className="rm-mod-num font-mono">MODULE 1</span>
+                        <h5 className="rm-mod-title">Python Core Syntax &amp; Data Types</h5>
+                        <p className="rm-mod-desc">Variables, basic types, list slicing, and dictionaries.</p>
+                      </div>
+                      <div className="rm-header-right">
+                        <span className="mod-count-pill font-mono">2 Topics</span>
+                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'py-mod-1' ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+
+                    {expandedModule === 'py-mod-1' && (
+                      <div className="rm-lessons-list animated-lessons">
+                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
+                          <span className="rm-ch-num font-mono">01</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Python Setup &amp; Running Scripts</span>
+                            <span className="rm-ch-sub">Getting started with Python and running code</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">⏱ 15m</span>
+                        </div>
+                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
+                          <span className="rm-ch-num font-mono">02</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Lists, Tuples, Sets &amp; Dictionaries</span>
+                            <span className="rm-ch-sub">Working with collections and list operations</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">⏱ 25m</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={`roadmap-module-card ${expandedModule === 'py-mod-2' ? 'module-open' : 'module-collapsed'}`}>
+                    <div
+                      className="rm-mod-header cursor-pointer"
+                      onClick={() => setExpandedModule(curr => curr === 'py-mod-2' ? null : 'py-mod-2')}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="rm-header-left">
+                        <span className="rm-mod-num font-mono">MODULE 2</span>
+                        <h5 className="rm-mod-title">Object-Oriented Python</h5>
+                        <p className="rm-mod-desc">Classes, objects, functions, and reusable code patterns.</p>
+                      </div>
+                      <div className="rm-header-right">
+                        <span className="mod-count-pill font-mono">2 Topics</span>
+                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'py-mod-2' ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+
+                    {expandedModule === 'py-mod-2' && (
+                      <div className="rm-lessons-list animated-lessons">
+                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
+                          <span className="rm-ch-num font-mono">03</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Classes &amp; Objects</span>
+                            <span className="rm-ch-sub">Creating classes and managing object properties</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">⏱ 20m</span>
+                        </div>
+                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
+                          <span className="rm-ch-num font-mono">04</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Iterators &amp; Generators</span>
+                            <span className="rm-ch-sub">Writing clean memory-efficient loops</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">⏱ 25m</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Java & OOP Architecture */}
+          <div
+            className={`course-card course-card-java ${expandedCourse === 'java' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => {
+              setExpandedCourse(curr => curr === 'java' ? null : 'java');
+              setExpandedModule('java-mod-1');
+            }}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-dev font-mono">● IN DEVELOPMENT</span>
+              <span className="course-badge-java font-mono">10 MODULES</span>
+            </div>
+            <h3 className="course-card-title">Java &amp; OOP Foundations</h3>
+            <p className="course-card-desc">
+              Learn Java basics, object-oriented design, Collections, and how Java runs programs efficiently.
+            </p>
+            <div className="course-card-footer">
+              <button
+                type="button"
+                className="btn-course-launch btn-course-java-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedCourse('java');
+                  setExpandedModule('java-mod-1');
+                }}
+              >
+                <span>Start Course</span>
+                <ArrowRightIcon size={12} />
+              </button>
+              <span className="course-click-hint font-mono">
+                {expandedCourse === 'java' ? '▲ Close Details' : '▼ View Syllabus & Modules'}
+              </span>
+            </div>
+
+            {/* Direct In-Card Unfolded Drawer for Java */}
+            {expandedCourse === 'java' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="drawer-quick-banner">
+                  <div className="banner-left">
+                    <span className="banner-badge font-mono">10 JAVA MODULES</span>
+                    <h4 className="banner-title">Java Programming Course Outline</h4>
+                    <p className="banner-sub">Object-oriented programming and Java foundations.</p>
+                  </div>
+                </div>
+
+                <div className="roadmap-modules-grid">
+                  <div className={`roadmap-module-card ${expandedModule === 'java-mod-1' ? 'module-open' : 'module-collapsed'}`}>
+                    <div
+                      className="rm-mod-header cursor-pointer"
+                      onClick={() => setExpandedModule(curr => curr === 'java-mod-1' ? null : 'java-mod-1')}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="rm-header-left">
+                        <span className="rm-mod-num font-mono">MODULE 1</span>
+                        <h5 className="rm-mod-title">Java Platform &amp; OOP Basics</h5>
+                        <p className="rm-mod-desc">Classes, objects, variables, and basic program structure.</p>
+                      </div>
+                      <div className="rm-header-right">
+                        <span className="mod-count-pill font-mono">2 Topics</span>
+                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'java-mod-1' ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+
+                    {expandedModule === 'java-mod-1' && (
+                      <div className="rm-lessons-list animated-lessons">
+                        <div className="rm-lesson-row">
+                          <span className="rm-ch-num font-mono">01</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Java Basics &amp; Memory</span>
+                            <span className="rm-ch-sub">How Java executes code and manages memory</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">Coming Soon</span>
+                        </div>
+                        <div className="rm-lesson-row">
+                          <span className="rm-ch-num font-mono">02</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Java Collections</span>
+                            <span className="rm-ch-sub">Lists, Sets, and Maps in Java</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">Coming Soon</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 4. C++ Modern Systems & STL */}
+          <div
+            className={`course-card course-card-cpp ${expandedCourse === 'cpp' ? 'active-course-card drawer-open' : ''}`}
+            onClick={() => {
+              setExpandedCourse(curr => curr === 'cpp' ? null : 'cpp');
+              setExpandedModule('cpp-mod-1');
+            }}
+          >
+            <div className="course-card-top">
+              <span className="course-status-pill status-dev font-mono">● IN DEVELOPMENT</span>
+              <span className="course-badge-cpp font-mono">10 MODULES</span>
+            </div>
+            <h3 className="course-card-title">Modern C++ &amp; Fast Data Structures</h3>
+            <p className="course-card-desc">
+              Learn modern C++, smart pointers, memory management, templates, and fast data structures (STL).
+            </p>
+            <div className="course-card-footer">
+              <button
+                type="button"
+                className="btn-course-launch btn-course-cpp-launch"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedCourse('cpp');
+                  setExpandedModule('cpp-mod-1');
+                }}
+              >
+                <span>Start Course</span>
+                <ArrowRightIcon size={12} />
+              </button>
+              <span className="course-click-hint font-mono">
+                {expandedCourse === 'cpp' ? '▲ Close Details' : '▼ View Syllabus & Modules'}
+              </span>
+            </div>
+
+            {/* Direct In-Card Unfolded Drawer for C++ */}
+            {expandedCourse === 'cpp' && (
+              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
+                <div className="drawer-quick-banner">
+                  <div className="banner-left">
+                    <span className="banner-badge font-mono">10 C++ MODULES</span>
+                    <h4 className="banner-title">Modern C++ Course Outline</h4>
+                    <p className="banner-sub">Safe memory management and fast C++ containers.</p>
+                  </div>
+                </div>
+
+                <div className="roadmap-modules-grid">
+                  <div className={`roadmap-module-card ${expandedModule === 'cpp-mod-1' ? 'module-open' : 'module-collapsed'}`}>
+                    <div
+                      className="rm-mod-header cursor-pointer"
+                      onClick={() => setExpandedModule(curr => curr === 'cpp-mod-1' ? null : 'cpp-mod-1')}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="rm-header-left">
+                        <span className="rm-mod-num font-mono">MODULE 1</span>
+                        <h5 className="rm-mod-title">Modern C++ &amp; Safe Memory</h5>
+                        <p className="rm-mod-desc">Pointers, memory safety, and standard C++ containers.</p>
+                      </div>
+                      <div className="rm-header-right">
+                        <span className="mod-count-pill font-mono">2 Topics</span>
+                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'cpp-mod-1' ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+
+                    {expandedModule === 'cpp-mod-1' && (
+                      <div className="rm-lessons-list animated-lessons">
+                        <div className="rm-lesson-row">
+                          <span className="rm-ch-num font-mono">01</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">Smart Pointers &amp; Memory</span>
+                            <span className="rm-ch-sub">Automatic memory cleanup and leak prevention</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">Coming Soon</span>
+                        </div>
+                        <div className="rm-lesson-row">
+                          <span className="rm-ch-num font-mono">02</span>
+                          <div className="rm-ch-info">
+                            <span className="rm-ch-title">C++ Standard Library (STL)</span>
+                            <span className="rm-ch-sub">Vectors, maps, sets, and algorithms</span>
+                          </div>
+                          <span className="rm-ch-meta font-mono">Coming Soon</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+
+
+      {/* ── 10. Final Call to Action ── */}
+      <section className="home-final-cta-card">
+        <div className="final-cta-content">
+          <span className="final-cta-badge">🚀 START LEARNING TODAY</span>
+          <h2 className="final-cta-title">Ready to Master Coding &amp; Algorithms?</h2>
+          <p className="final-cta-desc">
+            Join thousands of learners mastering programming and data structures through simple, step-by-step visual lessons.
           </p>
-          <div className="bento-ds-pills">
-            <span className="ds-pill">Stack (LIFO)</span>
-            <span className="ds-pill">Queue (FIFO)</span>
-            <span className="ds-pill">Circular Buffer</span>
-            <span className="ds-pill">Min-Heap</span>
-            <span className="ds-pill">Linked Lists</span>
+          <div className="final-cta-buttons">
+            <button
+              className="btn-final-academy"
+              onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
+            >
+              🎓 Start Learning C (23 Chapters) &rarr;
+            </button>
+            <button
+              className="btn-final-studio"
+              onClick={() => onSelectAlgo('quick-sort')}
+            >
+              ⚡ Explore Algorithm Studio
+            </button>
           </div>
         </div>
       </section>
