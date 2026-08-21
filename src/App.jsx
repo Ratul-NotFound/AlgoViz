@@ -2,30 +2,42 @@ import { useState, useEffect, useCallback } from 'react';
 import Sidebar       from './components/Sidebar.jsx';
 import HomePage      from './pages/HomePage.jsx';
 import AlgorithmPage from './pages/AlgorithmPage.jsx';
+import LearnCPage    from './pages/LearnCPage.jsx';
+import PythonComingSoonModal from './components/PythonComingSoonModal.jsx';
 import { ALGORITHMS } from './data/algorithms.js';
 import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon, AlgoFlowXLogo, GoogleIcon } from './components/Icons.jsx';
 import { isAudioEnabled, toggleSound } from './utils/sound.js';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import UserAvatarMenu from './components/UserAvatarMenu.jsx';
+import LiveUserCounter from './components/LiveUserCounter.jsx';
 
-function getInitialSlug() {
-  if (typeof window === 'undefined') return null;
-  const hash = window.location.hash.replace(/^#\/?/, '').trim();
-  if (hash) {
-    const matched = ALGORITHMS.find(a => a.slug === hash);
-    if (matched) return matched.slug;
+function parseRouteFromHash() {
+  if (typeof window === 'undefined') return { mode: 'algo', slug: null, lesson: null };
+  const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+
+  if (rawHash.startsWith('learn/c')) {
+    const parts = rawHash.split('/');
+    const lesson = parts[2] || 'hello-world-intro';
+    return { mode: 'learn-c', slug: null, lesson };
   }
-  const saved = localStorage.getItem('algoviz-current-algo');
-  if (saved) {
-    const matched = ALGORITHMS.find(a => a.slug === saved);
-    if (matched) return matched.slug;
+
+  if (rawHash) {
+    const matched = ALGORITHMS.find(a => a.slug === rawHash);
+    if (matched) return { mode: 'algo', slug: matched.slug, lesson: null };
   }
-  return null;
+
+  return { mode: 'algo', slug: null, lesson: null };
 }
 
 function AppContent() {
-  const [currentSlug, setCurrentSlug] = useState(getInitialSlug);
+  const initialRoute = parseRouteFromHash();
+  const [viewMode, setViewMode] = useState(initialRoute.mode); // 'algo' | 'learn-c'
+  const [currentSlug, setCurrentSlug] = useState(initialRoute.slug);
+  const [learnLessonSlug, setLearnLessonSlug] = useState(initialRoute.lesson || 'hello-world-intro');
+  const [homeTab, setHomeTab] = useState('catalog'); // 'catalog' | 'academy-preview'
+  const [pythonModalOpen, setPythonModalOpen] = useState(false);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1024 : false);
   const [soundOn, setSoundOn] = useState(isAudioEnabled());
@@ -43,31 +55,26 @@ function AppContent() {
     localStorage.setItem('algoviz-theme', theme);
   }, [theme]);
 
-  // Synchronize URL hash & localStorage whenever currentSlug changes
+  // Synchronize URL hash whenever mode or slug changes
   useEffect(() => {
-    if (currentSlug) {
+    if (viewMode === 'learn-c') {
+      window.location.hash = `#learn/c/${learnLessonSlug}`;
+    } else if (currentSlug) {
       window.location.hash = `#/${currentSlug}`;
-      localStorage.setItem('algoviz-current-algo', currentSlug);
     } else {
       if (window.location.hash) {
         history.replaceState(null, '', window.location.pathname + window.location.search);
       }
-      localStorage.removeItem('algoviz-current-algo');
     }
-  }, [currentSlug]);
+  }, [viewMode, currentSlug, learnLessonSlug]);
 
   // Listen to browser Back / Forward navigation (hashchange & popstate)
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace(/^#\/?/, '').trim();
-      if (hash) {
-        const matched = ALGORITHMS.find(a => a.slug === hash);
-        if (matched) {
-          setCurrentSlug(matched.slug);
-          return;
-        }
-      }
-      setCurrentSlug(null);
+      const route = parseRouteFromHash();
+      setViewMode(route.mode);
+      setCurrentSlug(route.slug);
+      if (route.lesson) setLearnLessonSlug(route.lesson);
     };
 
     window.addEventListener('hashchange', handleHashChange);
@@ -93,6 +100,56 @@ function AppContent() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  const handleVisualizersClick = useCallback(() => {
+    setViewMode('algo');
+    setCurrentSlug(null);
+    setHomeTab('catalog');
+    if (typeof window !== 'undefined' && window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    setTimeout(() => {
+      const el = document.querySelector('.platform-nav-bar') || document.querySelector('.catalog-header-bar');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+    setSidebarOpen(false);
+  }, []);
+
+  const handleCodingAcademyClick = useCallback(() => {
+    setViewMode('algo');
+    setCurrentSlug(null);
+    setHomeTab('academy-preview');
+    if (typeof window !== 'undefined' && window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    setTimeout(() => {
+      const el = document.querySelector('.platform-nav-bar') || document.querySelector('.courses-hub-grid');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+    setSidebarOpen(false);
+  }, []);
+
+  const handleGoHome = useCallback(() => {
+    setViewMode('algo');
+    setCurrentSlug(null);
+    setHomeTab('catalog');
+    setSidebarOpen(false);
+    if (typeof window !== 'undefined' && window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleOpenLearnC = useCallback((slug) => {
+    setViewMode('learn-c');
+    setCurrentSlug(null);
+    setLearnLessonSlug(slug || 'hello-world-intro');
+    setSidebarOpen(false);
+  }, []);
+
   const handleSelectAlgo = useCallback((slug) => {
     setCurrentSlug(slug);
     setSidebarOpen(false);
@@ -103,7 +160,7 @@ function AppContent() {
     : null;
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${viewMode === 'learn-c' || !currentSlug ? 'app-shell-fullwidth' : ''}`}>
       {/* ── Header ── */}
       <header className="header">
         <button
@@ -123,26 +180,51 @@ function AppContent() {
           href="#/"
           onClick={(e) => {
             e.preventDefault();
-            setCurrentSlug(null);
-            setSidebarOpen(false);
+            handleGoHome();
           }}
         >
           <AlgoFlowXLogo size={32} />
-          <div className="header-logo-text">AlgoFlow<span className="logo-x-accent">X</span></div>
+          <div className="header-logo-group">
+            <div className="header-logo-text">AlgoFlow<span className="logo-x-accent">X</span></div>
+            <span className="header-logo-sub">Code &amp; Algorithm Mastery</span>
+          </div>
         </a>
 
-        {algoName && (
+        {/* Header Mode Navigation: 1. DSA Visualization | 2. Coding Academy */}
+        <div className="header-mode-nav">
+          <button
+            type="button"
+            className={`header-mode-btn ${viewMode === 'algo' && homeTab === 'catalog' ? 'active' : ''}`}
+            onClick={handleVisualizersClick}
+          >
+            <span>⚡ DSA Visualization</span>
+          </button>
+          <button
+            type="button"
+            className={`header-mode-btn ${viewMode === 'algo' && homeTab === 'academy-preview' ? 'active' : ''}`}
+            onClick={handleCodingAcademyClick}
+          >
+            <CIcon size={13} />
+            <span>Coding Academy</span>
+            <span className="badge-learn-chapters">23 Ch</span>
+          </button>
+        </div>
+
+        {algoName && viewMode === 'algo' && (
           <div className="header-breadcrumb">
             <span>/</span>
             <span>{algoName}</span>
           </div>
         )}
 
+        {/* Live Total User Counter */}
+        <LiveUserCounter />
+
         <div className="header-spacer" />
 
         {/* Google Sign In / User Profile Avatar */}
         {isAuthenticated ? (
-          <UserAvatarMenu onSelectAlgo={handleSelectAlgo} />
+          <UserAvatarMenu onSelectAlgo={handleSelectAlgo} onOpenLearnC={handleOpenLearnC} />
         ) : (
           <button
             type="button"
@@ -200,60 +282,94 @@ function AppContent() {
           )}
         </button>
 
-        <div className="header-langs">
-          <span className="header-lang-pill">
-            <PythonIcon size={13} />
-            <span>Python</span>
-          </span>
-          <span className="header-lang-pill">
-            <CIcon size={13} />
-            <span>C</span>
-          </span>
-          <span className="header-lang-pill">
-            <CppIcon size={13} />
-            <span>C++</span>
-          </span>
-          <span className="header-lang-pill">
-            <JavaIcon size={13} />
-            <span>Java</span>
-          </span>
-          <span className="header-lang-pill">
-            <JSIcon size={13} />
-            <span>JS</span>
-          </span>
-        </div>
-
         <div className="header-badge">v1.0</div>
       </header>
 
-      {/* ── Sidebar (Desktop) ── */}
-      <div className="desktop-sidebar-wrapper">
-        <Sidebar currentSlug={currentSlug} onSelect={handleSelectAlgo} />
-      </div>
+      {/* ── Sidebar (Desktop - only when inside an algorithm studio workspace) ── */}
+      {viewMode === 'algo' && currentSlug && (
+        <div className="desktop-sidebar-wrapper">
+          <Sidebar
+            viewMode={viewMode}
+            currentSlug={currentSlug}
+            learnLessonSlug={learnLessonSlug}
+            onSelect={handleSelectAlgo}
+            onOpenLearnC={handleOpenLearnC}
+            onOpenPythonModal={() => setPythonModalOpen(true)}
+            onSwitchToVisualizers={handleVisualizersClick}
+            onSwitchToAcademy={() => handleOpenLearnC('hello-world-intro')}
+          />
+        </div>
+      )}
 
-      {/* ── Mobile / Tablet Drawer ── */}
+      {/* ── Mobile / Tablet Drawer (Synced with active viewMode) ── */}
       <div
         className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
         onClick={() => setSidebarOpen(false)}
       />
       <div className={`sidebar-drawer ${sidebarOpen ? 'open' : ''}`}>
         <Sidebar
+          viewMode={viewMode}
           currentSlug={currentSlug}
-          onSelect={handleSelectAlgo}
+          learnLessonSlug={learnLessonSlug}
+          onSelect={(slug) => {
+            handleSelectAlgo(slug);
+            setSidebarOpen(false);
+          }}
           onClose={() => setSidebarOpen(false)}
+          onOpenLearnC={(slug) => {
+            handleOpenLearnC(slug);
+            setSidebarOpen(false);
+          }}
+          onOpenPythonModal={() => {
+            setPythonModalOpen(true);
+            setSidebarOpen(false);
+          }}
+          onSwitchToVisualizers={() => {
+            handleVisualizersClick();
+            setSidebarOpen(false);
+          }}
+          onSwitchToAcademy={() => {
+            handleOpenLearnC('hello-world-intro');
+            setSidebarOpen(false);
+          }}
         />
       </div>
 
       {/* ── Main Content ── */}
-      <main className="main">
-        {currentSlug
-          ? <AlgorithmPage key={currentSlug} slug={currentSlug} />
-          : <HomePage onSelectAlgo={handleSelectAlgo} />
-        }
+      <main className={`main ${viewMode === 'learn-c' ? 'main-fullwidth' : ''}`}>
+        {viewMode === 'learn-c' ? (
+          <LearnCPage
+            initialLessonSlug={learnLessonSlug}
+            onSelectAlgo={(slug) => {
+              setViewMode('algo');
+              setCurrentSlug(slug);
+            }}
+            onOpenPythonModal={() => setPythonModalOpen(true)}
+          />
+        ) : currentSlug ? (
+          <AlgorithmPage key={currentSlug} slug={currentSlug} />
+        ) : (
+          <HomePage
+            onSelectAlgo={handleSelectAlgo}
+            onOpenLearnC={handleOpenLearnC}
+            onOpenPythonModal={() => setPythonModalOpen(true)}
+            initialTab={homeTab}
+          />
+        )}
       </main>
 
       {/* ── Global Google Auth Modal ── */}
       <AuthModal />
+
+      {/* ── Python Coming Soon Preview Modal ── */}
+      <PythonComingSoonModal
+        isOpen={pythonModalOpen}
+        onClose={() => setPythonModalOpen(false)}
+        onSwitchToC={() => {
+          handleOpenLearnC('hello-world-intro');
+          setPythonModalOpen(false);
+        }}
+      />
     </div>
   );
 }

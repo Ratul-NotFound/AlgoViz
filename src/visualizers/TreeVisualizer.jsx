@@ -26,7 +26,7 @@ function getNodeColor(node, frame, isRoot) {
   if (!frame) return { fill: '#1e293b', stroke: '#475569', textColor: '#cbd5e1', glow: false };
   if (frame.currentNodeId === node.id) {
     return {
-      fill: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+      fill: '#7c3aed',
       stroke: '#c084fc',
       strokeWidth: 3,
       textColor: '#ffffff',
@@ -37,7 +37,7 @@ function getNodeColor(node, frame, isRoot) {
   }
   if (frame.path?.includes(node.id)) {
     return {
-      fill: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+      fill: '#0284c7',
       stroke: '#38bdf8',
       strokeWidth: 2.5,
       textColor: '#ffffff',

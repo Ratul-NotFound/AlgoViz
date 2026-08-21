@@ -8,6 +8,7 @@ import {
   ResetIcon,
   ShuffleIcon,
 } from './Icons.jsx';
+import { useAuth } from '../context/useAuth.js';
 
 export default function Controls({
   isPlaying, isDone, speed, setSpeed,
@@ -18,6 +19,16 @@ export default function Controls({
   searchTarget, setSearchTarget,
   type = 'sorting',
 }) {
+  const { isAuthenticated, openAuthModal } = useAuth();
+
+  const handleProtectedAction = (actionFn) => {
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
+    if (actionFn) actionFn();
+  };
+
   return (
     <div className="controls-bar">
       {/* ── Step Progress Track ── */}
@@ -28,10 +39,19 @@ export default function Controls({
       {/* ── Row 1: Playback Controls & Frame Status ── */}
       <div className="controls-row controls-row-main">
         <div className="controls-playback-group">
-          <button className="btn btn-icon" title="Reset (R)" onClick={onReset}>
+          <button
+            className="btn btn-icon"
+            title={!isAuthenticated ? 'Sign In to Reset' : 'Reset (R)'}
+            onClick={() => handleProtectedAction(onReset)}
+          >
             <ResetIcon size={16} />
           </button>
-          <button className="btn btn-icon" title="Step Back (Left Arrow)" onClick={onStepBackward} disabled={currentIdx === 0}>
+          <button
+            className="btn btn-icon"
+            title={!isAuthenticated ? 'Sign In to Step Back' : 'Step Back (Left Arrow)'}
+            onClick={() => handleProtectedAction(onStepBackward)}
+            disabled={currentIdx === 0}
+          >
             <StepBackIcon size={16} />
           </button>
 
@@ -41,13 +61,23 @@ export default function Controls({
               <span>Pause</span>
             </button>
           ) : (
-            <button className="btn btn-primary btn-play-main" onClick={onPlay} disabled={isDone}>
+            <button
+              className={`btn btn-primary btn-play-main ${!isAuthenticated ? 'btn-play-locked' : ''}`}
+              onClick={() => handleProtectedAction(onPlay)}
+              disabled={isDone}
+              title={!isAuthenticated ? 'Sign in with Google to play algorithm visualizer' : 'Play Algorithm'}
+            >
               <PlayIcon size={16} />
-              <span>{isDone ? 'Finished' : 'Play'}</span>
+              <span>{isDone ? 'Finished' : !isAuthenticated ? 'Play (Sign In)' : 'Play'}</span>
             </button>
           )}
 
-          <button className="btn btn-icon" title="Step Forward (Right Arrow)" onClick={onStepForward} disabled={isDone}>
+          <button
+            className="btn btn-icon"
+            title={!isAuthenticated ? 'Sign In to Step Forward' : 'Step Forward (Right Arrow)'}
+            onClick={() => handleProtectedAction(onStepForward)}
+            disabled={isDone}
+          >
             <StepForwardIcon size={16} />
           </button>
         </div>
@@ -126,10 +156,18 @@ export default function Controls({
               />
             )}
             <div className="config-buttons-group">
-              <button className="btn btn-action" onClick={onApplyCustom} title="Apply custom array (or press Enter)">
+              <button
+                className="btn btn-action"
+                onClick={() => handleProtectedAction(onApplyCustom)}
+                title={!isAuthenticated ? 'Sign In to Apply Custom Input' : 'Apply custom array (or press Enter)'}
+              >
                 Apply
               </button>
-              <button className="btn btn-action btn-random" onClick={onRandomize} title="Generate random array">
+              <button
+                className="btn btn-action btn-random"
+                onClick={() => handleProtectedAction(onRandomize)}
+                title={!isAuthenticated ? 'Sign In to Randomize' : 'Generate random array'}
+              >
                 <ShuffleIcon size={15} />
                 <span>Random</span>
               </button>

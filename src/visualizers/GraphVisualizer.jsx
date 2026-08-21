@@ -30,7 +30,7 @@ function getNodeStyles(nodeId, frame, isStart) {
 
   if (current === nodeId) {
     return {
-      fill: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+      fill: '#2563eb',
       stroke: '#93c5fd',
       strokeWidth: 3,
       textColor: '#ffffff',
@@ -41,7 +41,7 @@ function getNodeStyles(nodeId, frame, isStart) {
   }
   if (visited?.has(nodeId)) {
     return {
-      fill: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+      fill: '#059669',
       stroke: '#6ee7b7',
       strokeWidth: 2.5,
       textColor: '#ffffff',
@@ -52,7 +52,7 @@ function getNodeStyles(nodeId, frame, isStart) {
   }
   if (frontier?.has(nodeId)) {
     return {
-      fill: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+      fill: '#d97706',
       stroke: '#fcd34d',
       strokeWidth: 2.5,
       textColor: '#ffffff',

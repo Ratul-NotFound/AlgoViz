@@ -11,6 +11,7 @@ import CodePanel        from '../components/CodePanel.jsx';
 import InfoPanel        from '../components/InfoPanel.jsx';
 import { DEFAULT_GRAPH as BFS_GRAPH }      from '../algorithms/graphs/bfs.js';
 import { DEFAULT_GRAPH as DIJKSTRA_GRAPH } from '../algorithms/graphs/dijkstra.js';
+import { useAuth } from '../context/useAuth.js';
 
 const LEGEND_ITEMS = {
   sorting: [
@@ -30,6 +31,7 @@ const LEGEND_ITEMS = {
 
 export default function AlgorithmPage({ slug }) {
   const algo = getAlgorithm(slug);
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const isMobileInitial = typeof window !== 'undefined' && window.innerWidth <= 768;
   const defaultSize = isMobileInitial ? 10 : 14;
@@ -153,7 +155,9 @@ export default function AlgorithmPage({ slug }) {
         {/* Step Message Status */}
         <div className="visualizer-message-bar">
           <span className="status-dot" />
-          <span className="message-text">{message || `Click Play to start ${algo.name}`}</span>
+          <span className="message-text">
+            {message || (!isAuthenticated ? `🔒 Sign in with Google to start & interact with ${algo.name}` : `Click Play to start ${algo.name}`)}
+          </span>
         </div>
 
         {/* Visualizer Area */}
@@ -173,7 +177,16 @@ export default function AlgorithmPage({ slug }) {
           {stepper.isDone && (
             <div className="done-overlay">
               <div className="done-overlay-text">Algorithm Finished</div>
-              <button className="btn btn-primary" onClick={stepper.reset}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    openAuthModal();
+                    return;
+                  }
+                  stepper.reset();
+                }}
+              >
                 Reset & Run Again
               </button>
             </div>

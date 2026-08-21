@@ -1,39 +1,94 @@
-// src/components/Sidebar.jsx — Sidebar navigation with creator profile card
+// src/components/Sidebar.jsx — Synced Sidebar navigation (DSA Studio & Coding Academy) with creator profile card
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
-import { getAlgoIcon, AlgoFlowXLogo, BookmarkIcon } from './Icons.jsx';
+import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
+import { getAlgoIcon, AlgoFlowXLogo, BookmarkIcon, CIcon } from './Icons.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
-export default function Sidebar({ currentSlug, onSelect, onClose }) {
-  const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
+export default function Sidebar({
+  viewMode = 'algo', // 'algo' | 'learn-c'
+  currentSlug,
+  learnLessonSlug,
+  onSelect,
+  onClose,
+  onOpenLearnC,
+  onOpenPythonModal,
+  onSwitchToVisualizers,
+  onSwitchToAcademy,
+}) {
+  const { isBookmarked, toggleBookmark, isCompleted, cCompletedLessons, isCLessonCompleted } = useAuth();
+  const [academySearch, setAcademySearch] = useState('');
+  const [algoSearch, setAlgoSearch] = useState('');
 
-  const grouped = Object.entries(CATEGORIES).map(([catKey, cat]) => ({
-    ...cat,
-    key: catKey,
-    items: ALGORITHMS.filter(a => a.category === catKey),
-  }));
+  // ── DSA Studio Groups ──
+  const groupedAlgos = useMemo(() => {
+    const q = algoSearch.trim().toLowerCase();
+    return Object.entries(CATEGORIES).map(([catKey, cat]) => {
+      const items = ALGORITHMS.filter(a => {
+        if (a.category !== catKey) return false;
+        if (!q) return true;
+        return a.name.toLowerCase().includes(q) || a.category.toLowerCase().includes(q);
+      });
+      return {
+        ...cat,
+        key: catKey,
+        items,
+      };
+    }).filter(g => g.items.length > 0);
+  }, [algoSearch]);
+
+  // ── C Academy Modules & Lessons ──
+  const modulesWithLessons = useMemo(() => {
+    const q = academySearch.trim().toLowerCase();
+    const filtered = q
+      ? C_LESSONS.filter(
+          l =>
+            l.title.toLowerCase().includes(q) ||
+            l.category.toLowerCase().includes(q) ||
+            (l.subtitle && l.subtitle.toLowerCase().includes(q))
+        )
+      : C_LESSONS;
+
+    return C_MODULES.map(mod => {
+      const lessons = filtered.filter(l => l.moduleId === mod.id);
+      const doneCount = lessons.filter(l => isCLessonCompleted(l.slug)).length;
+      return {
+        ...mod,
+        lessons,
+        doneCount,
+      };
+    }).filter(mod => mod.lessons.length > 0);
+  }, [academySearch, isCLessonCompleted]);
+
+  const completedCount = (cCompletedLessons || []).length;
+  const progressPercent = Math.round((completedCount / C_LESSONS.length) * 100);
+
+  const isAcademy = viewMode === 'learn-c';
 
   return (
     <aside className="sidebar">
-      {/* Top Sidebar Brand Header */}
+      {/* ── Top Sidebar Brand Header & Close Button ── */}
       <div className="sidebar-brand">
         <div
           className="sidebar-brand-left"
-          onClick={() => onSelect(null)}
+          onClick={() => {
+            if (onSelect) onSelect(null);
+            if (onClose) onClose();
+          }}
           role="button"
           tabIndex={0}
           title="AlgoFlowX Home"
         >
           <div className="sidebar-brand-logo">
-            <AlgoFlowXLogo size={26} />
+            <AlgoFlowXLogo size={24} />
           </div>
           <div className="sidebar-brand-info">
             <div className="sidebar-brand-title">
               <span>AlgoFlow</span>
               <span className="logo-x-accent">X</span>
             </div>
-            <span className="sidebar-brand-badge">DSA Visualizer</span>
+            <span className="sidebar-brand-badge">DSA & Academy</span>
           </div>
         </div>
         {onClose && (
@@ -55,57 +110,277 @@ export default function Sidebar({ currentSlug, onSelect, onClose }) {
         )}
       </div>
 
-      {/* Scrollable Algorithm Navigation */}
-      <div className="sidebar-scroll-content">
-        {grouped.map(group => (
-          <div className="sidebar-category" key={group.key}>
-            <div className="sidebar-category-header">
-              {group.label}
-            </div>
-            <div className="sidebar-items">
-              {group.items.map(algo => {
-                const bookmarked = isBookmarked(algo.slug);
-                const completed = isCompleted(algo.slug);
-
-                return (
-                  <div
-                    key={algo.slug}
-                    className={`sidebar-item ${currentSlug === algo.slug ? 'active' : ''} ${completed ? 'item-completed' : ''}`}
-                    onClick={() => onSelect(algo.slug)}
-                  >
-                    <span className="sidebar-item-name">
-                      <span className="sidebar-algo-glyph">{getAlgoIcon(algo.slug, 15)}</span>
-                      <span>{algo.name}</span>
-                    </span>
-                    <div className="sidebar-item-meta">
-                      <span className="sidebar-item-complexity">
-                        {algo.timeComplexity.average}
-                      </span>
-                      <button
-                        type="button"
-                        className={`sidebar-star-btn ${bookmarked ? 'star-active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleBookmark(algo.slug);
-                        }}
-                        title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
-                        aria-label="Bookmark"
-                      >
-                        <BookmarkIcon size={12} filled={bookmarked} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+      {/* ── Synced Mode Switcher Tabs (DSA Studio vs Coding Academy) ── */}
+      <div className="sidebar-mode-switcher-bar">
+        <button
+          type="button"
+          className={`sidebar-mode-tab-btn ${!isAcademy ? 'active' : ''}`}
+          onClick={() => {
+            if (onSwitchToVisualizers) onSwitchToVisualizers();
+            else if (onSelect) onSelect(null);
+          }}
+        >
+          <span>⚡ DSA Studio</span>
+        </button>
+        <button
+          type="button"
+          className={`sidebar-mode-tab-btn ${isAcademy ? 'active' : ''}`}
+          onClick={() => {
+            if (onSwitchToAcademy) onSwitchToAcademy();
+            else if (onOpenLearnC) onOpenLearnC('hello-world-intro');
+          }}
+        >
+          <span>🎓 C Academy</span>
+        </button>
       </div>
 
-      {/* Premium Developer Profile Card */}
+      {/* ── Main Scroll Content (Synced by Mode) ── */}
+      <div className="sidebar-scroll-content">
+        {isAcademy ? (
+          /* ══════════════════════════════════════════════════════════════════
+             MODE A: CODING ACADEMY (LEARN C)
+             ══════════════════════════════════════════════════════════════════ */
+          <div className="sidebar-academy-view">
+            {/* Track Progress & Search */}
+            <div className="sidebar-track-subbox">
+              <div className="sidebar-track-row">
+                <div className="track-icon-c"><CIcon size={18} /></div>
+                <div className="track-title-info">
+                  <div className="track-title-flex">
+                    <strong className="track-title-sm">C Learning Path</strong>
+                    <span className="track-percent-pill font-mono">{progressPercent}%</span>
+                  </div>
+                  <span className="track-subtitle-sm">{completedCount} of {C_LESSONS.length} Done</span>
+                </div>
+              </div>
+
+              {/* Glowing Progress Bar */}
+              <div className="track-progress-track">
+                <div className="track-progress-fill" style={{ width: `${progressPercent}%` }} />
+              </div>
+
+              {/* Search Box */}
+              <div className="sidebar-search-box">
+                <span className="sidebar-search-icon">🔍</span>
+                <input
+                  type="text"
+                  className="sidebar-search-input"
+                  placeholder="Search chapters..."
+                  value={academySearch}
+                  onChange={(e) => setAcademySearch(e.target.value)}
+                  aria-label="Filter chapters"
+                />
+                {academySearch && (
+                  <button
+                    type="button"
+                    className="sidebar-search-clear"
+                    onClick={() => setAcademySearch('')}
+                    aria-label="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Module-by-Module Chapters List */}
+            <div className="learn-syllabus-list">
+              {modulesWithLessons.length === 0 ? (
+                <div className="sidebar-empty-state">
+                  <span>🔍 No chapters match search</span>
+                </div>
+              ) : (
+                modulesWithLessons.map((mod, mIdx) => (
+                  <div className="syllabus-module-section" key={mod.id}>
+                    <div className={`module-header-row ${mod.doneCount === mod.lessons.length ? 'module-done' : ''}`}>
+                      <div className="module-title-text">
+                        <span className="module-num font-mono">M{mIdx + 1}</span>
+                        <span className="module-name-str">{mod.name.replace(/^Module \d+:\s*/, '')}</span>
+                      </div>
+                      <div className={`module-count-badge font-mono ${mod.doneCount === mod.lessons.length ? 'badge-all-done' : ''}`}>
+                        {mod.doneCount === mod.lessons.length ? '✓' : `${mod.doneCount}/${mod.lessons.length}`}
+                      </div>
+                    </div>
+
+                    <div className="module-lessons-list">
+                      {mod.lessons.map((lesson) => {
+                        const isActive = lesson.slug === learnLessonSlug;
+                        const isDone = isCLessonCompleted(lesson.slug);
+
+                        return (
+                          <button
+                            key={lesson.slug}
+                            type="button"
+                            className={`syllabus-item ${isActive ? 'active' : ''} ${isDone ? 'completed' : ''}`}
+                            onClick={() => {
+                              if (onOpenLearnC) onOpenLearnC(lesson.slug);
+                              if (onClose) onClose();
+                            }}
+                          >
+                            <div className="syllabus-item-status font-mono">
+                              {isDone ? '✓' : String(lesson.chapter).padStart(2, '0')}
+                            </div>
+                            <div className="syllabus-item-content">
+                              <div className="syllabus-item-title">
+                                {lesson.title.replace(/^Chapter \d+:\s*/, '')}
+                              </div>
+                              <div className="syllabus-item-meta">
+                                {isDone ? (
+                                  <span className="meta-completed font-mono">Completed ✓</span>
+                                ) : (
+                                  <span className="meta-time">⏱ {lesson.readTime}</span>
+                                )}
+                              </div>
+                            </div>
+                            {isActive && <span className="active-item-indicator" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Python Teaser Card */}
+            <div className="python-teaser-box">
+              <div className="python-teaser-header">
+                <span className="teaser-title">🐍 Python Path</span>
+                <span className="teaser-badge">Coming Soon</span>
+              </div>
+              <p className="python-teaser-desc">Modern Python syntax with interactive playground & algorithms.</p>
+              <button
+                type="button"
+                className="btn-teaser-preview"
+                onClick={() => {
+                  if (onOpenPythonModal) onOpenPythonModal();
+                  if (onClose) onClose();
+                }}
+              >
+                View Syllabus
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* ══════════════════════════════════════════════════════════════════
+             MODE B: DSA STUDIO (ALGORITHM VISUALIZERS)
+             ══════════════════════════════════════════════════════════════════ */
+          <div className="sidebar-algo-view">
+            {/* Quick Algo Search Filter */}
+            <div className="sidebar-search-box" style={{ marginBottom: '12px' }}>
+              <span className="sidebar-search-icon">🔍</span>
+              <input
+                type="text"
+                className="sidebar-search-input"
+                placeholder="Search algorithms..."
+                value={algoSearch}
+                onChange={(e) => setAlgoSearch(e.target.value)}
+                aria-label="Filter algorithms"
+              />
+              {algoSearch && (
+                <button
+                  type="button"
+                  className="sidebar-search-clear"
+                  onClick={() => setAlgoSearch('')}
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Quick Academy Launch Card */}
+            <div className="sidebar-category sidebar-academy-box" style={{ marginBottom: '14px' }}>
+              <div className="sidebar-category-header">
+                🎓 Interactive Academy
+              </div>
+              <div className="sidebar-items">
+                <button
+                  type="button"
+                  className="sidebar-academy-btn"
+                  onClick={() => {
+                    if (onOpenLearnC) onOpenLearnC();
+                    if (onClose) onClose();
+                  }}
+                >
+                  <span className="academy-btn-left">
+                    <span className="academy-c-dot" />
+                    <span>Learn C (23 Chapters)</span>
+                  </span>
+                  <span className="academy-badge-live">Live</span>
+                </button>
+                <button
+                  type="button"
+                  className="sidebar-academy-btn academy-python-btn"
+                  onClick={() => {
+                    if (onOpenPythonModal) onOpenPythonModal();
+                    if (onClose) onClose();
+                  }}
+                >
+                  <span className="academy-btn-left">
+                    <span className="academy-py-dot" />
+                    <span>Learn Python</span>
+                  </span>
+                  <span className="academy-badge-soon">Soon</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Grouped Algorithm Categories */}
+            {groupedAlgos.map(group => (
+              <div className="sidebar-category" key={group.key}>
+                <div className="sidebar-category-header">
+                  {group.label}
+                </div>
+                <div className="sidebar-items">
+                  {group.items.map(algo => {
+                    const bookmarked = isBookmarked(algo.slug);
+                    const completed = isCompleted(algo.slug);
+
+                    return (
+                      <div
+                        key={algo.slug}
+                        className={`sidebar-item ${currentSlug === algo.slug ? 'active' : ''} ${completed ? 'item-completed' : ''}`}
+                        onClick={() => {
+                          if (onSelect) onSelect(algo.slug);
+                          if (onClose) onClose();
+                        }}
+                      >
+                        <span className="sidebar-item-name">
+                          <span className="sidebar-algo-glyph">{getAlgoIcon(algo.slug, 15)}</span>
+                          <span>{algo.name}</span>
+                        </span>
+                        <div className="sidebar-item-meta">
+                          <span className="sidebar-item-complexity">
+                            {algo.timeComplexity.average}
+                          </span>
+                          <button
+                            type="button"
+                            className={`sidebar-star-btn ${bookmarked ? 'star-active' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleBookmark(algo.slug);
+                            }}
+                            title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
+                            aria-label="Bookmark"
+                          >
+                            <BookmarkIcon size={12} filled={bookmarked} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Common Premium Developer Profile Card (Footer) ── */}
       <div className="sidebar-footer">
         <div className="dev-profile-card">
-          {/* Top: Avatar & Title Header */}
+          {/* Top: Avatar & Creator Header */}
           <a
             href="https://mh-ratul.vercel.app/"
             target="_blank"
@@ -127,6 +402,7 @@ export default function Sidebar({ currentSlug, onSelect, onClose }) {
             </div>
             <div className="dev-meta">
               <span className="dev-name">Ratul</span>
+              <span className="dev-role-label">Creator & Engineer</span>
             </div>
           </a>
 
@@ -181,3 +457,4 @@ export default function Sidebar({ currentSlug, onSelect, onClose }) {
     </aside>
   );
 }
+
