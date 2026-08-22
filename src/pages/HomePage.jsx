@@ -1,4 +1,4 @@
-/* Step 5: feat(visualizer): redesign DSA studio hub cards with expandable nested drawers */
+/* Step 6: feat(catalog): implement categorized algorithm directory with real-time search */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
