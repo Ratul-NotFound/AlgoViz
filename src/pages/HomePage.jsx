@@ -1,4 +1,4 @@
-/* Step 6: feat(catalog): implement categorized algorithm directory with real-time search */
+/* Step 7: feat(duel): integrate real-time algorithm duel arena and performance race lanes */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
