@@ -1,3 +1,4 @@
+/* Step 1: refactor(landing): redesign hero workbench with beginner-friendly value proposition */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
@@ -9,120 +10,17 @@ import {
 } from '../components/Icons.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const LANG_OPTIONS = [
-  { id: 'python', label: 'Python', icon: PythonIcon, ext: 'py' },
-  { id: 'c',      label: 'C',      icon: CIcon,      ext: 'c' },
-  { id: 'cpp',    label: 'C++',    icon: CppIcon,    ext: 'cpp' },
-  { id: 'java',   label: 'Java',   icon: JavaIcon,   ext: 'java' },
-  { id: 'js',     label: 'JavaScript', icon: JSIcon, ext: 'js' },
-];
-
-const FEATURED_CHIPS = [
-  { slug: 'quick-sort', name: 'Quick Sort', comp: 'O(n log n)' },
-  { slug: 'binary-search', name: 'Binary Search', comp: 'O(log n)' },
-  { slug: 'dijkstra', name: "Dijkstra's", comp: 'O(E log V)' },
-  { slug: 'binary-heap', name: 'Min-Heap', comp: 'O(log n)' },
-  { slug: 'circular-queue', name: 'Circular Queue', comp: 'O(1)' },
-  { slug: 'bst', name: 'BST', comp: 'O(log n)' },
-];
-
-const LEARNING_TRACKS = [
-  {
-    id: 'sorting-foundations',
-    trackNum: '01',
-    title: 'Sorting Fundamentals',
-    category: 'sorting',
-    description: 'Master iterative comparisons, adjacent swaps, min-element selection, and progressive insertion mechanics.',
-    difficulty: 'Beginner',
-    diffColor: '#10b981',
-    timeEst: '25 mins',
-    algorithms: ['bubble-sort', 'selection-sort', 'insertion-sort'],
-  },
-  {
-    id: 'divide-and-conquer',
-    trackNum: '02',
-    title: 'Divide & Conquer Sorting',
-    category: 'sorting',
-    description: 'Learn recursive array partitioning, logarithmic merges, and binary min-heap sift-up/down balancing.',
-    difficulty: 'Intermediate',
-    diffColor: '#f59e0b',
-    timeEst: '35 mins',
-    algorithms: ['merge-sort', 'quick-sort', 'heap-sort'],
-  },
-  {
-    id: 'searching-algorithms',
-    trackNum: '03',
-    title: 'Search Strategies',
-    category: 'searching',
-    description: 'Compare linear memory sweeps against logarithmic interval bisection in sorted datasets.',
-    difficulty: 'Beginner',
-    diffColor: '#10b981',
-    timeEst: '15 mins',
-    algorithms: ['linear-search', 'binary-search'],
-  },
-  {
-    id: 'linear-data-structures',
-    trackNum: '04',
-    title: 'Linear Data Structures',
-    category: 'datastructures',
-    description: 'Master LIFO stacks, FIFO queues, circular ring buffers, and singly/doubly linked pointer chains.',
-    difficulty: 'Beginner',
-    diffColor: '#10b981',
-    timeEst: '30 mins',
-    algorithms: ['stack', 'queue', 'linked-list', 'doubly-linked-list', 'circular-queue'],
-  },
-  {
-    id: 'tree-structures',
-    trackNum: '05',
-    title: 'Hierarchical Trees',
-    category: 'trees',
-    description: 'Understand Binary Search Tree invariant, dynamic node insertions, and recursive tree traversals.',
-    difficulty: 'Intermediate',
-    diffColor: '#8b5cf6',
-    timeEst: '20 mins',
-    algorithms: ['bst'],
-  },
-  {
-    id: 'graph-traversals',
-    trackNum: '06',
-    title: 'Graph Theory & Shortest Paths',
-    category: 'graphs',
-    description: 'Traverse complex graphs using queues, recursive stacks, and greedy edge relaxation algorithms.',
-    difficulty: 'Advanced',
-    diffColor: '#3b82f6',
-    timeEst: '45 mins',
-    algorithms: ['bfs', 'dfs', 'dijkstra'],
-  },
-  {
-    id: 'advanced-data-structures',
-    trackNum: '07',
-    title: 'Priority Heaps & Hash Tables',
-    category: 'datastructures',
-    description: 'Build binary min-heaps with vector branches and hash tables with separate chaining collisions.',
-    difficulty: 'Intermediate',
-    diffColor: '#f59e0b',
-    timeEst: '35 mins',
-    algorithms: ['binary-heap', 'hash-table'],
-  },
-];
-
+/* ─── Helpers ─────────────────────────────────────── */
 function calculateOperations(n) {
+  const fmt = (x) => x >= 1_000_000 ? `${(x / 1_000_000).toFixed(1)}M` : x >= 1_000 ? `${(x / 1_000).toFixed(0)}K` : `${x}`;
   return [
-    { name: 'O(1)', label: 'Constant', ops: 1, class: 'good' },
-    { name: 'O(log n)', label: 'Logarithmic', ops: Math.max(1, Math.round(Math.log2(n || 1))), class: 'good' },
-    { name: 'O(n)', label: 'Linear', ops: n, class: 'med' },
-    { name: 'O(n log n)', label: 'Linearithmic', ops: Math.round(n * Math.log2(n || 1)), class: 'med' },
-    { name: 'O(n²)', label: 'Quadratic', ops: n * n, class: 'bad' },
+    { notation: 'O(1)',      label: 'Constant',      color: '#10b981', opsFormatted: fmt(1) },
+    { notation: 'O(log n)', label: 'Logarithmic',   color: '#10b981', opsFormatted: fmt(Math.max(1, Math.round(Math.log2(n || 1)))) },
+    { notation: 'O(n)',      label: 'Linear',        color: '#3b82f6', opsFormatted: fmt(n) },
+    { notation: 'O(n log n)', label: 'Linearithmic', color: '#f59e0b', opsFormatted: fmt(Math.round(n * Math.log2(n || 1))) },
+    { notation: 'O(n²)',    label: 'Quadratic',     color: '#ef4444', opsFormatted: fmt(n * n) },
   ];
 }
-
-const CATEGORY_COLORS = {
-  sorting:        '#3b82f6',
-  searching:      '#0284c7',
-  datastructures: '#6366f1',
-  graphs:         '#10b981',
-  trees:          '#8b5cf6',
-};
 
 function getComplexityColor(comp = '') {
   if (comp.includes('O(1)') || comp.includes('O(log n)')) return '#10b981';
@@ -131,24 +29,24 @@ function getComplexityColor(comp = '') {
   return '#8b5cf6';
 }
 
+/* ─── Component ─────────────────────────────────────── */
 export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal, initialTab = 'catalog' }) {
-  const { isBookmarked, toggleBookmark, isCompleted, isAuthenticated, openAuthModal } = useAuth();
+  const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
+
+  /* Catalog state */
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState(initialTab); // 'catalog' | 'academy-preview' | 'duel' | 'matrix'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'catalog' | 'duel' | 'matrix'
   const [showAllAlgos, setShowAllAlgos] = useState(false);
-  const [expandedCourse, setExpandedCourse] = useState('c'); // 'c' | 'python' | 'java' | 'cpp' | null
-  const [expandedModule, setExpandedModule] = useState('module-1'); // moduleId or null for 2-tier disclosure
-  const [selectedLang, setSelectedLang] = useState('python');
+
+  /* Academy state */
+  const [expandedCourse, setExpandedCourse] = useState('c');
+  const [expandedModule, setExpandedModule] = useState('module-1');
+
+  /* Big-O slider */
   const [sliderN, setSliderN] = useState(64);
 
-  useEffect(() => {
-    if (initialTab) {
-      setActiveTab(initialTab);
-    }
-  }, [initialTab]);
-
-  // ── Hero Interactive DSA Console State ──
+  /* Hero sandbox state */
   const [heroMode, setHeroMode] = useState('quick'); // 'quick' | 'bubble' | 'binary'
   const [heroArray, setHeroArray] = useState([42, 18, 85, 29, 67, 12, 94, 38, 55, 73]);
   const [heroActiveIdx, setHeroActiveIdx] = useState({ i: -1, j: -1, pivot: -1 });
@@ -156,15 +54,20 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
   const [heroStats, setHeroStats] = useState({ step: 0, comps: 0, swaps: 0 });
   const heroTimerRef = useRef(null);
 
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab]);
+
+  useEffect(() => () => clearInterval(heroTimerRef.current), []);
+
+  /* Hero sandbox helpers */
   const shuffleHero = () => {
     clearInterval(heroTimerRef.current);
     setHeroSorting(false);
     setHeroActiveIdx({ i: -1, j: -1, pivot: -1 });
     setHeroStats({ step: 0, comps: 0, swaps: 0 });
     const fresh = Array.from({ length: 10 }, () => Math.floor(Math.random() * 75) + 15);
-    if (heroMode === 'binary') {
-      fresh.sort((a, b) => a - b);
-    }
+    if (heroMode === 'binary') fresh.sort((a, b) => a - b);
     setHeroArray(fresh);
   };
 
@@ -175,9 +78,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
     setHeroStats({ step: 0, comps: 0, swaps: 0 });
     setHeroMode(mode);
     const fresh = Array.from({ length: 10 }, () => Math.floor(Math.random() * 75) + 15);
-    if (mode === 'binary') {
-      fresh.sort((a, b) => a - b);
-    }
+    if (mode === 'binary') fresh.sort((a, b) => a - b);
     setHeroArray(fresh);
   };
 
@@ -187,7 +88,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
       setHeroSorting(false);
       return;
     }
-
     setHeroSorting(true);
     let arr = [...heroArray];
     let stepCount = heroStats.step;
@@ -200,22 +100,16 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
       heroTimerRef.current = setInterval(() => {
         if (i < n) {
           if (j < n - i - 1) {
-            compCount++;
-            stepCount++;
+            compCount++; stepCount++;
             setHeroActiveIdx({ i: j, j: j + 1, pivot: -1 });
             if (arr[j] > arr[j + 1]) {
               swapCount++;
-              const temp = arr[j];
-              arr[j] = arr[j + 1];
-              arr[j + 1] = temp;
+              [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
               setHeroArray([...arr]);
             }
             setHeroStats({ step: stepCount, comps: compCount, swaps: swapCount });
             j++;
-          } else {
-            j = 0;
-            i++;
-          }
+          } else { j = 0; i++; }
         } else {
           clearInterval(heroTimerRef.current);
           setHeroSorting(false);
@@ -223,24 +117,17 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         }
       }, 90);
     } else if (heroMode === 'binary') {
-      let left = 0;
-      let right = arr.length - 1;
+      let left = 0, right = arr.length - 1;
       const target = arr[Math.floor(Math.random() * arr.length)];
       heroTimerRef.current = setInterval(() => {
         if (left <= right) {
-          stepCount++;
-          compCount++;
+          stepCount++; compCount++;
           const mid = Math.floor((left + right) / 2);
           setHeroActiveIdx({ i: left, j: right, pivot: mid });
           setHeroStats({ step: stepCount, comps: compCount, swaps: swapCount });
-          if (arr[mid] === target) {
-            clearInterval(heroTimerRef.current);
-            setHeroSorting(false);
-          } else if (arr[mid] < target) {
-            left = mid + 1;
-          } else {
-            right = mid - 1;
-          }
+          if (arr[mid] === target) { clearInterval(heroTimerRef.current); setHeroSorting(false); }
+          else if (arr[mid] < target) left = mid + 1;
+          else right = mid - 1;
         } else {
           clearInterval(heroTimerRef.current);
           setHeroSorting(false);
@@ -254,22 +141,16 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
       heroTimerRef.current = setInterval(() => {
         if (i < n) {
           if (j < n - i - 1) {
-            compCount++;
-            stepCount++;
+            compCount++; stepCount++;
             setHeroActiveIdx({ i: j, j: j + 1, pivot: n - 1 });
             if (arr[j] > arr[j + 1]) {
               swapCount++;
-              const temp = arr[j];
-              arr[j] = arr[j + 1];
-              arr[j + 1] = temp;
+              [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
               setHeroArray([...arr]);
             }
             setHeroStats({ step: stepCount, comps: compCount, swaps: swapCount });
             j++;
-          } else {
-            j = 0;
-            i++;
-          }
+          } else { j = 0; i++; }
         } else {
           clearInterval(heroTimerRef.current);
           setHeroSorting(false);
@@ -279,10 +160,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
     }
   };
 
-  useEffect(() => {
-    return () => clearInterval(heroTimerRef.current);
-  }, []);
-
+  /* Catalog filters */
   const filteredAlgos = useMemo(() => {
     return ALGORITHMS.filter(algo => {
       const matchesCat = activeCategory === 'all' || algo.category === activeCategory;
@@ -298,412 +176,362 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
   }, [activeCategory, searchQuery]);
 
   const displayedAlgos = useMemo(() => {
-    if (searchQuery || activeCategory !== 'all' || showAllAlgos) {
-      return filteredAlgos;
-    }
+    if (searchQuery || activeCategory !== 'all' || showAllAlgos) return filteredAlgos;
     return filteredAlgos.slice(0, 8);
   }, [filteredAlgos, searchQuery, activeCategory, showAllAlgos]);
 
   const complexityResults = useMemo(() => calculateOperations(sliderN), [sliderN]);
 
+  /* ──────────────────────────────────────────────────────────────────── */
   return (
-    <div className="home-layout">
-      {/* ── 1. World-Class Hero Section ── */}
-      <section className="hero-workbench">
-        {/* Left: Value Proposition */}
-        <div className="hero-content">
-          <div className="hero-badge-pill">
-            <span className="badge-glow-dot" />
-            <span className="badge-pill-text">🎓 C Academy (23 Chapters) &bull; 40+ Interactive Visualizers</span>
+    <div className="hp-layout">
+
+      {/* ══ SECTION 1: HERO WORKBENCH ══════════════════════════════════ */}
+      <section className="hp-hero">
+
+        {/* Left: Value proposition */}
+        <div className="hp-hero-left">
+          <div className="hp-eyebrow-pill">
+            <span className="hp-eyebrow-dot" />
+            <span>🎓 C Academy (23 Chapters) &bull; 40+ Interactive Visualizers</span>
           </div>
 
-          <h1 className="hero-title">
-            Learn Coding &amp; Master Algorithms Through <span className="hero-highlight-text">Interactive Visuals</span>.
+          <h1 className="hp-h1">
+            Learn Coding &amp; Master Algorithms Through{' '}
+            <span className="hp-h1-accent">Interactive Visuals.</span>
           </h1>
 
-          <p className="hero-description">
-            The easy way to learn programming and data structures. Start C coding from scratch with simple visual guides, run real code in your browser, and watch every algorithm step-by-step.
+          <p className="hp-hero-desc">
+            The simplest way to learn programming and data structures. Start C from scratch,
+            run code in your browser, and watch every algorithm step-by-step — completely free.
           </p>
 
-          {/* Primary Action Buttons */}
-          <div className="hero-actions">
+          <div className="hp-hero-actions">
             <button
-              className="btn-hero-academy"
+              className="hp-btn-academy"
               onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
             >
-              🎓 Start Learning C (23 Chapters) &rarr;
+              🎓 Start Learning C (23 Chapters) →
             </button>
             <button
-              className="btn-hero-primary"
+              className="hp-btn-studio"
               onClick={() => {
                 setActiveTab('catalog');
-                const el = document.querySelector('.platform-nav-bar') || document.querySelector('.catalog-header-bar');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                  const el = document.getElementById('hp-dsa-section');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
               }}
             >
-              <PlayIcon size={14} />
+              <PlayIcon size={13} />
               <span>Explore 40+ Visualizers</span>
             </button>
           </div>
 
-          {/* Clean Quick Features Pill List */}
-          <div className="hero-simple-highlights">
-            <div className="simple-highlight-pill">
-              <span className="pill-check">✓</span>
-              <span>100% Free &amp; Open Access</span>
-            </div>
-            <div className="simple-highlight-pill">
-              <span className="pill-check">✓</span>
-              <span>230 Practice Quizzes &amp; Labs</span>
-            </div>
-            <div className="simple-highlight-pill">
-              <span className="pill-check">✓</span>
-              <span>In-Browser C Compiler &amp; Sandbox</span>
-            </div>
-            <div className="simple-highlight-pill">
-              <span className="pill-check">✓</span>
-              <span>Free Certificate of Completion</span>
-            </div>
+          <div className="hp-hero-pills">
+            {['100% Free & Open Access', '230 Quizzes & Labs', 'In-Browser C Compiler', 'Free Certificate'].map(t => (
+              <div key={t} className="hp-hero-pill">
+                <span className="hp-pill-check">✓</span>
+                <span>{t}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Right: Live Interactive Sandbox Terminal */}
-        <div className="hero-sandbox">
-          <div className="sandbox-header">
-            <div className="window-dots">
-              <span className="w-dot dot-r" />
-              <span className="w-dot dot-y" />
-              <span className="w-dot dot-g" />
+        {/* Right: Live interactive sandbox */}
+        <div className="hp-sandbox">
+          <div className="hp-sb-header">
+            <div className="hp-sb-dots">
+              <span className="hp-dot dot-r" /><span className="hp-dot dot-y" /><span className="hp-dot dot-g" />
             </div>
-
-            <div className="sandbox-tabs">
-              <button
-                className={`s-tab ${heroMode === 'quick' ? 'active' : ''}`}
-                onClick={() => handleSwitchHeroMode('quick')}
-              >
-                Quick Sort
-              </button>
-              <button
-                className={`s-tab ${heroMode === 'bubble' ? 'active' : ''}`}
-                onClick={() => handleSwitchHeroMode('bubble')}
-              >
-                Bubble Sort
-              </button>
-              <button
-                className={`s-tab ${heroMode === 'binary' ? 'active' : ''}`}
-                onClick={() => handleSwitchHeroMode('binary')}
-              >
-                Binary Search
-              </button>
+            <div className="hp-sb-tabs">
+              {[
+                { id: 'quick', label: 'Quick Sort' },
+                { id: 'bubble', label: 'Bubble Sort' },
+                { id: 'binary', label: 'Binary Search' },
+              ].map(m => (
+                <button
+                  key={m.id}
+                  className={`hp-sb-tab${heroMode === m.id ? ' active' : ''}`}
+                  onClick={() => handleSwitchHeroMode(m.id)}
+                >
+                  {m.label}
+                </button>
+              ))}
             </div>
-
-            <div className="sandbox-btns">
-              <button
-                className="s-btn-icon"
-                onClick={shuffleHero}
-                title="Shuffle Data"
-              >
+            <div className="hp-sb-controls">
+              <button className="hp-sb-icon-btn" onClick={shuffleHero} title="Shuffle">
                 <ShuffleIcon size={12} />
               </button>
-              <button
-                className="s-btn-play"
-                onClick={runHeroAnimation}
-                title="Run / Pause Animation"
-              >
+              <button className="hp-sb-play-btn" onClick={runHeroAnimation}>
                 {heroSorting ? <PauseIcon size={11} /> : <PlayIcon size={11} />}
                 <span>{heroSorting ? 'Pause' : 'Run'}</span>
               </button>
             </div>
           </div>
 
-          {/* Sandbox Stage */}
-          <div className="sandbox-stage">
+          <div className="hp-sb-stage">
             {heroArray.map((val, idx) => {
               const isI = idx === heroActiveIdx.i;
               const isJ = idx === heroActiveIdx.j;
               const isPivot = idx === heroActiveIdx.pivot;
               const isActive = isI || isJ || isPivot;
-
               return (
-                <div key={idx} className="stage-col">
+                <div key={idx} className="hp-sb-col">
                   <div
-                    className={`stage-bar ${isActive ? 'active' : ''} ${isPivot ? 'pivot' : ''}`}
+                    className={`hp-sb-bar${isActive ? ' active' : ''}${isPivot ? ' pivot' : ''}`}
                     style={{ height: `${Math.max(12, val)}%` }}
                   />
-                  <span className="stage-val font-mono">{val}</span>
-                  {isI && <span className="stage-ptr ptr-i">i</span>}
-                  {isJ && <span className="stage-ptr ptr-j">j</span>}
-                  {isPivot && <span className="stage-ptr ptr-p">p</span>}
+                  <span className="hp-sb-val font-mono">{val}</span>
+                  {isI && <span className="hp-sb-ptr hp-ptr-i">i</span>}
+                  {isJ && <span className="hp-sb-ptr hp-ptr-j">j</span>}
+                  {isPivot && <span className="hp-sb-ptr hp-ptr-p">p</span>}
                 </div>
               );
             })}
           </div>
 
-          {/* Sandbox Footer */}
-          <div className="sandbox-footer">
-            <div className="telemetry-group">
-              <span className="t-pill">Step <b className="font-mono">{heroStats.step}</b></span>
-              <span className="t-pill">Comps <b className="font-mono">{heroStats.comps}</b></span>
-              <span className="t-pill">Swaps <b className="font-mono">{heroStats.swaps}</b></span>
+          <div className="hp-sb-footer">
+            <div className="hp-telemetry">
+              <span className="hp-t-chip font-mono">Step <b>{heroStats.step}</b></span>
+              <span className="hp-t-chip font-mono">Comps <b>{heroStats.comps}</b></span>
+              <span className="hp-t-chip font-mono">Swaps <b>{heroStats.swaps}</b></span>
             </div>
             <button
-              className="open-studio-btn"
+              className="hp-open-studio-btn"
               onClick={() => onSelectAlgo(heroMode === 'binary' ? 'binary-search' : heroMode === 'quick' ? 'quick-sort' : 'bubble-sort')}
             >
-              <span>Inspect in Studio</span>
+              <span>Open in Studio</span>
               <ArrowRightIcon size={11} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* ── 2. Dual-Mission Gateways (Choose Your Path) ── */}
-      <section className="dual-flagship-section">
-        <div className="flagship-card card-learn-c" onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}>
-          <div className="flagship-top-header">
-            <span className="flagship-badge badge-c-learn">🎓 C ACADEMY</span>
-            <span className="flagship-pill-ch font-mono">23 CHAPTERS • 230 QUIZZES &amp; LABS</span>
+      {/* ══ SECTION 2: DUAL FLAGSHIP GATEWAYS ═══════════════════════════ */}
+      <section className="hp-flagship-grid">
+
+        {/* C Academy Card */}
+        <div
+          className="hp-flagship-card hp-card-academy"
+          onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
+        >
+          <div className="hp-fc-header">
+            <span className="hp-fc-badge hp-badge-green">🎓 C ACADEMY</span>
+            <span className="hp-fc-meta font-mono">23 CHAPTERS • 230 QUIZZES</span>
           </div>
-          <h2 className="flagship-title">C Programming Academy</h2>
-          <p className="flagship-desc">
-            Learn pointers, memory layout, structs, and how computers store data with clear visual examples and an in-browser C compiler.
+          <h2 className="hp-fc-title">C Programming Academy</h2>
+          <p className="hp-fc-desc">
+            Learn pointers, memory layout, structs, and dynamic memory with visual guides and an in-browser C compiler.
           </p>
-
-          <div className="flagship-code-snippet font-mono">
-            <span className="c-kw">int</span> *ptr = &amp;val; <span className="c-cm">/* 0x7ffd14 ➔ 42 */</span>
+          <div className="hp-fc-snippet font-mono">
+            <span className="fc-kw">int</span> *ptr = &amp;val;<span className="fc-cm"> /* 0x7ffd14 → 42 */</span>
           </div>
-
-          <div className="flagship-feature-pills">
-            <span className="feat-pill">📦 23 Visual Chapters</span>
-            <span className="feat-pill">💻 In-Browser Compiler</span>
-            <span className="feat-pill">🎓 Gold Certificate</span>
+          <div className="hp-fc-pills">
+            <span className="hp-fc-pill">📦 23 Visual Chapters</span>
+            <span className="hp-fc-pill">💻 In-Browser Compiler</span>
+            <span className="hp-fc-pill">🎓 Free Certificate</span>
           </div>
-
-          <div className="flagship-action-row">
-            <button className="btn-flagship-c">
+          <div className="hp-fc-footer">
+            <button className="hp-btn-fc hp-btn-fc-green">
               <span>Start Chapter 1</span>
               <ArrowRightIcon size={12} />
             </button>
-            <span className="flagship-meta-text">100% Free &amp; Interactive</span>
+            <span className="hp-fc-sub">100% Free &amp; Interactive</span>
           </div>
         </div>
 
+        {/* DSA Studio Card */}
         <div
-          className="flagship-card card-dsa-studio"
+          className="hp-flagship-card hp-card-studio"
           onClick={() => {
             setActiveTab('catalog');
-            const el = document.querySelector('.platform-nav-bar') || document.querySelector('.catalog-header-bar');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+              const el = document.getElementById('hp-dsa-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
           }}
         >
-          <div className="flagship-top-header">
-            <span className="flagship-badge badge-dsa-engine">⚡ DSA STUDIO</span>
-            <span className="flagship-pill-dsa font-mono">40+ ALGORITHMS • SPEED RACE</span>
+          <div className="hp-fc-header">
+            <span className="hp-fc-badge hp-badge-blue">⚡ DSA STUDIO</span>
+            <span className="hp-fc-meta font-mono">40+ ALGORITHMS • SPEED RACE</span>
           </div>
-          <h2 className="flagship-title">Data Structures &amp; Algorithm Visualizer</h2>
-          <p className="flagship-desc">
+          <h2 className="hp-fc-title">Data Structures &amp; Algorithm Visualizer</h2>
+          <p className="hp-fc-desc">
             Watch sorting, searching, trees, and graphs execute step-by-step with real data and Big-O analytics.
           </p>
-
-          <div className="flagship-duel-snippet font-mono">
-            <span className="f-good">Quick: O(n log n) ⚡</span> <span className="f-vs">vs</span> <span className="f-bad">Bubble: O(n²)</span>
+          <div className="hp-fc-snippet font-mono">
+            <span className="fc-good">Quick: O(n log n) ⚡</span> <span className="fc-vs">vs</span> <span className="fc-bad">Bubble: O(n²)</span>
           </div>
-
-          <div className="flagship-feature-pills">
-            <span className="feat-pill">📊 Step Playback</span>
-            <span className="feat-pill">⚔️ Speed Race</span>
-            <span className="feat-pill">🌐 5 Languages</span>
+          <div className="hp-fc-pills">
+            <span className="hp-fc-pill">📊 Step Playback</span>
+            <span className="hp-fc-pill">⚔️ Speed Race</span>
+            <span className="hp-fc-pill">🌐 5 Languages</span>
           </div>
-
-          <div className="flagship-action-row">
-            <button className="btn-flagship-dsa">
+          <div className="hp-fc-footer">
+            <button className="hp-btn-fc hp-btn-fc-blue">
               <span>Explore Visualizers</span>
               <ArrowRightIcon size={12} />
             </button>
-            <span className="flagship-meta-text">40+ Algorithms Available</span>
+            <span className="hp-fc-sub">40+ Algorithms Available</span>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 1: ⚡ DSA VISUALIZER (1. VISUALIZATIONS | 2. BATTLE ARENA | 3. BIG-O)
-      ══════════════════════════════════════════════════════════════════ */}
-      <section className="section-block algo-studio-section" id="visualizers-section">
-        <div className="section-header-row">
-          <div className="section-header-left">
-            <span className="section-eyebrow font-mono">⚡ DSA VISUALIZER</span>
-            <h2 className="section-main-title">DSA Visualizer</h2>
-            <p className="section-main-sub">
-              Watch algorithms run step-by-step, see variables change in real-time, and race algorithms head-to-head.
-            </p>
+      {/* ══ SECTION 3: VALUE PILLARS ══════════════════════════════════════ */}
+      <section className="hp-pillars">
+        {[
+          {
+            icon: '🧠',
+            title: 'Real-World Analogies',
+            desc: 'Every concept is explained using physical analogies — RAM as a bookshelf, pointers as addresses — so mental models click fast.',
+          },
+          {
+            icon: '🎬',
+            title: 'Frame-by-Frame Tracing',
+            desc: 'Watch every comparison, swap, and pointer move highlighted live. Pause, rewind, and replay any step you want.',
+          },
+          {
+            icon: '🌐',
+            title: 'Multi-Language Code',
+            desc: 'See every algorithm in C, Python, C++, Java, and JavaScript side-by-side with the same visualizer running in sync.',
+          },
+        ].map(p => (
+          <div key={p.title} className="hp-pillar-card">
+            <div className="hp-pillar-icon">{p.icon}</div>
+            <h3 className="hp-pillar-title">{p.title}</h3>
+            <p className="hp-pillar-desc">{p.desc}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* ══ SECTION 4: DSA VISUALIZER STUDIO ═══════════════════════════ */}
+      <section className="hp-section" id="hp-dsa-section">
+        <div className="hp-section-header">
+          <div>
+            <span className="hp-section-eyebrow font-mono">⚡ DSA VISUALIZER</span>
+            <h2 className="hp-section-title">Algorithm Studio</h2>
+            <p className="hp-section-sub">Watch algorithms execute step-by-step, race them head-to-head, and compare Big-O complexity.</p>
           </div>
         </div>
 
-        {/* 3 Creative Interactive Flagship Cards with Direct In-Card Unfolding Drawers */}
-        <div className="courses-hub-grid dsa-hub-grid">
-          {/* Card 1: ⚡ Visualizations (19) */}
+        <div className="hp-dsa-hub">
+          {/* Card 1: Visualizations */}
           <div
-            className={`course-card dsa-flagship-card card-visualizers ${activeTab === 'catalog' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => setActiveTab(curr => curr === 'catalog' ? null : 'catalog')}
+            className={`hp-hub-card${activeTab === 'catalog' ? ' hp-hub-open' : ''}`}
+            onClick={() => setActiveTab(t => t === 'catalog' ? null : 'catalog')}
           >
-            <div className="course-card-top">
-              <span className="course-status-pill status-live font-mono">● {ALGORITHMS.length} ALGORITHMS</span>
-              <span className="course-badge-ch font-mono">SORT • SEARCH • GRAPH • TREE • DP</span>
+            <div className="hp-hub-card-top">
+              <span className="hp-hub-status-pill hp-pill-green font-mono">● {ALGORITHMS.length} ALGORITHMS</span>
+              <span className="hp-hub-badge font-mono">SORT • SEARCH • GRAPH • TREE</span>
             </div>
-            
-            <div className="flagship-title-row">
-              <div className="flagship-icon-badge icon-green">⚡</div>
-              <h3 className="course-card-title">Interactive Visualizations</h3>
+            <div className="hp-hub-icon-row">
+              <span className="hp-hub-icon hp-icon-green">⚡</span>
+              <h3 className="hp-hub-title">Interactive Visualizations</h3>
             </div>
-
-            <p className="course-card-desc">
-              Step through Sorting, Searching, Trees, Graphs, and Dynamic Programming with live step-by-step animation.
-            </p>
-
-            {/* Creative Micro Visual Graphic Preview */}
-            <div className="card-mini-preview preview-bars">
-              <div className="mini-bar" style={{ height: '35%', background: '#3b82f6' }} />
-              <div className="mini-bar active-bar" style={{ height: '70%', background: '#10b981' }} />
-              <div className="mini-bar" style={{ height: '45%', background: '#3b82f6' }} />
-              <div className="mini-bar active-bar-swap" style={{ height: '90%', background: '#f59e0b' }} />
-              <div className="mini-bar" style={{ height: '60%', background: '#3b82f6' }} />
-              <span className="mini-preview-tag font-mono">Step-by-Step Tracing</span>
+            <p className="hp-hub-desc">Step through Sorting, Searching, Trees, Graphs with live step-by-step animation.</p>
+            <div className="hp-mini-bars">
+              {[35, 70, 45, 90, 60].map((h, i) => (
+                <div key={i} className={`hp-mini-bar${i === 1 ? ' bar-active' : i === 3 ? ' bar-pivot' : ''}`} style={{ height: `${h}%` }} />
+              ))}
             </div>
-
-            <div className="course-card-footer">
+            <div className="hp-hub-footer">
               <button
-                type="button"
-                className="btn-course-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTab('catalog');
-                }}
+                className="hp-btn-hub hp-btn-hub-green"
+                onClick={e => { e.stopPropagation(); setActiveTab('catalog'); }}
               >
                 <span>⚡ Explore Visualizers</span>
                 <ArrowRightIcon size={12} />
               </button>
-              <span className="course-click-hint font-mono">
-                {activeTab === 'catalog' ? '▲ Close Visualizers' : `▼ Open Visualizers (${ALGORITHMS.length})`}
+              <span className="hp-hub-hint font-mono">
+                {activeTab === 'catalog' ? '▲ Close' : `▼ Open (${ALGORITHMS.length})`}
               </span>
             </div>
 
-            {/* Direct In-Card Unfolded Drawer: Visualizations Catalog */}
+            {/* Catalog Drawer */}
             {activeTab === 'catalog' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="catalog-header-bar">
-                  {/* Horizontally Scrollable Category Filter Pills */}
-                  <div className="cat-filter-pills">
+              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
+                {/* Filter pills + search */}
+                <div className="hp-drawer-header">
+                  <div className="hp-cat-pills">
                     <button
-                      className={`filter-pill ${activeCategory === 'all' ? 'active' : ''}`}
+                      className={`hp-cat-pill${activeCategory === 'all' ? ' active' : ''}`}
                       onClick={() => setActiveCategory('all')}
                     >
                       All ({ALGORITHMS.length})
                     </button>
-                    {Object.entries(CATEGORIES).map(([key, cat]) => {
-                      const count = ALGORITHMS.filter(a => a.category === key).length;
-                      return (
-                        <button
-                          key={key}
-                          className={`filter-pill ${activeCategory === key ? 'active' : ''}`}
-                          onClick={() => setActiveCategory(key)}
-                        >
-                          <span>{cat.label} ({count})</span>
-                        </button>
-                      );
-                    })}
+                    {Object.entries(CATEGORIES).map(([key, cat]) => (
+                      <button
+                        key={key}
+                        className={`hp-cat-pill${activeCategory === key ? ' active' : ''}`}
+                        onClick={() => setActiveCategory(key)}
+                      >
+                        {cat.label} ({ALGORITHMS.filter(a => a.category === key).length})
+                      </button>
+                    ))}
                   </div>
-
-                  {/* Clean Search Input */}
-                  <div className="search-wrapper">
-                    <SearchIcon size={14} className="search-ico" />
+                  <div className="hp-search-wrap">
+                    <SearchIcon size={14} className="hp-search-ico" />
                     <input
                       type="text"
-                      className="search-field"
-                      placeholder="Search algorithms (e.g. quick, O(log n))..."
+                      className="hp-search-field"
+                      placeholder="Search algorithms..."
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                     />
                     {searchQuery && (
-                      <button className="search-x" onClick={() => setSearchQuery('')}>✕</button>
+                      <button className="hp-search-x" onClick={() => setSearchQuery('')}>✕</button>
                     )}
                   </div>
                 </div>
 
-                {/* Creative Compact Algorithm Showcase Grid */}
-                <div className="algo-cards-grid creative-micro-grid">
+                {/* Algorithm cards grid */}
+                <div className="hp-algo-grid">
                   {displayedAlgos.length === 0 ? (
-                    <div className="empty-results">
+                    <div className="hp-empty-state">
                       <p>No algorithms match "{searchQuery}"</p>
-                      <button className="btn-hero-secondary" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
+                      <button className="hp-btn-outline" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
                         Reset Filters
                       </button>
                     </div>
                   ) : (
                     displayedAlgos.map(algo => {
-                      const catLabel = CATEGORIES[algo.category]?.label || algo.category;
                       const bookmarked = isBookmarked(algo.slug);
                       const completed = isCompleted(algo.slug);
                       const timeColor = getComplexityColor(algo.timeComplexity.average);
-
                       return (
                         <div
                           key={algo.slug}
-                          className={`micro-algo-tile cat-tile-${algo.category} ${completed ? 'tile-completed' : ''}`}
+                          className={`hp-algo-tile${completed ? ' tile-done' : ''}`}
                           onClick={() => onSelectAlgo(algo.slug)}
                         >
-                          {/* Top Row: Icon + Name + Category + Bookmark */}
-                          <div className="micro-tile-top">
-                            <div className="micro-tile-identity">
-                              <div className="micro-tile-icon">
-                                {getAlgoIcon(algo.slug, 15)}
-                              </div>
-                              <div className="micro-tile-names">
-                                <h4 className="micro-tile-title">{algo.name}</h4>
-                                <span className="micro-tile-cat font-mono">{catLabel}</span>
+                          <div className="hp-tile-top">
+                            <div className="hp-tile-identity">
+                              <div className="hp-tile-icon">{getAlgoIcon(algo.slug, 15)}</div>
+                              <div>
+                                <h4 className="hp-tile-name">{algo.name}</h4>
+                                <span className="hp-tile-cat font-mono">{CATEGORIES[algo.category]?.label}</span>
                               </div>
                             </div>
-
-                            <div className="micro-tile-actions">
-                              <button
-                                type="button"
-                                className={`micro-bookmark-btn ${bookmarked ? 'star-active' : ''}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleBookmark(algo.slug);
-                                }}
-                                title={bookmarked ? 'Remove Bookmark' : 'Bookmark this algorithm'}
-                                aria-label="Bookmark"
-                              >
-                                <BookmarkIcon size={12} filled={bookmarked} />
-                              </button>
-                            </div>
+                            <button
+                              className={`hp-bookmark-btn${bookmarked ? ' bookmarked' : ''}`}
+                              onClick={e => { e.stopPropagation(); toggleBookmark(algo.slug); }}
+                              aria-label="Bookmark"
+                            >
+                              <BookmarkIcon size={12} filled={bookmarked} />
+                            </button>
                           </div>
-
-                          {/* Middle: Micro Metrics Capsule Bar */}
-                          <div className="micro-metrics-capsule">
-                            <span className="micro-metric-pill font-mono" style={{ color: timeColor }}>
+                          <div className="hp-tile-metrics">
+                            <span className="hp-metric-pill font-mono" style={{ color: timeColor }}>
                               <span className="metric-dot" style={{ background: timeColor }} />
                               {algo.timeComplexity.average}
                             </span>
-                            <span className="micro-metric-pill font-mono metric-space">
-                              💾 {algo.spaceComplexity}
-                            </span>
-                            {algo.stable && (
-                              <span className="micro-metric-pill font-mono metric-stable">
-                                ✓ Stable
-                              </span>
-                            )}
+                            <span className="hp-metric-pill font-mono">💾 {algo.spaceComplexity}</span>
+                            {algo.stable && <span className="hp-metric-pill font-mono hp-stable">✓ Stable</span>}
                           </div>
-
-                          {/* Bottom: Fast Micro-Hint + Launch CTA */}
-                          <div className="micro-tile-footer">
-                            <span className="micro-insight-text font-mono">
-                              {algo.stable ? 'Preserves order' : 'In-place partition'}
-                            </span>
-                            <span className="micro-launch-pill">
-                              <span>Visualizer</span>
-                              <ArrowRightIcon size={10} className="micro-arrow-icon" />
-                            </span>
+                          <div className="hp-tile-footer">
+                            <span className="hp-tile-hint font-mono">{algo.stable ? 'Preserves order' : 'In-place'}</span>
+                            <span className="hp-tile-launch font-mono">Visualizer <ArrowRightIcon size={10} /></span>
                           </div>
                         </div>
                       );
@@ -711,15 +539,11 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
                   )}
                 </div>
 
-                {/* Show More / Progressive Disclosure Trigger */}
+                {/* Show more */}
                 {activeCategory === 'all' && !searchQuery && filteredAlgos.length > 8 && (
-                  <div className="show-more-row">
-                    <button
-                      type="button"
-                      className="btn-show-more font-mono"
-                      onClick={() => setShowAllAlgos(prev => !prev)}
-                    >
-                      <span>{showAllAlgos ? '▲ Show Top 8 Featured' : `▼ Show All ${ALGORITHMS.length} Algorithms (+${ALGORITHMS.length - 8} more)`}</span>
+                  <div className="hp-show-more-row">
+                    <button className="hp-btn-show-more font-mono" onClick={() => setShowAllAlgos(p => !p)}>
+                      {showAllAlgos ? '▲ Show Top 8 Featured' : `▼ Show All ${ALGORITHMS.length} Algorithms`}
                     </button>
                   </div>
                 )}
@@ -727,215 +551,155 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             )}
           </div>
 
-          {/* Card 2: ⚔️ Battle Arena */}
+          {/* Card 2: Battle Arena */}
           <div
-            className={`course-card dsa-flagship-card card-duel ${activeTab === 'duel' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => setActiveTab(curr => curr === 'duel' ? null : 'duel')}
+            className={`hp-hub-card${activeTab === 'duel' ? ' hp-hub-open' : ''}`}
+            onClick={() => setActiveTab(t => t === 'duel' ? null : 'duel')}
           >
-            <div className="course-card-top">
-              <span className="course-status-pill status-soon font-mono">● LIVE DUEL</span>
-              <span className="course-badge-py font-mono">SIDE-BY-SIDE SPEED RACE</span>
+            <div className="hp-hub-card-top">
+              <span className="hp-hub-status-pill hp-pill-amber font-mono">● LIVE DUEL</span>
+              <span className="hp-hub-badge font-mono">SIDE-BY-SIDE SPEED RACE</span>
             </div>
-
-            <div className="flagship-title-row">
-              <div className="flagship-icon-badge icon-amber">⚔️</div>
-              <h3 className="course-card-title">Algorithm Battle Arena</h3>
+            <div className="hp-hub-icon-row">
+              <span className="hp-hub-icon hp-icon-amber">⚔️</span>
+              <h3 className="hp-hub-title">Algorithm Battle Arena</h3>
             </div>
-
-            <p className="course-card-desc">
-              Race QuickSort, MergeSort, BubbleSort, and HeapSort against each other to see which is faster in real-time.
-            </p>
-
-            {/* Creative Micro Visual Graphic Preview */}
-            <div className="card-mini-preview preview-duel">
-              <div className="mini-duel-lane">
-                <span className="lane-tag font-mono">MergeSort</span>
-                <div className="lane-progress"><div className="lane-bar-fill fill-blue" style={{ width: '85%' }} /></div>
-                <span className="lane-time font-mono">1.2ms</span>
+            <p className="hp-hub-desc">Race QuickSort, MergeSort, BubbleSort, and HeapSort against each other in real-time.</p>
+            <div className="hp-duel-preview">
+              <div className="hp-duel-lane">
+                <span className="hp-lane-tag font-mono">MergeSort</span>
+                <div className="hp-lane-bar"><div className="hp-lane-fill fill-blue" style={{ width: '85%' }} /></div>
+                <span className="hp-lane-time font-mono">1.2ms</span>
               </div>
-              <div className="mini-duel-lane">
-                <span className="lane-tag font-mono">QuickSort</span>
-                <div className="lane-progress"><div className="lane-bar-fill fill-amber" style={{ width: '100%' }} /></div>
-                <span className="lane-time font-mono">0.8ms 🏆</span>
+              <div className="hp-duel-lane">
+                <span className="hp-lane-tag font-mono">QuickSort</span>
+                <div className="hp-lane-bar"><div className="hp-lane-fill fill-amber" style={{ width: '100%' }} /></div>
+                <span className="hp-lane-time font-mono">0.8ms 🏆</span>
               </div>
             </div>
-
-            <div className="course-card-footer">
+            <div className="hp-hub-footer">
               <button
-                type="button"
-                className="btn-course-launch btn-course-py-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTab('duel');
-                }}
+                className="hp-btn-hub hp-btn-hub-amber"
+                onClick={e => { e.stopPropagation(); setActiveTab('duel'); }}
               >
                 <span>⚔️ Launch Arena</span>
                 <ArrowRightIcon size={12} />
               </button>
-              <span className="course-click-hint font-mono">
+              <span className="hp-hub-hint font-mono">
                 {activeTab === 'duel' ? '▲ Close Arena' : '▼ Open Race Arena'}
               </span>
             </div>
 
-            {/* Direct In-Card Unfolded Drawer: Battle Arena */}
             {activeTab === 'duel' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="duel-content-block">
-                  <AlgorithmDuel />
-                </div>
+              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
+                <AlgorithmDuel />
               </div>
             )}
           </div>
 
-          {/* Card 3: 📈 Big-O Matrix */}
+          {/* Card 3: Big-O Matrix */}
           <div
-            className={`course-card dsa-flagship-card card-matrix ${activeTab === 'matrix' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => setActiveTab(curr => curr === 'matrix' ? null : 'matrix')}
+            className={`hp-hub-card${activeTab === 'matrix' ? ' hp-hub-open' : ''}`}
+            onClick={() => setActiveTab(t => t === 'matrix' ? null : 'matrix')}
           >
-            <div className="course-card-top">
-              <span className="course-status-pill status-dev font-mono">● COMPLEXITY CHART</span>
-              <span className="course-badge-java font-mono">LIVE SPEED CALCULATOR</span>
+            <div className="hp-hub-card-top">
+              <span className="hp-hub-status-pill hp-pill-blue font-mono">● COMPLEXITY CHART</span>
+              <span className="hp-hub-badge font-mono">LIVE SPEED CALCULATOR</span>
             </div>
-
-            <div className="flagship-title-row">
-              <div className="flagship-icon-badge icon-blue">📈</div>
-              <h3 className="course-card-title">Big-O Complexity Matrix</h3>
+            <div className="hp-hub-icon-row">
+              <span className="hp-hub-icon hp-icon-blue">📈</span>
+              <h3 className="hp-hub-title">Big-O Complexity Matrix</h3>
             </div>
-
-            <p className="course-card-desc">
-              Quick reference guide for Best, Average, and Worst speeds, plus a live calculator to see how input size affects speed.
-            </p>
-
-            {/* Creative Micro Visual Graphic Preview */}
-            <div className="card-mini-preview preview-matrix">
-              <span className="comp-dot-tag font-mono comp-green">O(1)</span>
-              <span className="comp-dot-arrow font-mono">→</span>
-              <span className="comp-dot-tag font-mono comp-cyan">O(log n)</span>
-              <span className="comp-dot-arrow font-mono">→</span>
-              <span className="comp-dot-tag font-mono comp-yellow">O(n)</span>
-              <span className="comp-dot-arrow font-mono">→</span>
-              <span className="comp-dot-tag font-mono comp-red">O(n²)</span>
+            <p className="hp-hub-desc">Quick reference guide with a live calculator showing how input size affects performance.</p>
+            <div className="hp-matrix-preview">
+              {['O(1)', 'O(log n)', 'O(n)', 'O(n²)'].map((n, i) => (
+                <span key={n} className={`hp-comp-chip font-mono comp-${['green', 'green', 'yellow', 'red'][i]}`}>{n}</span>
+              ))}
             </div>
-
-            <div className="course-card-footer">
+            <div className="hp-hub-footer">
               <button
-                type="button"
-                className="btn-course-launch btn-course-java-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTab('matrix');
-                }}
+                className="hp-btn-hub hp-btn-hub-blue"
+                onClick={e => { e.stopPropagation(); setActiveTab('matrix'); }}
               >
                 <span>📈 Open Matrix</span>
                 <ArrowRightIcon size={12} />
               </button>
-              <span className="course-click-hint font-mono">
+              <span className="hp-hub-hint font-mono">
                 {activeTab === 'matrix' ? '▲ Close Matrix' : '▼ Open Complexity Table'}
               </span>
             </div>
 
-            {/* Direct In-Card Unfolded Drawer: Big-O Matrix */}
             {activeTab === 'matrix' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="matrix-content-block">
-                  {/* Dynamic Scalability Calculator */}
-                  <div className="scalability-calc-card">
-                    <div className="calc-header-row">
-                      <div className="calc-left">
-                        <span className="calc-badge font-mono">⚡ LIVE SPEED CALCULATOR</span>
-                        <h4 className="calc-title">Big-O Speed &amp; Steps Calculator</h4>
-                        <p className="calc-sub">Move the slider to see how the number of steps grows as you add more items.</p>
-                      </div>
-                      <div className="slider-control-box">
-                        <div className="slider-label-row">
-                          <span className="s-label font-mono">Input Size (N):</span>
-                          <span className="s-val font-mono font-bold">{sliderN} items</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="4"
-                          max="1024"
-                          step="4"
-                          value={sliderN}
-                          onChange={(e) => setSliderN(Number(e.target.value))}
-                          className="complexity-slider"
-                        />
-                      </div>
+              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
+                {/* Live Calculator */}
+                <div className="hp-calc-card">
+                  <div className="hp-calc-header">
+                    <div>
+                      <span className="hp-calc-badge font-mono">⚡ LIVE SPEED CALCULATOR</span>
+                      <h4 className="hp-calc-title">Big-O Speed Calculator</h4>
+                      <p className="hp-calc-sub">Move the slider to see how steps grow with input size.</p>
                     </div>
-
-                    <div className="calc-bars-grid">
-                      {Object.entries(complexityResults).map(([key, data]) => (
-                        <div key={key} className="calc-stat-pill">
-                          <div className="c-head">
-                            <span className="c-name">{data.label}</span>
-                            <span className="c-notation font-mono" style={{ color: data.color }}>{data.notation}</span>
-                          </div>
-                          <span className="c-ops font-mono">{data.opsFormatted} steps</span>
+                    <div className="hp-slider-box">
+                      <div className="hp-slider-label-row">
+                        <span className="font-mono">Input Size (N):</span>
+                        <span className="font-mono font-bold">{sliderN} items</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="4" max="1024" step="4"
+                        value={sliderN}
+                        onChange={e => setSliderN(Number(e.target.value))}
+                        className="hp-complexity-slider"
+                      />
+                    </div>
+                  </div>
+                  <div className="hp-calc-grid">
+                    {complexityResults.map(d => (
+                      <div key={d.notation} className="hp-calc-pill">
+                        <div className="hp-calc-pill-head">
+                          <span className="hp-calc-label">{d.label}</span>
+                          <span className="hp-calc-notation font-mono" style={{ color: d.color }}>{d.notation}</span>
                         </div>
+                        <span className="hp-calc-ops font-mono">{d.opsFormatted} steps</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Matrix Table */}
+                <div className="hp-matrix-table-wrap">
+                  <table className="hp-matrix-table">
+                    <thead>
+                      <tr>
+                        <th>Algorithm</th>
+                        <th>Category</th>
+                        <th>Best</th>
+                        <th>Average</th>
+                        <th>Worst</th>
+                        <th>Space</th>
+                        <th>Stable</th>
+                        <th>Run</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ALGORITHMS.map(algo => (
+                        <tr key={algo.slug} onClick={() => onSelectAlgo(algo.slug)} className="hp-matrix-row">
+                          <td className="font-mono font-bold">{algo.name}</td>
+                          <td><span className="hp-mat-cat font-mono">{CATEGORIES[algo.category]?.label}</span></td>
+                          <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.best) }}>{algo.timeComplexity.best}</span></td>
+                          <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.average) }}>{algo.timeComplexity.average}</span></td>
+                          <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.worst) }}>{algo.timeComplexity.worst}</span></td>
+                          <td><span className="hp-mat-space font-mono">{algo.spaceComplexity}</span></td>
+                          <td><span className={`hp-mat-stable${algo.stable ? ' is-stable' : ' is-unstable'}`}>{algo.stable ? '✓' : '✕'}</span></td>
+                          <td>
+                            <button className="hp-mat-run-btn" onClick={e => { e.stopPropagation(); onSelectAlgo(algo.slug); }}>
+                              Run →
+                            </button>
+                          </td>
+                        </tr>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Matrix Table */}
-                  <div className="matrix-table-card">
-                    <div className="matrix-table-wrap">
-                      <table className="matrix-table">
-                        <thead>
-                          <tr>
-                            <th className="col-algo">Algorithm</th>
-                            <th className="col-cat">Category</th>
-                            <th className="col-best">Best Time</th>
-                            <th className="col-avg">Average Time</th>
-                            <th className="col-worst">Worst Time</th>
-                            <th className="col-space">Space</th>
-                            <th className="col-stable">Stable</th>
-                            <th className="col-action">Launch</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {ALGORITHMS.map(algo => (
-                            <tr key={algo.slug} onClick={() => onSelectAlgo(algo.slug)} className="bigo-matrix-row matrix-row">
-                              <td className="col-algo font-bold font-mono matrix-name-cell">
-                                {algo.name}
-                              </td>
-                              <td className="col-cat">
-                                <span className="matrix-cat-pill font-mono">{CATEGORIES[algo.category]?.label || algo.category}</span>
-                              </td>
-                              <td className="col-best">
-                                <span className="complexity-badge font-mono" style={{ color: getComplexityColor(algo.timeComplexity.best) }}>
-                                  {algo.timeComplexity.best}
-                                </span>
-                              </td>
-                              <td className="col-avg">
-                                <span className="complexity-badge font-mono" style={{ color: getComplexityColor(algo.timeComplexity.average) }}>
-                                  {algo.timeComplexity.average}
-                                </span>
-                              </td>
-                              <td className="col-worst">
-                                <span className="complexity-badge font-mono" style={{ color: getComplexityColor(algo.timeComplexity.worst) }}>
-                                  {algo.timeComplexity.worst}
-                                </span>
-                              </td>
-                              <td className="col-space">
-                                <span className="matrix-space-pill font-mono">{algo.spaceComplexity}</span>
-                              </td>
-                              <td className="col-stable">
-                                <span className={`matrix-stable-pill ${algo.stable ? 'is-stable' : 'is-unstable'}`}>
-                                  {algo.stable ? '✓ Yes' : '✕ No'}
-                                </span>
-                              </td>
-                              <td className="col-action">
-                                <button className="matrix-action-btn" onClick={(e) => { e.stopPropagation(); onSelectAlgo(algo.slug); }}>
-                                  <span>Run</span>
-                                  <ArrowRightIcon size={10} />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -943,124 +707,100 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 2: 🎓 CODING ACADEMY (C, PYTHON, JAVA, C++)
-      ══════════════════════════════════════════════════════════════════ */}
-      <section className="section-block coding-academy-section" id="academy-section">
-        <div className="section-header-row">
-          <div className="section-header-left">
-            <span className="section-eyebrow eyebrow-green font-mono">🎓 CODING ACADEMY</span>
-            <h2 className="section-main-title">Coding Academy</h2>
-            <p className="section-main-sub">
-              Learn programming step-by-step from beginner to advanced with interactive lessons, in-browser code practice, and quizzes.
-            </p>
+      {/* ══ SECTION 5: CODING ACADEMY HUB ═══════════════════════════════ */}
+      <section className="hp-section" id="hp-academy-section">
+        <div className="hp-section-header">
+          <div>
+            <span className="hp-section-eyebrow hp-eyebrow-green font-mono">🎓 CODING ACADEMY</span>
+            <h2 className="hp-section-title">Coding Academy</h2>
+            <p className="hp-section-sub">Learn programming step-by-step from beginner to advanced with interactive lessons and quizzes.</p>
           </div>
           <button
-            type="button"
-            className="btn btn-primary btn-md"
+            className="hp-btn-academy"
             onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
           >
-            🎓 Start Learning C (Chapter 1) &rarr;
+            🎓 Start Chapter 1 →
           </button>
         </div>
 
-        {/* Multi-Language Available Courses Grid with Direct In-Card Drawers */}
-        <div className="courses-hub-grid multi-lang-grid">
-          {/* 1. C Master Academy */}
+        <div className="hp-courses-grid">
+          {/* C Programming — LIVE */}
           <div
-            className={`course-card course-card-c ${expandedCourse === 'c' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => setExpandedCourse(curr => curr === 'c' ? null : 'c')}
+            className={`hp-course-card hp-course-c${expandedCourse === 'c' ? ' hp-course-open' : ''}`}
+            onClick={() => setExpandedCourse(c => c === 'c' ? null : 'c')}
           >
-            <div className="course-card-top">
-              <span className="course-status-pill status-live font-mono">● LIVE &amp; FREE</span>
-              <span className="course-badge-ch font-mono">23 CHAPTERS • 230 QUIZZES</span>
+            <div className="hp-course-top">
+              <span className="hp-course-pill hp-pill-green font-mono">● LIVE & FREE</span>
+              <span className="hp-course-meta font-mono">23 CHAPTERS • 230 QUIZZES</span>
             </div>
-            <h3 className="course-card-title">C Programming Academy</h3>
-            <p className="course-card-desc">
-              Learn pointers, memory layout, structs, and dynamic memory with visual guides and a free certificate.
-            </p>
-            <div className="course-card-footer">
+            <h3 className="hp-course-title">C Programming Academy</h3>
+            <p className="hp-course-desc">Learn pointers, memory layout, structs, and dynamic memory with visual guides and a free certificate.</p>
+            <div className="hp-course-footer">
               <button
-                type="button"
-                className="btn-course-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenLearnC && onOpenLearnC('hello-world-intro');
-                }}
+                className="hp-btn-course hp-btn-course-c"
+                onClick={e => { e.stopPropagation(); onOpenLearnC && onOpenLearnC('hello-world-intro'); }}
               >
                 <span>Start Course</span>
                 <ArrowRightIcon size={12} />
               </button>
-              <span className="course-click-hint font-mono">
-                {expandedCourse === 'c' ? '▲ Close Details' : '▼ View Syllabus & Chapters'}
+              <span className="hp-course-hint font-mono">
+                {expandedCourse === 'c' ? '▲ Close Details' : '▼ View Syllabus'}
               </span>
             </div>
 
-            {/* Direct In-Card Unfolded Drawer for C */}
             {expandedCourse === 'c' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="drawer-quick-banner">
-                  <div className="banner-left">
-                    <span className="banner-badge font-mono">11 CORE MODULES • 23 CHAPTERS</span>
-                    <h4 className="banner-title">C Programming Course Outline</h4>
-                    <p className="banner-sub">Select any module below to see its chapters, practice quizzes, and interactive code exercises.</p>
+              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
+                <div className="hp-drawer-banner">
+                  <div>
+                    <span className="hp-drawer-badge font-mono">11 CORE MODULES • 23 CHAPTERS</span>
+                    <h4 className="hp-drawer-title">C Programming Course Outline</h4>
+                    <p className="hp-drawer-sub">Select any module below to see its chapters.</p>
                   </div>
                   <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
+                    className="hp-btn-sm-green"
                     onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
                   >
-                    <span>🎓 Open Chapter 1</span>
-                    <ArrowRightIcon size={12} />
+                    🎓 Open Chapter 1 →
                   </button>
                 </div>
-
-                <div className="roadmap-modules-grid">
+                <div className="hp-modules-grid">
                   {C_MODULES.map((mod, mIdx) => {
                     const lessonsInMod = C_LESSONS.filter(l => l.moduleId === mod.id);
-                    const isModOpen = expandedModule === mod.id;
+                    const isOpen = expandedModule === mod.id;
                     return (
-                      <div
-                        key={mod.id}
-                        className={`roadmap-module-card ${isModOpen ? 'module-open' : 'module-collapsed'}`}
-                      >
+                      <div key={mod.id} className={`hp-mod-card${isOpen ? ' mod-open' : ''}`}>
                         <div
-                          className="rm-mod-header cursor-pointer"
-                          onClick={() => setExpandedModule(curr => curr === mod.id ? null : mod.id)}
+                          className="hp-mod-header"
+                          onClick={() => setExpandedModule(c => c === mod.id ? null : mod.id)}
                           role="button"
                           tabIndex={0}
                         >
-                          <div className="rm-header-left">
-                            <span className="rm-mod-num font-mono">MODULE {mIdx + 1}</span>
-                            <h5 className="rm-mod-title">{mod.name.replace(/^Module \d+:\s*/, '')}</h5>
-                            <p className="rm-mod-desc">{mod.desc}</p>
+                          <div className="hp-mod-left">
+                            <span className="hp-mod-num font-mono">MODULE {mIdx + 1}</span>
+                            <h5 className="hp-mod-title">{mod.name.replace(/^Module \d+:\s*/, '')}</h5>
+                            <p className="hp-mod-desc">{mod.desc}</p>
                           </div>
-                          <div className="rm-header-right">
-                            <span className="mod-count-pill font-mono">
-                              {lessonsInMod.length} Chapters
-                            </span>
-                            <span className="mod-toggle-arrow font-mono">
-                              {isModOpen ? '▲' : '▼'}
-                            </span>
+                          <div className="hp-mod-right">
+                            <span className="hp-mod-count font-mono">{lessonsInMod.length} Ch</span>
+                            <span className="hp-mod-toggle font-mono">{isOpen ? '▲' : '▼'}</span>
                           </div>
                         </div>
-
-                        {isModOpen && (
-                          <div className="rm-lessons-list animated-lessons">
+                        {isOpen && (
+                          <div className="hp-lessons-list">
                             {lessonsInMod.map(lesson => (
                               <div
                                 key={lesson.slug}
-                                className="rm-lesson-row"
+                                className="hp-lesson-row"
                                 onClick={() => onOpenLearnC && onOpenLearnC(lesson.slug)}
                                 role="button"
                                 tabIndex={0}
                               >
-                                <span className="rm-ch-num font-mono">{String(lesson.chapter).padStart(2, '0')}</span>
-                                <div className="rm-ch-info">
-                                  <span className="rm-ch-title">{lesson.title.replace(/^Chapter \d+:\s*/, '')}</span>
-                                  <span className="rm-ch-sub">{lesson.subtitle}</span>
+                                <span className="hp-lesson-num font-mono">{String(lesson.chapter).padStart(2, '0')}</span>
+                                <div className="hp-lesson-info">
+                                  <span className="hp-lesson-title">{lesson.title.replace(/^Chapter \d+:\s*/, '')}</span>
+                                  <span className="hp-lesson-sub">{lesson.subtitle}</span>
                                 </div>
-                                <span className="rm-ch-meta font-mono">⏱ {lesson.readTime}</span>
+                                <span className="hp-lesson-time font-mono">⏱ {lesson.readTime}</span>
                               </div>
                             ))}
                           </div>
@@ -1073,349 +813,155 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             )}
           </div>
 
-          {/* 2. Python 3 Masterclass */}
+          {/* Python — Preview */}
           <div
-            className={`course-card course-card-python ${expandedCourse === 'python' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => {
-              setExpandedCourse(curr => curr === 'python' ? null : 'python');
-              setExpandedModule('py-mod-1');
-            }}
+            className={`hp-course-card hp-course-python${expandedCourse === 'python' ? ' hp-course-open' : ''}`}
+            onClick={() => { setExpandedCourse(c => c === 'python' ? null : 'python'); setExpandedModule('py-1'); }}
           >
-            <div className="course-card-top">
-              <span className="course-status-pill status-soon font-mono">● PREVIEW READY</span>
-              <span className="course-badge-py font-mono">12 MODULES</span>
+            <div className="hp-course-top">
+              <span className="hp-course-pill hp-pill-amber font-mono">● PREVIEW READY</span>
+              <span className="hp-course-meta font-mono">12 MODULES</span>
             </div>
-            <h3 className="course-card-title">Python 3 Masterclass</h3>
-            <p className="course-card-desc">
-              Learn Python basics, object-oriented programming, data structures, and solve coding problems directly in your browser.
-            </p>
-            <div className="course-card-footer">
+            <h3 className="hp-course-title">Python 3 Masterclass</h3>
+            <p className="hp-course-desc">Learn Python basics, OOP, data structures, and solve problems directly in your browser.</p>
+            <div className="hp-course-footer">
               <button
-                type="button"
-                className="btn-course-launch btn-course-py-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenPythonModal && onOpenPythonModal();
-                }}
+                className="hp-btn-course hp-btn-course-python"
+                onClick={e => { e.stopPropagation(); onOpenPythonModal && onOpenPythonModal(); }}
               >
-                <span>Start Course</span>
+                <span>Preview Course</span>
                 <ArrowRightIcon size={12} />
               </button>
-              <span className="course-click-hint font-mono">
-                {expandedCourse === 'python' ? '▲ Close Details' : '▼ View Syllabus & Modules'}
+              <span className="hp-course-hint font-mono">
+                {expandedCourse === 'python' ? '▲ Close Details' : '▼ View Syllabus'}
               </span>
             </div>
-
-            {/* Direct In-Card Unfolded Drawer for Python */}
             {expandedCourse === 'python' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="drawer-quick-banner">
-                  <div className="banner-left">
-                    <span className="banner-badge font-mono">12 PYTHON MODULES</span>
-                    <h4 className="banner-title">Python 3 Course Outline</h4>
-                    <p className="banner-sub">Select any module below to see topics and practice exercises.</p>
+              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
+                <div className="hp-drawer-banner">
+                  <div>
+                    <span className="hp-drawer-badge font-mono">12 PYTHON MODULES</span>
+                    <h4 className="hp-drawer-title">Python 3 Course Outline</h4>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm btn-course-py-launch"
-                    onClick={() => onOpenPythonModal && onOpenPythonModal()}
-                  >
-                    <span>🐍 Preview Syllabus</span>
-                    <ArrowRightIcon size={12} />
+                  <button className="hp-btn-sm-amber" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
+                    🐍 Preview Syllabus →
                   </button>
                 </div>
-
-                <div className="roadmap-modules-grid">
-                  <div className={`roadmap-module-card ${expandedModule === 'py-mod-1' ? 'module-open' : 'module-collapsed'}`}>
-                    <div
-                      className="rm-mod-header cursor-pointer"
-                      onClick={() => setExpandedModule(curr => curr === 'py-mod-1' ? null : 'py-mod-1')}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className="rm-header-left">
-                        <span className="rm-mod-num font-mono">MODULE 1</span>
-                        <h5 className="rm-mod-title">Python Core Syntax &amp; Data Types</h5>
-                        <p className="rm-mod-desc">Variables, basic types, list slicing, and dictionaries.</p>
+                <div className="hp-modules-grid">
+                  {[
+                    { id: 'py-1', num: 1, title: 'Python Core Syntax & Data Types', desc: 'Variables, basic types, list slicing, and dictionaries.', count: 2 },
+                    { id: 'py-2', num: 2, title: 'Object-Oriented Python', desc: 'Classes, objects, functions, and reusable code patterns.', count: 2 },
+                  ].map(m => (
+                    <div key={m.id} className={`hp-mod-card${expandedModule === m.id ? ' mod-open' : ''}`}>
+                      <div
+                        className="hp-mod-header"
+                        onClick={() => setExpandedModule(c => c === m.id ? null : m.id)}
+                        role="button" tabIndex={0}
+                      >
+                        <div className="hp-mod-left">
+                          <span className="hp-mod-num font-mono">MODULE {m.num}</span>
+                          <h5 className="hp-mod-title">{m.title}</h5>
+                          <p className="hp-mod-desc">{m.desc}</p>
+                        </div>
+                        <div className="hp-mod-right">
+                          <span className="hp-mod-count font-mono">{m.count} Topics</span>
+                          <span className="hp-mod-toggle font-mono">{expandedModule === m.id ? '▲' : '▼'}</span>
+                        </div>
                       </div>
-                      <div className="rm-header-right">
-                        <span className="mod-count-pill font-mono">2 Topics</span>
-                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'py-mod-1' ? '▲' : '▼'}</span>
-                      </div>
+                      {expandedModule === m.id && (
+                        <div className="hp-lessons-list">
+                          <div className="hp-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()} role="button" tabIndex={0}>
+                            <span className="hp-lesson-num font-mono">01</span>
+                            <div className="hp-lesson-info">
+                              <span className="hp-lesson-title">Python Setup & Running Scripts</span>
+                              <span className="hp-lesson-sub">Getting started with Python</span>
+                            </div>
+                            <span className="hp-lesson-time font-mono">⏱ 15m</span>
+                          </div>
+                          <div className="hp-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()} role="button" tabIndex={0}>
+                            <span className="hp-lesson-num font-mono">02</span>
+                            <div className="hp-lesson-info">
+                              <span className="hp-lesson-title">Lists, Tuples, Sets & Dictionaries</span>
+                              <span className="hp-lesson-sub">Working with Python collections</span>
+                            </div>
+                            <span className="hp-lesson-time font-mono">⏱ 25m</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-
-                    {expandedModule === 'py-mod-1' && (
-                      <div className="rm-lessons-list animated-lessons">
-                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
-                          <span className="rm-ch-num font-mono">01</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Python Setup &amp; Running Scripts</span>
-                            <span className="rm-ch-sub">Getting started with Python and running code</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">⏱ 15m</span>
-                        </div>
-                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
-                          <span className="rm-ch-num font-mono">02</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Lists, Tuples, Sets &amp; Dictionaries</span>
-                            <span className="rm-ch-sub">Working with collections and list operations</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">⏱ 25m</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={`roadmap-module-card ${expandedModule === 'py-mod-2' ? 'module-open' : 'module-collapsed'}`}>
-                    <div
-                      className="rm-mod-header cursor-pointer"
-                      onClick={() => setExpandedModule(curr => curr === 'py-mod-2' ? null : 'py-mod-2')}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className="rm-header-left">
-                        <span className="rm-mod-num font-mono">MODULE 2</span>
-                        <h5 className="rm-mod-title">Object-Oriented Python</h5>
-                        <p className="rm-mod-desc">Classes, objects, functions, and reusable code patterns.</p>
-                      </div>
-                      <div className="rm-header-right">
-                        <span className="mod-count-pill font-mono">2 Topics</span>
-                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'py-mod-2' ? '▲' : '▼'}</span>
-                      </div>
-                    </div>
-
-                    {expandedModule === 'py-mod-2' && (
-                      <div className="rm-lessons-list animated-lessons">
-                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
-                          <span className="rm-ch-num font-mono">03</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Classes &amp; Objects</span>
-                            <span className="rm-ch-sub">Creating classes and managing object properties</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">⏱ 20m</span>
-                        </div>
-                        <div className="rm-lesson-row" onClick={() => onOpenPythonModal && onOpenPythonModal()}>
-                          <span className="rm-ch-num font-mono">04</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Iterators &amp; Generators</span>
-                            <span className="rm-ch-sub">Writing clean memory-efficient loops</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">⏱ 25m</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* 3. Java & OOP Architecture */}
-          <div
-            className={`course-card course-card-java ${expandedCourse === 'java' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => {
-              setExpandedCourse(curr => curr === 'java' ? null : 'java');
-              setExpandedModule('java-mod-1');
-            }}
-          >
-            <div className="course-card-top">
-              <span className="course-status-pill status-dev font-mono">● IN DEVELOPMENT</span>
-              <span className="course-badge-java font-mono">10 MODULES</span>
+          {/* Java — Coming soon */}
+          <div className="hp-course-card hp-course-java hp-course-soon">
+            <div className="hp-course-top">
+              <span className="hp-course-pill hp-pill-purple font-mono">● IN DEVELOPMENT</span>
+              <span className="hp-course-meta font-mono">10 MODULES</span>
             </div>
-            <h3 className="course-card-title">Java &amp; OOP Foundations</h3>
-            <p className="course-card-desc">
-              Learn Java basics, object-oriented design, Collections, and how Java runs programs efficiently.
-            </p>
-            <div className="course-card-footer">
-              <button
-                type="button"
-                className="btn-course-launch btn-course-java-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedCourse('java');
-                  setExpandedModule('java-mod-1');
-                }}
-              >
-                <span>Start Course</span>
-                <ArrowRightIcon size={12} />
+            <h3 className="hp-course-title">Java &amp; OOP Foundations</h3>
+            <p className="hp-course-desc">Learn Java basics, object-oriented design, Collections, and how Java runs programs efficiently.</p>
+            <div className="hp-course-footer">
+              <button className="hp-btn-course hp-btn-course-java" disabled>
+                <span>Coming Soon</span>
               </button>
-              <span className="course-click-hint font-mono">
-                {expandedCourse === 'java' ? '▲ Close Details' : '▼ View Syllabus & Modules'}
-              </span>
             </div>
-
-            {/* Direct In-Card Unfolded Drawer for Java */}
-            {expandedCourse === 'java' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="drawer-quick-banner">
-                  <div className="banner-left">
-                    <span className="banner-badge font-mono">10 JAVA MODULES</span>
-                    <h4 className="banner-title">Java Programming Course Outline</h4>
-                    <p className="banner-sub">Object-oriented programming and Java foundations.</p>
-                  </div>
-                </div>
-
-                <div className="roadmap-modules-grid">
-                  <div className={`roadmap-module-card ${expandedModule === 'java-mod-1' ? 'module-open' : 'module-collapsed'}`}>
-                    <div
-                      className="rm-mod-header cursor-pointer"
-                      onClick={() => setExpandedModule(curr => curr === 'java-mod-1' ? null : 'java-mod-1')}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className="rm-header-left">
-                        <span className="rm-mod-num font-mono">MODULE 1</span>
-                        <h5 className="rm-mod-title">Java Platform &amp; OOP Basics</h5>
-                        <p className="rm-mod-desc">Classes, objects, variables, and basic program structure.</p>
-                      </div>
-                      <div className="rm-header-right">
-                        <span className="mod-count-pill font-mono">2 Topics</span>
-                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'java-mod-1' ? '▲' : '▼'}</span>
-                      </div>
-                    </div>
-
-                    {expandedModule === 'java-mod-1' && (
-                      <div className="rm-lessons-list animated-lessons">
-                        <div className="rm-lesson-row">
-                          <span className="rm-ch-num font-mono">01</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Java Basics &amp; Memory</span>
-                            <span className="rm-ch-sub">How Java executes code and manages memory</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">Coming Soon</span>
-                        </div>
-                        <div className="rm-lesson-row">
-                          <span className="rm-ch-num font-mono">02</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Java Collections</span>
-                            <span className="rm-ch-sub">Lists, Sets, and Maps in Java</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">Coming Soon</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* 4. C++ Modern Systems & STL */}
-          <div
-            className={`course-card course-card-cpp ${expandedCourse === 'cpp' ? 'active-course-card drawer-open' : ''}`}
-            onClick={() => {
-              setExpandedCourse(curr => curr === 'cpp' ? null : 'cpp');
-              setExpandedModule('cpp-mod-1');
-            }}
-          >
-            <div className="course-card-top">
-              <span className="course-status-pill status-dev font-mono">● IN DEVELOPMENT</span>
-              <span className="course-badge-cpp font-mono">10 MODULES</span>
+          {/* C++ — Coming soon */}
+          <div className="hp-course-card hp-course-cpp hp-course-soon">
+            <div className="hp-course-top">
+              <span className="hp-course-pill hp-pill-purple font-mono">● IN DEVELOPMENT</span>
+              <span className="hp-course-meta font-mono">10 MODULES</span>
             </div>
-            <h3 className="course-card-title">Modern C++ &amp; Fast Data Structures</h3>
-            <p className="course-card-desc">
-              Learn modern C++, smart pointers, memory management, templates, and fast data structures (STL).
-            </p>
-            <div className="course-card-footer">
-              <button
-                type="button"
-                className="btn-course-launch btn-course-cpp-launch"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedCourse('cpp');
-                  setExpandedModule('cpp-mod-1');
-                }}
-              >
-                <span>Start Course</span>
-                <ArrowRightIcon size={12} />
+            <h3 className="hp-course-title">Modern C++ &amp; Fast Data Structures</h3>
+            <p className="hp-course-desc">Learn modern C++, smart pointers, memory management, templates, and fast STL data structures.</p>
+            <div className="hp-course-footer">
+              <button className="hp-btn-course hp-btn-course-cpp" disabled>
+                <span>Coming Soon</span>
               </button>
-              <span className="course-click-hint font-mono">
-                {expandedCourse === 'cpp' ? '▲ Close Details' : '▼ View Syllabus & Modules'}
-              </span>
             </div>
-
-            {/* Direct In-Card Unfolded Drawer for C++ */}
-            {expandedCourse === 'cpp' && (
-              <div className="card-nested-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="drawer-quick-banner">
-                  <div className="banner-left">
-                    <span className="banner-badge font-mono">10 C++ MODULES</span>
-                    <h4 className="banner-title">Modern C++ Course Outline</h4>
-                    <p className="banner-sub">Safe memory management and fast C++ containers.</p>
-                  </div>
-                </div>
-
-                <div className="roadmap-modules-grid">
-                  <div className={`roadmap-module-card ${expandedModule === 'cpp-mod-1' ? 'module-open' : 'module-collapsed'}`}>
-                    <div
-                      className="rm-mod-header cursor-pointer"
-                      onClick={() => setExpandedModule(curr => curr === 'cpp-mod-1' ? null : 'cpp-mod-1')}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className="rm-header-left">
-                        <span className="rm-mod-num font-mono">MODULE 1</span>
-                        <h5 className="rm-mod-title">Modern C++ &amp; Safe Memory</h5>
-                        <p className="rm-mod-desc">Pointers, memory safety, and standard C++ containers.</p>
-                      </div>
-                      <div className="rm-header-right">
-                        <span className="mod-count-pill font-mono">2 Topics</span>
-                        <span className="mod-toggle-arrow font-mono">{expandedModule === 'cpp-mod-1' ? '▲' : '▼'}</span>
-                      </div>
-                    </div>
-
-                    {expandedModule === 'cpp-mod-1' && (
-                      <div className="rm-lessons-list animated-lessons">
-                        <div className="rm-lesson-row">
-                          <span className="rm-ch-num font-mono">01</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">Smart Pointers &amp; Memory</span>
-                            <span className="rm-ch-sub">Automatic memory cleanup and leak prevention</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">Coming Soon</span>
-                        </div>
-                        <div className="rm-lesson-row">
-                          <span className="rm-ch-num font-mono">02</span>
-                          <div className="rm-ch-info">
-                            <span className="rm-ch-title">C++ Standard Library (STL)</span>
-                            <span className="rm-ch-sub">Vectors, maps, sets, and algorithms</span>
-                          </div>
-                          <span className="rm-ch-meta font-mono">Coming Soon</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
 
-
-
-      {/* ── 10. Final Call to Action ── */}
-      <section className="home-final-cta-card">
-        <div className="final-cta-content">
-          <span className="final-cta-badge">🚀 START LEARNING TODAY</span>
-          <h2 className="final-cta-title">Ready to Master Coding &amp; Algorithms?</h2>
-          <p className="final-cta-desc">
-            Join thousands of learners mastering programming and data structures through simple, step-by-step visual lessons.
-          </p>
-          <div className="final-cta-buttons">
-            <button
-              className="btn-final-academy"
-              onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
-            >
-              🎓 Start Learning C (23 Chapters) &rarr;
-            </button>
-            <button
-              className="btn-final-studio"
-              onClick={() => onSelectAlgo('quick-sort')}
-            >
-              ⚡ Explore Algorithm Studio
-            </button>
+      {/* ══ SECTION 6: PLATFORM STATS STRIP ══════════════════════════════ */}
+      <section className="hp-stats-strip">
+        {[
+          { value: '23', label: 'C Chapters', color: '#10b981' },
+          { value: '230', label: 'Quizzes & Labs', color: '#2563eb' },
+          { value: `${ALGORITHMS.length}+`, label: 'Algorithm Visualizers', color: '#8b5cf6' },
+          { value: '100%', label: 'Free & Open Access', color: '#f59e0b' },
+        ].map(s => (
+          <div key={s.label} className="hp-stat-item">
+            <span className="hp-stat-value font-mono" style={{ color: s.color }}>{s.value}</span>
+            <span className="hp-stat-label">{s.label}</span>
           </div>
+        ))}
+      </section>
+
+      {/* ══ SECTION 7: FINAL CTA ══════════════════════════════════════════ */}
+      <section className="hp-final-cta">
+        <span className="hp-final-badge">🚀 START LEARNING TODAY</span>
+        <h2 className="hp-final-title">Ready to Master Coding &amp; Algorithms?</h2>
+        <p className="hp-final-desc">
+          Join thousands of learners mastering programming and data structures through simple, step-by-step visual lessons.
+        </p>
+        <div className="hp-final-actions">
+          <button
+            className="hp-btn-academy"
+            onClick={() => onOpenLearnC && onOpenLearnC('hello-world-intro')}
+          >
+            🎓 Start Learning C (23 Chapters) →
+          </button>
+          <button
+            className="hp-btn-studio"
+            onClick={() => onSelectAlgo('quick-sort')}
+          >
+            ⚡ Explore Algorithm Studio
+          </button>
         </div>
       </section>
     </div>
