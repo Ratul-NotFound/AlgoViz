@@ -1,4 +1,4 @@
-/* Step 4: feat(landing): introduce core value pillars for clear conceptual learning */
+/* Step 5: feat(visualizer): redesign DSA studio hub cards with expandable nested drawers */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
