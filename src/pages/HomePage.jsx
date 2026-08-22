@@ -1,4 +1,4 @@
-/* Step 8: feat(matrix): embed Big-O complexity matrix and dynamic scalability calculator */
+/* Step 9: feat(academy): implement multi-language course explorer and chapter syllabus roadmap */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
