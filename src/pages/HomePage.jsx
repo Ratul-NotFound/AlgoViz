@@ -1,4 +1,4 @@
-/* Step 7: feat(duel): integrate real-time algorithm duel arena and performance race lanes */
+/* Step 8: feat(matrix): embed Big-O complexity matrix and dynamic scalability calculator */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
