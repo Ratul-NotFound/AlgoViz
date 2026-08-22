@@ -1,4 +1,4 @@
-/* Step 1: refactor(landing): redesign hero workbench with beginner-friendly value proposition */
+/* Step 2: feat(hero): add interactive sorting sandbox with live playback and telemetry */
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
