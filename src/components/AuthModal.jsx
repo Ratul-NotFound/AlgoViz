@@ -9,7 +9,6 @@ export default function AuthModal() {
   const { authModalOpen, closeAuthModal, handleGoogleSuccess, signInWithDemo } = useAuth();
   const googleBtnContainerRef = useRef(null);
   const [hasClientId, setHasClientId] = useState(false);
-  const [showConfigHelp, setShowConfigHelp] = useState(false);
 
   useEffect(() => {
     const isConfigured = hasCustomGoogleClientId();
@@ -105,41 +104,6 @@ export default function AuthModal() {
               <GoogleIcon size={18} />
               <span>Continue with Google</span>
             </button>
-          )}
-
-          <div className="auth-divider">
-            <span>OR INSTANT ACCESS</span>
-          </div>
-
-          {/* Instant Guest / Explorer Sign In */}
-          <button
-            type="button"
-            className="btn-demo-sign-in"
-            onClick={() => signInWithDemo('Algorithm Explorer', 'explorer@algoflowx.dev')}
-          >
-            <span>⚡ Instant Demo Account (No Password)</span>
-          </button>
-        </div>
-
-        {/* Google OAuth Setup Helper Toggle */}
-        <div className="auth-client-help-box">
-          <button
-            type="button"
-            className="auth-help-toggle"
-            onClick={() => setShowConfigHelp(prev => !prev)}
-          >
-            <span>{showConfigHelp ? '▲ Hide Google OAuth Setup Guide' : 'ℹ️ How to connect your own Google Cloud Client ID?'}</span>
-          </button>
-
-          {showConfigHelp && (
-            <div className="auth-help-content animate-fade-in">
-              <ol className="auth-help-steps">
-                <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer">Google Cloud Credentials</a>.</li>
-                <li>Create an <strong>OAuth 2.0 Client ID</strong> (Web Application).</li>
-                <li>Add <code>http://localhost:5173</code> to <strong>Authorized JavaScript origins</strong>.</li>
-                <li>Paste the Client ID in <code className="env-pill">.env</code> as: <br /><code>VITE_GOOGLE_CLIENT_ID=your-id.apps.googleusercontent.com</code></li>
-              </ol>
-            </div>
           )}
         </div>
 

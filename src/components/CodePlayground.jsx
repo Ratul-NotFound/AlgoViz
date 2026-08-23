@@ -1,12 +1,11 @@
 // src/components/CodePlayground.jsx — In-Browser C Compiler & Execution Playground
-import React, { useState, useEffect } from 'react';
-import { Highlight, themes } from 'prism-react-renderer';
+import React, { useState, useEffect, useRef } from 'react';
 import { PlayIcon, ResetIcon, CheckCircleIcon } from './Icons.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { compileAndRunC } from '../utils/cCompiler.js';
 
 export default function CodePlayground({ lesson, starterCode, expectedOutput, onRunSuccess }) {
-  const { isAuthenticated, openAuthModal, addCoins } = useAuth();
+  const { isAuthenticated, addCoins } = useAuth();
   
   const getInitialCode = () => {
     return starterCode || lesson?.starterCode || lesson?.codePlayground || lesson?.initialCode || '';
@@ -21,6 +20,9 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
   const [testPassed, setTestPassed] = useState(false);
   const [execStats, setExecStats] = useState({ timeMs: 0, exitCode: 0 });
 
+  const textareaRef = useRef(null);
+  const gutterRef = useRef(null);
+
   // Update initial code when lesson or starterCode changes
   useEffect(() => {
     setCode(getInitialCode());
@@ -28,12 +30,13 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
     setTestPassed(false);
   }, [lesson, starterCode]);
 
-  const handleRunCode = () => {
-    if (!isAuthenticated) {
-      openAuthModal();
-      return;
+  const handleScroll = (e) => {
+    if (gutterRef.current) {
+      gutterRef.current.scrollTop = e.target.scrollTop;
     }
+  };
 
+  const handleRunCode = () => {
     setIsRunning(true);
 
     setTimeout(() => {
@@ -54,7 +57,9 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
       if (cleanExp && cleanSim.includes(cleanExp)) {
         if (!testPassed) {
           setTestPassed(true);
-          addCoins(15, 'Code Output Test Passed');
+          if (isAuthenticated && addCoins) {
+            addCoins(15, 'Code Output Test Passed');
+          }
         }
         if (onRunSuccess) onRunSuccess();
       } else if (!cleanExp) {
@@ -74,6 +79,9 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const lines = code.split('\n');
+  const lineCount = Math.max(1, lines.length);
 
   return (
     <div className="code-playground-box">
@@ -119,10 +127,10 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
             className="btn btn-primary btn-sm btn-run-playground"
             onClick={handleRunCode}
             disabled={isRunning}
-            title={!isAuthenticated ? 'Sign in with Google to run C code' : 'Execute C Code'}
+            title="Execute C Code"
           >
             <PlayIcon size={13} />
-            <span>{isRunning ? 'Compiling…' : !isAuthenticated ? 'Run (Sign In)' : 'Run Code'}</span>
+            <span>{isRunning ? 'Compiling…' : 'Run Code'}</span>
           </button>
         </div>
       </div>
@@ -146,12 +154,19 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
 
       {/* Main Sandbox Grid: Editor & Output */}
       <div className="playground-body">
-        {/* Editor Area */}
+        {/* Editor Area with Synchronized Gutter */}
         <div className="playground-editor-wrapper">
+          <div className="playground-gutter font-mono" ref={gutterRef} aria-hidden="true">
+            {Array.from({ length: lineCount }, (_, i) => (
+              <div key={i + 1} className="gutter-ln">{i + 1}</div>
+            ))}
+          </div>
           <textarea
-            className="playground-textarea"
+            ref={textareaRef}
+            className="playground-textarea font-mono"
             value={code}
             onChange={(e) => setCode(e.target.value)}
+            onScroll={handleScroll}
             spellCheck="false"
             autoCapitalize="off"
             autoComplete="off"
@@ -163,27 +178,13 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
                 const end = e.target.selectionEnd;
                 setCode(code.substring(0, start) + '    ' + code.substring(end));
                 setTimeout(() => {
-                  e.target.selectionStart = e.target.selectionEnd = start + 4;
+                  if (textareaRef.current) {
+                    textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 4;
+                  }
                 }, 0);
               }
             }}
           />
-          <div className="code-highlight-underlay" aria-hidden="true">
-            <Highlight theme={themes.nightOwl} code={code} language="c">
-              {({ tokens, getLineProps, getTokenProps }) => (
-                <pre>
-                  {tokens.map((line, i) => (
-                    <div key={i} {...getLineProps({ line })}>
-                      <span className="line-number">{i + 1}</span>
-                      {line.map((token, key) => (
-                        <span key={key} {...getTokenProps({ token })} />
-                      ))}
-                    </div>
-                  ))}
-                </pre>
-              )}
-            </Highlight>
-          </div>
         </div>
 
         {/* Output Console / stdout */}
@@ -217,3 +218,4 @@ export default function CodePlayground({ lesson, starterCode, expectedOutput, on
     </div>
   );
 }
+

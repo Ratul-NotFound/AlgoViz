@@ -85,12 +85,7 @@ export default function LearnCPage({
     setUserAnswers({});
     setRevealedQuestions({});
     setIsQuizCompleted(false);
-    const practices = C_CHAPTER_PRACTICES[currentSlug] || [];
-    if (practices.length > 0) {
-      setOpenDrawerIds({ [practices[0].id]: true });
-    } else {
-      setOpenDrawerIds({});
-    }
+    setOpenDrawerIds({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
       window.location.hash = `#learn/c/${currentSlug}`;
@@ -929,38 +924,88 @@ export default function LearnCPage({
                     {/* Drawer Expandable Body */}
                     {isOpen && (
                       <div className="drawer-body-content animate-fade-in">
-                        {/* Challenge Problem Statement & Description */}
+                        {/* Challenge Problem Statement & Description (beecrowd / ICPC Standard) */}
                         <div className="challenge-problem-body">
+                          {/* Problem Limits & Meta Strip */}
+                          <div className="problem-meta-strip font-mono">
+                            <div className="problem-meta-item">
+                              <span className="meta-dot bg-blue" />
+                              <span>Timelimit: <strong>1.00 sec</strong></span>
+                            </div>
+                            <div className="problem-meta-item">
+                              <span className="meta-dot bg-green" />
+                              <span>Memory: <strong>256 MB</strong></span>
+                            </div>
+                            <div className="problem-meta-item">
+                              <span className="meta-dot bg-purple" />
+                              <span>Standard: <strong>C99 / C11 (GCC)</strong></span>
+                            </div>
+                          </div>
+
+                          {/* Problem Statement Narrative */}
                           <div className="problem-description-box">
+                            <h4 className="problem-box-title">
+                              <span>📖 Problem Statement</span>
+                            </h4>
                             <p className="problem-statement-text">{prob.description || prob.scenario}</p>
                           </div>
 
-                          {/* Input & Output Specifications Grid */}
+                          {/* Side-by-Side Input & Output Specifications Grid */}
                           <div className="challenge-spec-grid">
-                            <div className="spec-card">
+                            {/* Left Column: Input */}
+                            <div className="spec-card spec-input-card">
                               <div className="spec-header">
-                                <span className="spec-title font-mono font-bold">📥 INPUT SPECIFICATION</span>
+                                <span className="spec-title font-mono font-bold">📥 Input</span>
                               </div>
-                              <p className="spec-desc">{prob.inputSpec || 'Standard console input stream.'}</p>
-                              {prob.sampleInput && (
-                                <div className="sample-io-box">
-                                  <span className="sample-label font-mono">Sample Input:</span>
-                                  <pre className="sample-pre font-mono"><code>{prob.sampleInput}</code></pre>
-                                </div>
-                              )}
+                              <p className="spec-desc">{prob.inputSpec || 'The problem has no input.'}</p>
                             </div>
 
-                            <div className="spec-card">
+                            {/* Right Column: Output */}
+                            <div className="spec-card spec-output-card">
                               <div className="spec-header">
-                                <span className="spec-title font-mono font-bold">📤 OUTPUT SPECIFICATION</span>
+                                <span className="spec-title font-mono font-bold">📤 Output</span>
                               </div>
-                              <p className="spec-desc">{prob.outputSpec || 'Print according to expected format.'}</p>
-                              {prob.sampleOutput && (
-                                <div className="sample-io-box">
-                                  <span className="sample-label font-mono">Sample Output:</span>
-                                  <pre className="sample-pre font-mono"><code>{prob.sampleOutput}</code></pre>
-                                </div>
-                              )}
+                              <p className="spec-desc">{prob.outputSpec || 'Print according to the expected output format.'}</p>
+                            </div>
+                          </div>
+
+                          {/* Side-by-Side Sample Input / Output Comparison Table (beecrowd classic) */}
+                          <div className="sample-io-table-container">
+                            <div className="sample-io-table-header">
+                              <div className="sample-col-header">
+                                <span className="sample-tag-blue font-mono font-bold">📥 Sample Input</span>
+                                {prob.sampleInput && prob.sampleInput !== 'No input' && (
+                                  <button
+                                    type="button"
+                                    className="btn-copy-sample-io"
+                                    onClick={() => handleCopySnippet(prob.sampleInput, `sample_in_${prob.id}`)}
+                                    title="Copy Sample Input"
+                                  >
+                                    {copiedCodeId === `sample_in_${prob.id}` ? '✓ Copied' : 'Copy'}
+                                  </button>
+                                )}
+                              </div>
+                              <div className="sample-col-header">
+                                <span className="sample-tag-green font-mono font-bold">📤 Sample Output</span>
+                                {prob.sampleOutput && (
+                                  <button
+                                    type="button"
+                                    className="btn-copy-sample-io"
+                                    onClick={() => handleCopySnippet(prob.sampleOutput, `sample_out_${prob.id}`)}
+                                    title="Copy Sample Output"
+                                  >
+                                    {copiedCodeId === `sample_out_${prob.id}` ? '✓ Copied' : 'Copy'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="sample-io-table-body">
+                              <div className="sample-col-content">
+                                <pre className="sample-code-block font-mono"><code>{prob.sampleInput || 'No input'}</code></pre>
+                              </div>
+                              <div className="sample-col-content">
+                                <pre className="sample-code-block sample-code-output font-mono"><code>{prob.sampleOutput || ''}</code></pre>
+                              </div>
                             </div>
                           </div>
                         </div>
