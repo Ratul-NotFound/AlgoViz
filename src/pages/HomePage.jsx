@@ -392,32 +392,60 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </div>
           <h2 className="hp-fc-title">C Programming Academy</h2>
           <p className="hp-fc-desc">
-            Master memory addresses, pointers, structs, and dynamic allocation through physical real-world analogies and live in-browser compilation.
+            Learn C from absolute basics to advanced memory mastery. Write code, compile in-browser, and master pointers through real physical mental models.
           </p>
 
-          {/* Graphical Memory Architecture Preview */}
-          <div className="hp-fc-graphic graphic-memory font-mono">
-            <div className="mem-block stack-block">
-              <span className="mem-tag">STACK</span>
-              <span className="mem-addr">0x7ffd10</span>
-              <span className="mem-val">int *ptr = &amp;val</span>
+          {/* Creative Conceptual C Learning Workbench */}
+          <div className="hp-fc-canvas canvas-c-ide font-mono">
+            {/* Editor Window Header */}
+            <div className="c-ide-header">
+              <div className="c-ide-tabs">
+                <span className="c-ide-tab active">
+                  <span className="tab-icon">📄</span>
+                  <span>main.c</span>
+                </span>
+                <span className="c-ide-tab-dim">lesson_01.h</span>
+              </div>
+              <div className="c-ide-target">
+                <span className="gcc-badge">gcc 13.2</span>
+                <span className="wasm-badge">⚡ WASM</span>
+              </div>
             </div>
-            <div className="mem-pointer-arrow">
-              <span className="ptr-line" />
-              <span className="ptr-label">deref (*)</span>
-              <span className="ptr-arrow">➔</span>
-            </div>
-            <div className="mem-block heap-block">
-              <span className="mem-tag">HEAP / RAM</span>
-              <span className="mem-addr">0x7ffd14</span>
-              <span className="mem-val">val = 42</span>
+
+            {/* Split Editor + Live Terminal Output */}
+            <div className="c-ide-body">
+              {/* Code Panel */}
+              <div className="c-code-panel">
+                <div className="code-line"><span className="ln">1</span><span><span className="kw-c">#include</span> <span className="str-c">&lt;stdio.h&gt;</span></span></div>
+                <div className="code-line"><span className="ln">2</span><span><span className="kw-c">int</span> <span className="fn-c">main</span>() &#123;</span></div>
+                <div className="code-line indent"><span className="ln">3</span><span><span className="fn-c">printf</span>(<span className="str-c">&quot;Hello, C!\n&quot;</span>);</span></div>
+                <div className="code-line indent"><span className="ln">4</span><span><span className="kw-c">return</span> <span className="num-c">0</span>;</span></div>
+                <div className="code-line"><span className="ln">5</span><span>&#125;</span></div>
+              </div>
+
+              {/* Terminal / Live Learning Output Panel */}
+              <div className="c-term-panel">
+                <div className="term-header">
+                  <span className="term-dot green-dot" />
+                  <span>TERMINAL OUTPUT</span>
+                </div>
+                <div className="term-body">
+                  <div className="term-out-text">&gt; Hello, C!</div>
+                  <div className="term-status-badge">✓ Exit 0 &bull; 0 Errors</div>
+                  <div className="term-ch-track">
+                    <span className="ch-prog-text">Chapter 1/23</span>
+                    <div className="ch-prog-bar"><div className="ch-prog-fill" style={{ width: '15%' }} /></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="hp-fc-pills">
-            <span className="hp-fc-pill">📦 23 Visual Chapters</span>
-            <span className="hp-fc-pill">💻 In-Browser Compiler</span>
-            <span className="hp-fc-pill">🎓 Free Certificate</span>
+            <span className="hp-fc-pill">🟢 01 Basics</span>
+            <span className="hp-fc-pill">🔵 05 Pointers &amp; RAM</span>
+            <span className="hp-fc-pill">🟣 12 Structs &amp; Nodes</span>
+            <span className="hp-fc-pill">🟠 20 Dynamic Memory</span>
           </div>
           <div className="hp-fc-footer">
             <button className="hp-btn-fc hp-btn-fc-green">
@@ -448,19 +476,52 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             Watch sorting, searching, trees, and graphs execute step-by-step with real data and Big-O analytics.
           </p>
 
-          {/* Graphical DSA Speed & Partition Preview */}
-          <div className="hp-fc-graphic graphic-dsa font-mono">
-            <div className="dsa-sub-branch">
-              <span className="dsa-branch-tag">Left Subtree</span>
-              <span className="dsa-node-pill">[ 12, 18, 29 ]</span>
+          {/* Rich Graphical Multi-Visualizer Stage */}
+          <div className="hp-fc-canvas canvas-dsa-stage font-mono">
+            <div className="dsa-stage-top">
+              <div className="dsa-telemetry-badge">
+                <span className="tel-dot active" />
+                <span>QuickSort &bull; Pivot [42] &bull; Step 14/28</span>
+              </div>
+              <span className="dsa-lang-tag">C &bull; Python &bull; Java &bull; JS</span>
             </div>
-            <div className="dsa-pivot-pill">
-              <span className="p-badge">PIVOT</span>
-              <span className="p-val">42</span>
-            </div>
-            <div className="dsa-sub-branch">
-              <span className="dsa-branch-tag">Right Subtree</span>
-              <span className="dsa-node-pill">[ 67, 85, 94 ]</span>
+
+            <div className="dsa-visual-duo">
+              {/* Mini Array Wave */}
+              <div className="dsa-array-wave">
+                {[
+                  { v: 18, h: 35, type: 'sorted' },
+                  { v: 29, h: 52, type: 'active' },
+                  { v: 42, h: 76, type: 'pivot' },
+                  { v: 67, h: 88, type: 'compare' },
+                  { v: 85, h: 95, type: 'normal' },
+                  { v: 94, h: 100, type: 'sorted' },
+                ].map((b, i) => (
+                  <div key={i} className="dsa-wave-col">
+                    <div className={`dsa-wave-bar bar-${b.type}`} style={{ height: `${b.h}%` }} />
+                    <span className="dsa-wave-num">{b.v}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mini Graph Nodes */}
+              <div className="dsa-graph-mini">
+                <svg viewBox="0 0 110 65" className="dsa-graph-svg" fill="none">
+                  <line x1="20" y1="20" x2="55" y2="45" stroke="#3b82f6" strokeWidth="1.5" />
+                  <line x1="55" y1="45" x2="90" y2="20" stroke="#10b981" strokeWidth="2" />
+                  <line x1="20" y1="20" x2="90" y2="20" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="2 2" />
+
+                  <circle cx="20" cy="20" r="10" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5" />
+                  <text x="20" y="24" textAnchor="middle" fill="#60a5fa" fontSize="8" fontWeight="700">A</text>
+
+                  <circle cx="55" cy="45" r="10" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5" />
+                  <text x="55" y="49" textAnchor="middle" fill="#60a5fa" fontSize="8" fontWeight="700">B</text>
+
+                  <circle cx="90" cy="20" r="11" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="2" />
+                  <text x="90" y="24" textAnchor="middle" fill="#10b981" fontSize="8.5" fontWeight="800">C</text>
+                  <text x="90" y="38" textAnchor="middle" fill="#10b981" fontSize="6.5" fontWeight="700">PATH</text>
+                </svg>
+              </div>
             </div>
           </div>
 
