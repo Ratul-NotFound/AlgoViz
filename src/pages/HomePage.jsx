@@ -392,11 +392,28 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </div>
           <h2 className="hp-fc-title">C Programming Academy</h2>
           <p className="hp-fc-desc">
-            Learn pointers, memory layout, structs, and dynamic memory with visual guides and an in-browser C compiler.
+            Master memory addresses, pointers, structs, and dynamic allocation through physical real-world analogies and live in-browser compilation.
           </p>
-          <div className="hp-fc-snippet font-mono">
-            <span className="fc-kw">int</span> *ptr = &amp;val;<span className="fc-cm"> /* 0x7ffd14 → 42 */</span>
+
+          {/* Graphical Memory Architecture Preview */}
+          <div className="hp-fc-graphic graphic-memory font-mono">
+            <div className="mem-block stack-block">
+              <span className="mem-tag">STACK</span>
+              <span className="mem-addr">0x7ffd10</span>
+              <span className="mem-val">int *ptr = &amp;val</span>
+            </div>
+            <div className="mem-pointer-arrow">
+              <span className="ptr-line" />
+              <span className="ptr-label">deref (*)</span>
+              <span className="ptr-arrow">➔</span>
+            </div>
+            <div className="mem-block heap-block">
+              <span className="mem-tag">HEAP / RAM</span>
+              <span className="mem-addr">0x7ffd14</span>
+              <span className="mem-val">val = 42</span>
+            </div>
           </div>
+
           <div className="hp-fc-pills">
             <span className="hp-fc-pill">📦 23 Visual Chapters</span>
             <span className="hp-fc-pill">💻 In-Browser Compiler</span>
@@ -430,9 +447,23 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           <p className="hp-fc-desc">
             Watch sorting, searching, trees, and graphs execute step-by-step with real data and Big-O analytics.
           </p>
-          <div className="hp-fc-snippet font-mono">
-            <span className="fc-good">Quick: O(n log n) ⚡</span> <span className="fc-vs">vs</span> <span className="fc-bad">Bubble: O(n²)</span>
+
+          {/* Graphical DSA Speed & Partition Preview */}
+          <div className="hp-fc-graphic graphic-dsa font-mono">
+            <div className="dsa-sub-branch">
+              <span className="dsa-branch-tag">Left Subtree</span>
+              <span className="dsa-node-pill">[ 12, 18, 29 ]</span>
+            </div>
+            <div className="dsa-pivot-pill">
+              <span className="p-badge">PIVOT</span>
+              <span className="p-val">42</span>
+            </div>
+            <div className="dsa-sub-branch">
+              <span className="dsa-branch-tag">Right Subtree</span>
+              <span className="dsa-node-pill">[ 67, 85, 94 ]</span>
+            </div>
           </div>
+
           <div className="hp-fc-pills">
             <span className="hp-fc-pill">📊 Step Playback</span>
             <span className="hp-fc-pill">⚔️ Speed Race</span>
@@ -485,7 +516,8 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </div>
         </div>
 
-        <div className="hp-dsa-hub">
+        {/* 3-Column Conceptual Cards Grid */}
+        <div className="hp-hub-grid">
           {/* Card 1: Visualizations */}
           <div
             className={`hp-hub-card${activeTab === 'catalog' ? ' hp-hub-open' : ''}`}
@@ -493,22 +525,64 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           >
             <div className="hp-hub-card-top">
               <span className="hp-hub-status-pill hp-pill-green font-mono">● {ALGORITHMS.length} ALGORITHMS</span>
-              <span className="hp-hub-badge font-mono">SORT • SEARCH • GRAPH • TREE</span>
+              <span className="hp-hub-badge font-mono">STEP-BY-STEP TRACE</span>
             </div>
             <div className="hp-hub-icon-row">
               <span className="hp-hub-icon hp-icon-green">⚡</span>
               <h3 className="hp-hub-title">Interactive Visualizations</h3>
             </div>
-            <p className="hp-hub-desc">Step through Sorting, Searching, Trees, Graphs with live step-by-step animation.</p>
-            <div className="hp-mini-bars">
-              {[35, 70, 45, 90, 60].map((h, i) => (
-                <div key={i} className={`hp-mini-bar${i === 1 ? ' bar-active' : i === 3 ? ' bar-pivot' : ''}`} style={{ height: `${h}%` }} />
-              ))}
+            <p className="hp-hub-desc">Step through sorting, searching, trees, and graphs with live pointers and variable trace.</p>
+
+            {/* Creative Graphical SVG Preview: Tree & Array Visualizer */}
+            <div className="hp-graphical-canvas canvas-visualizer">
+              <svg viewBox="0 0 320 110" className="hp-svg-diagram" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Tree Branches */}
+                <path d="M160 22 L100 56" stroke="rgba(59,130,246,0.4)" strokeWidth="2" strokeDasharray="3 3" />
+                <path d="M160 22 L220 56" stroke="rgba(16,185,129,0.4)" strokeWidth="2" />
+                <path d="M100 56 L65 88" stroke="rgba(59,130,246,0.3)" strokeWidth="1.5" />
+                <path d="M100 56 L135 88" stroke="#10b981" strokeWidth="2" />
+                <path d="M220 56 L255 88" stroke="rgba(16,185,129,0.3)" strokeWidth="1.5" />
+
+                {/* Curved Swap Arc */}
+                <path d="M65 92 Q 100 70 135 92" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeDasharray="2 2" />
+
+                {/* Nodes */}
+                <g className="svg-node">
+                  <circle cx="160" cy="22" r="14" fill="#0284c7" fillOpacity="0.2" stroke="#0284c7" strokeWidth="1.5" />
+                  <text x="160" y="26" textAnchor="middle" fill="#38bdf8" fontSize="10" fontWeight="700" fontFamily="monospace">50</text>
+                </g>
+                <g className="svg-node">
+                  <circle cx="100" cy="56" r="12" fill="#2563eb" fillOpacity="0.2" stroke="#2563eb" strokeWidth="1.5" />
+                  <text x="100" y="60" textAnchor="middle" fill="#60a5fa" fontSize="9.5" fontWeight="700" fontFamily="monospace">25</text>
+                </g>
+                <g className="svg-node">
+                  <circle cx="220" cy="56" r="12" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1.5" />
+                  <text x="220" y="60" textAnchor="middle" fill="#34d399" fontSize="9.5" fontWeight="700" fontFamily="monospace">75</text>
+                </g>
+                <g className="svg-node">
+                  <circle cx="65" cy="88" r="11" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                  <text x="65" y="92" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="600" fontFamily="monospace">15</text>
+                </g>
+                <g className="svg-node target-node">
+                  <circle cx="135" cy="88" r="12" fill="#10b981" fillOpacity="0.3" stroke="#10b981" strokeWidth="2" />
+                  <text x="135" y="92" textAnchor="middle" fill="#10b981" fontSize="9.5" fontWeight="800" fontFamily="monospace">35</text>
+                  <text x="135" y="105" textAnchor="middle" fill="#10b981" fontSize="7" fontWeight="700" fontFamily="sans-serif">FOUND</text>
+                </g>
+                <g className="svg-node">
+                  <circle cx="255" cy="88" r="11" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                  <text x="255" y="92" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="600" fontFamily="monospace">90</text>
+                </g>
+              </svg>
+              <div className="hp-canvas-footer font-mono">
+                <span className="c-pill green-pill">● Binary Search Tree</span>
+                <span className="c-pill blue-pill">40+ Simulators</span>
+              </div>
             </div>
+
             <div className="hp-hub-footer">
               <button
                 className="hp-btn-hub hp-btn-hub-green"
-                onClick={e => { e.stopPropagation(); setActiveTab('catalog'); }}
+                onClick={e => { e.stopPropagation(); setActiveTab(t => t === 'catalog' ? null : 'catalog'); }}
               >
                 <span>⚡ Explore Visualizers</span>
                 <ArrowRightIcon size={12} />
@@ -517,108 +591,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
                 {activeTab === 'catalog' ? '▲ Close' : `▼ Open (${ALGORITHMS.length})`}
               </span>
             </div>
-
-            {/* Catalog Drawer */}
-            {activeTab === 'catalog' && (
-              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
-                {/* Filter pills + search */}
-                <div className="hp-drawer-header">
-                  <div className="hp-cat-pills">
-                    <button
-                      className={`hp-cat-pill${activeCategory === 'all' ? ' active' : ''}`}
-                      onClick={() => setActiveCategory('all')}
-                    >
-                      All ({ALGORITHMS.length})
-                    </button>
-                    {Object.entries(CATEGORIES).map(([key, cat]) => (
-                      <button
-                        key={key}
-                        className={`hp-cat-pill${activeCategory === key ? ' active' : ''}`}
-                        onClick={() => setActiveCategory(key)}
-                      >
-                        {cat.label} ({ALGORITHMS.filter(a => a.category === key).length})
-                      </button>
-                    ))}
-                  </div>
-                  <div className="hp-search-wrap">
-                    <SearchIcon size={14} className="hp-search-ico" />
-                    <input
-                      type="text"
-                      className="hp-search-field"
-                      placeholder="Search algorithms..."
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                    />
-                    {searchQuery && (
-                      <button className="hp-search-x" onClick={() => setSearchQuery('')}>✕</button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Algorithm cards grid */}
-                <div className="hp-algo-grid">
-                  {displayedAlgos.length === 0 ? (
-                    <div className="hp-empty-state">
-                      <p>No algorithms match "{searchQuery}"</p>
-                      <button className="hp-btn-outline" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
-                        Reset Filters
-                      </button>
-                    </div>
-                  ) : (
-                    displayedAlgos.map(algo => {
-                      const bookmarked = isBookmarked(algo.slug);
-                      const completed = isCompleted(algo.slug);
-                      const timeColor = getComplexityColor(algo.timeComplexity.average);
-                      return (
-                        <div
-                          key={algo.slug}
-                          className={`hp-algo-tile${completed ? ' tile-done' : ''}`}
-                          onClick={() => onSelectAlgo(algo.slug)}
-                        >
-                          <div className="hp-tile-top">
-                            <div className="hp-tile-identity">
-                              <div className="hp-tile-icon">{getAlgoIcon(algo.slug, 15)}</div>
-                              <div>
-                                <h4 className="hp-tile-name">{algo.name}</h4>
-                                <span className="hp-tile-cat font-mono">{CATEGORIES[algo.category]?.label}</span>
-                              </div>
-                            </div>
-                            <button
-                              className={`hp-bookmark-btn${bookmarked ? ' bookmarked' : ''}`}
-                              onClick={e => { e.stopPropagation(); toggleBookmark(algo.slug); }}
-                              aria-label="Bookmark"
-                            >
-                              <BookmarkIcon size={12} filled={bookmarked} />
-                            </button>
-                          </div>
-                          <div className="hp-tile-metrics">
-                            <span className="hp-metric-pill font-mono" style={{ color: timeColor }}>
-                              <span className="metric-dot" style={{ background: timeColor }} />
-                              {algo.timeComplexity.average}
-                            </span>
-                            <span className="hp-metric-pill font-mono">💾 {algo.spaceComplexity}</span>
-                            {algo.stable && <span className="hp-metric-pill font-mono hp-stable">✓ Stable</span>}
-                          </div>
-                          <div className="hp-tile-footer">
-                            <span className="hp-tile-hint font-mono">{algo.stable ? 'Preserves order' : 'In-place'}</span>
-                            <span className="hp-tile-launch font-mono">Visualizer <ArrowRightIcon size={10} /></span>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
-                {/* Show more */}
-                {activeCategory === 'all' && !searchQuery && filteredAlgos.length > 8 && (
-                  <div className="hp-show-more-row">
-                    <button className="hp-btn-show-more font-mono" onClick={() => setShowAllAlgos(p => !p)}>
-                      {showAllAlgos ? '▲ Show Top 8 Featured' : `▼ Show All ${ALGORITHMS.length} Algorithms`}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Card 2: Battle Arena */}
@@ -627,30 +599,53 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             onClick={() => setActiveTab(t => t === 'duel' ? null : 'duel')}
           >
             <div className="hp-hub-card-top">
-              <span className="hp-hub-status-pill hp-pill-amber font-mono">● LIVE DUEL</span>
-              <span className="hp-hub-badge font-mono">SIDE-BY-SIDE SPEED RACE</span>
+              <span className="hp-hub-status-pill hp-pill-amber font-mono">● SPEED BENCHMARK</span>
+              <span className="hp-hub-badge font-mono">SIDE-BY-SIDE RACE</span>
             </div>
             <div className="hp-hub-icon-row">
               <span className="hp-hub-icon hp-icon-amber">⚔️</span>
               <h3 className="hp-hub-title">Algorithm Battle Arena</h3>
             </div>
-            <p className="hp-hub-desc">Race QuickSort, MergeSort, BubbleSort, and HeapSort against each other in real-time.</p>
-            <div className="hp-duel-preview">
-              <div className="hp-duel-lane">
-                <span className="hp-lane-tag font-mono">MergeSort</span>
-                <div className="hp-lane-bar"><div className="hp-lane-fill fill-blue" style={{ width: '85%' }} /></div>
-                <span className="hp-lane-time font-mono">1.2ms</span>
+            <p className="hp-hub-desc">Race sorting algorithms head-to-head on identical arrays to see algorithmic speed in action.</p>
+
+            {/* Creative Graphical SVG Preview: Race Telemetry Track */}
+            <div className="hp-graphical-canvas canvas-duel">
+              <div className="hp-race-hud font-mono">
+                {/* Lane 1 */}
+                <div className="race-lane-row">
+                  <div className="lane-header">
+                    <span className="lane-badge badge-winner">🏎️ QuickSort O(n log n)</span>
+                    <span className="lane-time winner">1.2ms 🏆</span>
+                  </div>
+                  <div className="race-track">
+                    <div className="race-boost-fill fill-quick" style={{ width: '96%' }} />
+                    <span className="race-flag">🏁</span>
+                  </div>
+                </div>
+
+                {/* Lane 2 */}
+                <div className="race-lane-row">
+                  <div className="lane-header">
+                    <span className="lane-badge badge-slow">🐢 BubbleSort O(n²)</span>
+                    <span className="lane-time slower">48.6ms (40x)</span>
+                  </div>
+                  <div className="race-track">
+                    <div className="race-boost-fill fill-bubble" style={{ width: '28%' }} />
+                    <span className="race-flag">🏁</span>
+                  </div>
+                </div>
               </div>
-              <div className="hp-duel-lane">
-                <span className="hp-lane-tag font-mono">QuickSort</span>
-                <div className="hp-lane-bar"><div className="hp-lane-fill fill-amber" style={{ width: '100%' }} /></div>
-                <span className="hp-lane-time font-mono">0.8ms 🏆</span>
+
+              <div className="hp-canvas-footer font-mono">
+                <span className="c-pill amber-pill">⚡ 10K Elements Race</span>
+                <span className="c-pill gray-pill">Live Delta HUD</span>
               </div>
             </div>
+
             <div className="hp-hub-footer">
               <button
                 className="hp-btn-hub hp-btn-hub-amber"
-                onClick={e => { e.stopPropagation(); setActiveTab('duel'); }}
+                onClick={e => { e.stopPropagation(); setActiveTab(t => t === 'duel' ? null : 'duel'); }}
               >
                 <span>⚔️ Launch Arena</span>
                 <ArrowRightIcon size={12} />
@@ -659,12 +654,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
                 {activeTab === 'duel' ? '▲ Close Arena' : '▼ Open Race Arena'}
               </span>
             </div>
-
-            {activeTab === 'duel' && (
-              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
-                <AlgorithmDuel />
-              </div>
-            )}
           </div>
 
           {/* Card 3: Big-O Matrix */}
@@ -673,23 +662,58 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             onClick={() => setActiveTab(t => t === 'matrix' ? null : 'matrix')}
           >
             <div className="hp-hub-card-top">
-              <span className="hp-hub-status-pill hp-pill-blue font-mono">● COMPLEXITY CHART</span>
-              <span className="hp-hub-badge font-mono">LIVE SPEED CALCULATOR</span>
+              <span className="hp-hub-status-pill hp-pill-blue font-mono">● GROWTH ANALYZER</span>
+              <span className="hp-hub-badge font-mono">STEP CALCULATOR</span>
             </div>
             <div className="hp-hub-icon-row">
               <span className="hp-hub-icon hp-icon-blue">📈</span>
               <h3 className="hp-hub-title">Big-O Complexity Matrix</h3>
             </div>
-            <p className="hp-hub-desc">Quick reference guide with a live calculator showing how input size affects performance.</p>
-            <div className="hp-matrix-preview">
-              {['O(1)', 'O(log n)', 'O(n)', 'O(n²)'].map((n, i) => (
-                <span key={n} className={`hp-comp-chip font-mono comp-${['green', 'green', 'yellow', 'red'][i]}`}>{n}</span>
-              ))}
+            <p className="hp-hub-desc">Analyze performance curves and calculate exact CPU steps across logarithmic and quadratic scales.</p>
+
+            {/* Creative Graphical SVG Preview: Big-O Coordinate Graph */}
+            <div className="hp-graphical-canvas canvas-matrix">
+              <svg viewBox="0 0 320 110" className="hp-svg-diagram" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Coordinate Grid */}
+                <line x1="30" y1="95" x2="300" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <line x1="30" y1="10" x2="30" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <line x1="30" y1="55" x2="300" y2="55" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="3 3" />
+                <line x1="165" y1="10" x2="165" y2="95" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="3 3" />
+
+                {/* O(1) Constant (Green) */}
+                <line x1="30" y1="90" x2="300" y2="90" stroke="#10b981" strokeWidth="2" />
+                <text x="260" y="86" fill="#10b981" fontSize="8" fontWeight="700" fontFamily="monospace">O(1)</text>
+
+                {/* O(log n) (Teal) */}
+                <path d="M30 92 Q 100 85 300 78" stroke="#06b6d4" strokeWidth="2" />
+                <text x="260" y="74" fill="#06b6d4" fontSize="8" fontWeight="700" fontFamily="monospace">O(log n)</text>
+
+                {/* O(n) Linear (Blue) */}
+                <line x1="30" y1="95" x2="280" y2="45" stroke="#3b82f6" strokeWidth="2" />
+                <text x="265" y="42" fill="#3b82f6" fontSize="8" fontWeight="700" fontFamily="monospace">O(n)</text>
+
+                {/* O(n log n) (Amber) */}
+                <path d="M30 95 Q 180 75 250 25" stroke="#f59e0b" strokeWidth="2" />
+                <text x="220" y="20" fill="#f59e0b" fontSize="8" fontWeight="700" fontFamily="monospace">O(n log n)</text>
+
+                {/* O(n^2) Quadratic (Red) with Danger Zone */}
+                <path d="M30 95 Q 90 90 120 15" stroke="#ef4444" strokeWidth="2.5" />
+                <text x="125" y="18" fill="#ef4444" fontSize="8.5" fontWeight="800" fontFamily="monospace">O(n²)</text>
+
+                {/* Axis Labels */}
+                <text x="15" y="55" fill="#64748b" fontSize="7" fontWeight="600" fontFamily="sans-serif">Ops</text>
+                <text x="290" y="105" fill="#64748b" fontSize="7" fontWeight="600" fontFamily="sans-serif">N</text>
+              </svg>
+              <div className="hp-canvas-footer font-mono">
+                <span className="c-pill purple-pill">📈 Coordinate Growth Graph</span>
+                <span className="c-pill blue-pill">Interactive N-Slider</span>
+              </div>
             </div>
+
             <div className="hp-hub-footer">
               <button
                 className="hp-btn-hub hp-btn-hub-blue"
-                onClick={e => { e.stopPropagation(); setActiveTab('matrix'); }}
+                onClick={e => { e.stopPropagation(); setActiveTab(t => t === 'matrix' ? null : 'matrix'); }}
               >
                 <span>📈 Open Matrix</span>
                 <ArrowRightIcon size={12} />
@@ -698,83 +722,190 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
                 {activeTab === 'matrix' ? '▲ Close Matrix' : '▼ Open Complexity Table'}
               </span>
             </div>
+          </div>
+        </div>
 
-            {activeTab === 'matrix' && (
-              <div className="hp-drawer" onClick={e => e.stopPropagation()}>
-                {/* Live Calculator */}
-                <div className="hp-calc-card">
-                  <div className="hp-calc-header">
-                    <div>
-                      <span className="hp-calc-badge font-mono">⚡ LIVE SPEED CALCULATOR</span>
-                      <h4 className="hp-calc-title">Big-O Speed Calculator</h4>
-                      <p className="hp-calc-sub">Move the slider to see how steps grow with input size.</p>
-                    </div>
-                    <div className="hp-slider-box">
-                      <div className="hp-slider-label-row">
-                        <span className="font-mono">Input Size (N):</span>
-                        <span className="font-mono font-bold">{sliderN} items</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="4" max="1024" step="4"
-                        value={sliderN}
-                        onChange={e => setSliderN(Number(e.target.value))}
-                        className="hp-complexity-slider"
-                      />
-                    </div>
-                  </div>
-                  <div className="hp-calc-grid">
-                    {complexityResults.map(d => (
-                      <div key={d.notation} className="hp-calc-pill">
-                        <div className="hp-calc-pill-head">
-                          <span className="hp-calc-label">{d.label}</span>
-                          <span className="hp-calc-notation font-mono" style={{ color: d.color }}>{d.notation}</span>
+        {/* Dedicated Unfolded Drawer for Active Section */}
+        {activeTab === 'catalog' && (
+          <div className="hp-drawer hp-drawer-expanded" onClick={e => e.stopPropagation()}>
+            <div className="hp-drawer-header">
+              <div className="hp-cat-pills">
+                <button
+                  className={`hp-cat-pill${activeCategory === 'all' ? ' active' : ''}`}
+                  onClick={() => setActiveCategory('all')}
+                >
+                  All ({ALGORITHMS.length})
+                </button>
+                {Object.entries(CATEGORIES).map(([key, cat]) => (
+                  <button
+                    key={key}
+                    className={`hp-cat-pill${activeCategory === key ? ' active' : ''}`}
+                    onClick={() => setActiveCategory(key)}
+                  >
+                    {cat.label} ({ALGORITHMS.filter(a => a.category === key).length})
+                  </button>
+                ))}
+              </div>
+              <div className="hp-search-wrap">
+                <SearchIcon size={14} className="hp-search-ico" />
+                <input
+                  type="text"
+                  className="hp-search-field"
+                  placeholder="Search algorithms (e.g. quick, binary search, tree)..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button className="hp-search-x" onClick={() => setSearchQuery('')}>✕</button>
+                )}
+              </div>
+            </div>
+
+            {/* Algorithm cards grid */}
+            <div className="hp-algo-grid">
+              {displayedAlgos.length === 0 ? (
+                <div className="hp-empty-state">
+                  <p>No algorithms match "{searchQuery}"</p>
+                  <button className="hp-btn-outline" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
+                    Reset Filters
+                  </button>
+                </div>
+              ) : (
+                displayedAlgos.map(algo => {
+                  const bookmarked = isBookmarked(algo.slug);
+                  const completed = isCompleted(algo.slug);
+                  const timeColor = getComplexityColor(algo.timeComplexity.average);
+                  return (
+                    <div
+                      key={algo.slug}
+                      className={`hp-algo-tile${completed ? ' tile-done' : ''}`}
+                      onClick={() => onSelectAlgo(algo.slug)}
+                    >
+                      <div className="hp-tile-top">
+                        <div className="hp-tile-identity">
+                          <div className="hp-tile-icon">{getAlgoIcon(algo.slug, 15)}</div>
+                          <div>
+                            <h4 className="hp-tile-name">{algo.name}</h4>
+                            <span className="hp-tile-cat font-mono">{CATEGORIES[algo.category]?.label}</span>
+                          </div>
                         </div>
-                        <span className="hp-calc-ops font-mono">{d.opsFormatted} steps</span>
+                        <button
+                          className={`hp-bookmark-btn${bookmarked ? ' bookmarked' : ''}`}
+                          onClick={e => { e.stopPropagation(); toggleBookmark(algo.slug); }}
+                          aria-label="Bookmark"
+                        >
+                          <BookmarkIcon size={12} filled={bookmarked} />
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <div className="hp-tile-metrics">
+                        <span className="hp-metric-pill font-mono" style={{ color: timeColor }}>
+                          <span className="metric-dot" style={{ background: timeColor }} />
+                          {algo.timeComplexity.average}
+                        </span>
+                        <span className="hp-metric-pill font-mono">💾 {algo.spaceComplexity}</span>
+                        {algo.stable && <span className="hp-metric-pill font-mono hp-stable">✓ Stable</span>}
+                      </div>
+                      <div className="hp-tile-footer">
+                        <span className="hp-tile-hint font-mono">{algo.stable ? 'Preserves order' : 'In-place'}</span>
+                        <span className="hp-tile-launch font-mono">Visualizer <ArrowRightIcon size={10} /></span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
 
-                {/* Matrix Table */}
-                <div className="hp-matrix-table-wrap">
-                  <table className="hp-matrix-table">
-                    <thead>
-                      <tr>
-                        <th>Algorithm</th>
-                        <th>Category</th>
-                        <th>Best</th>
-                        <th>Average</th>
-                        <th>Worst</th>
-                        <th>Space</th>
-                        <th>Stable</th>
-                        <th>Run</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ALGORITHMS.map(algo => (
-                        <tr key={algo.slug} onClick={() => onSelectAlgo(algo.slug)} className="hp-matrix-row">
-                          <td className="font-mono font-bold">{algo.name}</td>
-                          <td><span className="hp-mat-cat font-mono">{CATEGORIES[algo.category]?.label}</span></td>
-                          <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.best) }}>{algo.timeComplexity.best}</span></td>
-                          <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.average) }}>{algo.timeComplexity.average}</span></td>
-                          <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.worst) }}>{algo.timeComplexity.worst}</span></td>
-                          <td><span className="hp-mat-space font-mono">{algo.spaceComplexity}</span></td>
-                          <td><span className={`hp-mat-stable${algo.stable ? ' is-stable' : ' is-unstable'}`}>{algo.stable ? '✓' : '✕'}</span></td>
-                          <td>
-                            <button className="hp-mat-run-btn" onClick={e => { e.stopPropagation(); onSelectAlgo(algo.slug); }}>
-                              Run →
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+            {/* Show more */}
+            {activeCategory === 'all' && !searchQuery && filteredAlgos.length > 8 && (
+              <div className="hp-show-more-row">
+                <button className="hp-btn-show-more font-mono" onClick={() => setShowAllAlgos(p => !p)}>
+                  {showAllAlgos ? '▲ Show Top 8 Featured' : `▼ Show All ${ALGORITHMS.length} Algorithms (+${ALGORITHMS.length - 8} more)`}
+                </button>
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {activeTab === 'duel' && (
+          <div className="hp-drawer hp-drawer-expanded" onClick={e => e.stopPropagation()}>
+            <AlgorithmDuel />
+          </div>
+        )}
+
+        {activeTab === 'matrix' && (
+          <div className="hp-drawer hp-drawer-expanded" onClick={e => e.stopPropagation()}>
+            {/* Live Calculator */}
+            <div className="hp-calc-card">
+              <div className="hp-calc-header">
+                <div>
+                  <span className="hp-calc-badge font-mono">⚡ LIVE SPEED CALCULATOR</span>
+                  <h4 className="hp-calc-title">Big-O Speed &amp; Operations Calculator</h4>
+                  <p className="hp-calc-sub">Move the slider to see how steps grow exponentially with input size.</p>
+                </div>
+                <div className="hp-slider-box">
+                  <div className="hp-slider-label-row">
+                    <span className="font-mono">Input Size (N):</span>
+                    <span className="font-mono font-bold">{sliderN} items</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4" max="1024" step="4"
+                    value={sliderN}
+                    onChange={e => setSliderN(Number(e.target.value))}
+                    className="hp-complexity-slider"
+                  />
+                </div>
+              </div>
+              <div className="hp-calc-grid">
+                {complexityResults.map(d => (
+                  <div key={d.notation} className="hp-calc-pill">
+                    <div className="hp-calc-pill-head">
+                      <span className="hp-calc-label">{d.label}</span>
+                      <span className="hp-calc-notation font-mono" style={{ color: d.color }}>{d.notation}</span>
+                    </div>
+                    <span className="hp-calc-ops font-mono">{d.opsFormatted} steps</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Matrix Table */}
+            <div className="hp-matrix-table-wrap">
+              <table className="hp-matrix-table">
+                <thead>
+                  <tr>
+                    <th>Algorithm</th>
+                    <th>Category</th>
+                    <th>Best</th>
+                    <th>Average</th>
+                    <th>Worst</th>
+                    <th>Space</th>
+                    <th>Stable</th>
+                    <th>Run</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ALGORITHMS.map(algo => (
+                    <tr key={algo.slug} onClick={() => onSelectAlgo(algo.slug)} className="hp-matrix-row">
+                      <td className="font-mono font-bold">{algo.name}</td>
+                      <td><span className="hp-mat-cat font-mono">{CATEGORIES[algo.category]?.label}</span></td>
+                      <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.best) }}>{algo.timeComplexity.best}</span></td>
+                      <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.average) }}>{algo.timeComplexity.average}</span></td>
+                      <td><span className="font-mono" style={{ color: getComplexityColor(algo.timeComplexity.worst) }}>{algo.timeComplexity.worst}</span></td>
+                      <td><span className="hp-mat-space font-mono">{algo.spaceComplexity}</span></td>
+                      <td><span className={`hp-mat-stable${algo.stable ? ' is-stable' : ' is-unstable'}`}>{algo.stable ? '✓' : '✕'}</span></td>
+                      <td>
+                        <button className="hp-mat-run-btn" onClick={e => { e.stopPropagation(); onSelectAlgo(algo.slug); }}>
+                          Run →
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ══ SECTION 5: CODING ACADEMY HUB ═══════════════════════════════ */}
