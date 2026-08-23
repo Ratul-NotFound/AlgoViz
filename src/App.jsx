@@ -35,7 +35,7 @@ function AppContent() {
   const [viewMode, setViewMode] = useState(initialRoute.mode); // 'algo' | 'learn-c'
   const [currentSlug, setCurrentSlug] = useState(initialRoute.slug);
   const [learnLessonSlug, setLearnLessonSlug] = useState(initialRoute.lesson || 'hello-world-intro');
-  const [homeTab, setHomeTab] = useState('catalog'); // 'catalog' | 'academy-preview'
+  const [homeTab, setHomeTab] = useState(null);
   const [pythonModalOpen, setPythonModalOpen] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);

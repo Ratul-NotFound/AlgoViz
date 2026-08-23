@@ -19071,7 +19071,8 @@ button,
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 280px;
+  height: 100%;
+  min-height: 290px;
 }
 
 .hp-sb-header {
@@ -19138,7 +19139,7 @@ button,
   display: flex; align-items: center; gap: 5px;
   background: #10b981;
   border: none; border-radius: 5px;
-  padding: 5px 10px;
+  padding: 5px 12px;
   color: #fff; font-size: 11.5px; font-family: var(--font-sans); font-weight: 600;
   cursor: pointer;
   transition: background 100ms;
@@ -19148,48 +19149,67 @@ button,
 /* Sandbox stage */
 .hp-sb-stage {
   flex: 1;
+  height: 180px;
+  min-height: 170px;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: space-around;
-  padding: 16px 12px 8px;
-  gap: 4px;
-  min-height: 120px;
+  padding: 20px 14px 28px;
+  gap: 6px;
+  background: #011627;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .hp-sb-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  justify-content: flex-end;
+  height: 100%;
   flex: 1;
   position: relative;
+  min-width: 0;
+}
+
+.hp-sb-bar-track {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .hp-sb-bar {
   width: 100%;
-  border-radius: 3px 3px 0 0;
+  max-width: 26px;
+  border-radius: 4px 4px 0 0;
   background: #1e3a5f;
-  transition: height 80ms ease, background 80ms;
-  min-height: 8px;
+  transition: height 120ms ease, background-color 100ms ease;
+  min-height: 14px;
 }
 .hp-sb-bar.active { background: #2563eb; }
 .hp-sb-bar.pivot  { background: #f59e0b; }
+.hp-sb-bar.sorted { background: #10b981; }
 
 .hp-sb-val {
-  font-size: 9px;
-  color: #475569;
+  font-size: 10px;
+  color: #94a3b8;
   line-height: 1;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  user-select: none;
 }
 
 .hp-sb-ptr {
   position: absolute;
-  bottom: -14px;
-  font-size: 9px;
+  bottom: -18px;
+  font-size: 10.5px;
   font-family: var(--font-mono);
   font-weight: 700;
   line-height: 1;
 }
-.hp-ptr-i { color: #2563eb; }
+.hp-ptr-i { color: #38bdf8; }
 .hp-ptr-j { color: #10b981; }
 .hp-ptr-p { color: #f59e0b; }
 
@@ -19202,6 +19222,7 @@ button,
   border-top: 1px solid rgba(255,255,255,0.06);
   gap: 8px;
   flex-wrap: wrap;
+  background: #021d2e;
 }
 
 .hp-telemetry { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -19950,56 +19971,93 @@ button,
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   RESPONSIVE — 5-Breakpoint Architecture
+   RESPONSIVE — 5-Breakpoint Architecture & Mobile Compact System
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ≤1024px: Hero stacks 1-col */
 @media (max-width: 1024px) {
-  .hp-layout { padding: 24px 20px 64px; gap: 32px; }
-  .hp-hero { grid-template-columns: 1fr; }
-  .hp-sandbox { min-height: 240px; }
+  .hp-layout { padding: 24px 20px 60px; gap: 28px; }
+  .hp-hero { grid-template-columns: 1fr; gap: 20px; }
+  .hp-sandbox { min-height: 220px; }
 }
 
 /* ≤860px: Flagship, courses go 1-col */
 @media (max-width: 860px) {
-  .hp-flagship-grid { grid-template-columns: 1fr; }
-  .hp-courses-grid  { grid-template-columns: 1fr; }
+  .hp-flagship-grid { grid-template-columns: 1fr; gap: 14px; }
+  .hp-courses-grid  { grid-template-columns: 1fr; gap: 12px; }
 }
 
-/* ≤768px: Mobile scale */
+/* ≤768px: Mobile scale & compact card system */
 @media (max-width: 768px) {
-  .hp-layout { padding: 20px 16px 52px; gap: 24px; }
-  .hp-h1 { font-size: 26px; }
-  .hp-hero-desc { font-size: 13.5px; }
-  .hp-hero-actions { flex-direction: column; align-items: flex-start; }
-  .hp-btn-academy, .hp-btn-studio { width: 100%; justify-content: center; }
-  .hp-stats-strip { grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 16px; }
-  .hp-final-cta { padding: 28px 20px; }
-  .hp-final-title { font-size: 22px; }
-  .hp-final-actions { flex-direction: column; align-items: stretch; }
+  .hp-layout { padding: 16px 14px 44px; gap: 20px; }
+  .hp-hero-left { gap: 14px; }
+  .hp-h1 { font-size: 24px; line-height: 1.25; }
+  .hp-hero-desc { font-size: 13px; line-height: 1.55; }
+  .hp-hero-actions { display: flex; flex-direction: column; width: 100%; gap: 8px; }
+  .hp-btn-academy, .hp-btn-studio { width: 100%; justify-content: center; padding: 10px 16px; font-size: 13px; }
+  .hp-hero-pills { gap: 6px; }
+  .hp-hero-pill { font-size: 11px; }
+
+  /* Compact Cards */
+  .hp-flagship-card { padding: 16px; gap: 10px; border-radius: 8px; }
+  .hp-fc-title { font-size: 17px; }
+  .hp-fc-desc { font-size: 12.5px; line-height: 1.5; }
+  .hp-fc-snippet { padding: 8px 10px; font-size: 11.5px; }
+  
+  .hp-pillars { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hp-pillar-card { padding: 14px; gap: 6px; border-radius: 8px; }
+  .hp-pillar-title { font-size: 13.5px; }
+  .hp-pillar-desc { font-size: 12px; line-height: 1.5; }
+
+  .hp-section-header { gap: 8px; }
+  .hp-section-title { font-size: 18px; }
+  .hp-section-sub { font-size: 12.5px; }
+
+  .hp-hub-card { padding: 14px 16px; border-radius: 8px; }
+  .hp-hub-title { font-size: 15px; }
+  .hp-hub-desc { font-size: 12.5px; margin-bottom: 8px; }
+
+  .hp-course-card { padding: 14px 16px; border-radius: 8px; }
+  .hp-course-title { font-size: 15px; }
+  .hp-course-desc { font-size: 12.5px; margin-bottom: 10px; }
+
+  .hp-algo-grid { grid-template-columns: 1fr; gap: 8px; }
+  .hp-algo-tile { padding: 10px 12px; }
+
+  .hp-stats-strip { grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 12px; border-radius: 8px; }
+  .hp-stat-value { font-size: 24px; }
+  .hp-stat-label { font-size: 11px; }
+
+  .hp-final-cta { padding: 24px 16px; gap: 12px; border-radius: 10px; }
+  .hp-final-title { font-size: 20px; }
+  .hp-final-desc { font-size: 13px; line-height: 1.5; }
+  .hp-final-actions { flex-direction: column; width: 100%; gap: 8px; }
   .hp-final-actions .hp-btn-academy, .hp-final-actions .hp-btn-studio { width: 100%; justify-content: center; }
-  .hp-fc-title { font-size: 18px; }
-  .hp-section-title { font-size: 19px; }
 }
 
-/* ≤540px: Pillars 1-col, small adjustments */
+/* ≤540px: Small Mobile compact tuning */
 @media (max-width: 540px) {
-  .hp-layout { padding: 16px 14px 48px; gap: 20px; }
-  .hp-h1 { font-size: 23px; }
+  .hp-layout { padding: 12px 10px 36px; gap: 16px; }
+  .hp-h1 { font-size: 21px; }
   .hp-pillars { grid-template-columns: 1fr; }
-  .hp-algo-grid { grid-template-columns: 1fr; }
-  .hp-stats-strip { grid-template-columns: 1fr 1fr; padding: 16px 14px; }
-  .hp-stat-value { font-size: 22px; }
-  .hp-calc-grid { grid-template-columns: 1fr 1fr; }
-  .hp-drawer-banner { flex-direction: column; }
+  .hp-sandbox { min-height: 190px; }
+  .hp-sb-stage { min-height: 85px; padding: 8px 6px 4px; }
+  .hp-sb-val { font-size: 8px; }
+  .hp-sb-header { padding: 6px 8px; gap: 4px; }
+  .hp-sb-tab { padding: 3px 6px; font-size: 10px; }
+  .hp-telemetry { gap: 4px; }
+  .hp-t-chip { font-size: 9.5px; padding: 2px 6px; }
+  .hp-calc-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .hp-calc-pill { padding: 8px 10px; }
+  .hp-drawer-banner { flex-direction: column; gap: 8px; padding: 10px 12px; }
 }
 
-/* ≤375px: Minimum comfortable reading */
+/* ≤375px: Minimum compact readability */
 @media (max-width: 375px) {
-  .hp-layout { padding: 12px 12px 40px; gap: 16px; }
-  .hp-h1 { font-size: 21px; }
-  .hp-stats-strip { grid-template-columns: 1fr; }
-  .hp-flagship-grid { gap: 12px; }
+  .hp-layout { padding: 10px 8px 32px; gap: 14px; }
+  .hp-h1 { font-size: 19px; }
+  .hp-stats-strip { grid-template-columns: 1fr 1fr; padding: 12px 8px; }
+  .hp-stat-value { font-size: 20px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -20023,3 +20081,4 @@ button,
 [data-theme="light"] .hp-algo-tile   { background: #f1f5f9; }
 [data-theme="light"] .hp-mod-card    { background: #ffffff; }
 [data-theme="light"] .hp-calc-card   { background: #f1f5f9; }
+

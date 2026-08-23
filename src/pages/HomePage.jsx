@@ -29,18 +29,18 @@ function getComplexityColor(comp = '') {
 }
 
 /* ─── Component ─────────────────────────────────────── */
-export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal, initialTab = 'catalog' }) {
+export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal, initialTab = null }) {
   const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
 
-  /* Catalog state */
+  /* Catalog state - closed by default */
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState(initialTab); // 'catalog' | 'duel' | 'matrix'
+  const [activeTab, setActiveTab] = useState(initialTab || null); // null | 'catalog' | 'duel' | 'matrix'
   const [showAllAlgos, setShowAllAlgos] = useState(false);
 
-  /* Academy state */
-  const [expandedCourse, setExpandedCourse] = useState('c');
-  const [expandedModule, setExpandedModule] = useState('module-1');
+  /* Academy state - closed by default */
+  const [expandedCourse, setExpandedCourse] = useState(null); // null | 'c' | 'python' | 'java' | 'cpp'
+  const [expandedModule, setExpandedModule] = useState(null);
 
   /* Big-O slider */
   const [sliderN, setSliderN] = useState(64);
@@ -48,24 +48,138 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
   /* Hero sandbox state */
   const [heroMode, setHeroMode] = useState('quick'); // 'quick' | 'bubble' | 'binary'
   const [heroArray, setHeroArray] = useState([42, 18, 85, 29, 67, 12, 94, 38, 55, 73]);
-  const [heroActiveIdx, setHeroActiveIdx] = useState({ i: -1, j: -1, pivot: -1 });
+  const [heroActiveIdx, setHeroActiveIdx] = useState({ i: -1, j: -1, pivot: -1, sorted: false, found: false });
   const [heroSorting, setHeroSorting] = useState(false);
   const [heroStats, setHeroStats] = useState({ step: 0, comps: 0, swaps: 0 });
   const heroTimerRef = useRef(null);
+  const heroFramesRef = useRef([]);
+  const heroFrameIdxRef = useRef(0);
 
   useEffect(() => {
-    if (initialTab) setActiveTab(initialTab);
+    if (initialTab !== undefined) setActiveTab(initialTab);
   }, [initialTab]);
 
   useEffect(() => () => clearInterval(heroTimerRef.current), []);
+
+  /* Generate trace frames for accurate step-by-step playback */
+  const generateFrames = (mode, arrInput) => {
+    const arr = [...arrInput];
+    const frames = [];
+    let comps = 0;
+    let swaps = 0;
+
+    if (mode === 'bubble') {
+      const n = arr.length;
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+          comps++;
+          frames.push({
+            array: [...arr],
+            active: { i: j, j: j + 1, pivot: -1 },
+            stats: { step: frames.length + 1, comps, swaps },
+          });
+          if (arr[j] > arr[j + 1]) {
+            swaps++;
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            frames.push({
+              array: [...arr],
+              active: { i: j, j: j + 1, pivot: -1 },
+              stats: { step: frames.length + 1, comps, swaps },
+            });
+          }
+        }
+      }
+      frames.push({
+        array: [...arr],
+        active: { i: -1, j: -1, pivot: -1, sorted: true },
+        stats: { step: frames.length + 1, comps, swaps },
+      });
+    } else if (mode === 'binary') {
+      const sortedArr = [...arr].sort((a, b) => a - b);
+      const target = sortedArr[Math.floor(Math.random() * sortedArr.length)];
+      let left = 0;
+      let right = sortedArr.length - 1;
+
+      while (left <= right) {
+        comps++;
+        const mid = Math.floor((left + right) / 2);
+        frames.push({
+          array: [...sortedArr],
+          active: { i: left, j: right, pivot: mid },
+          stats: { step: frames.length + 1, comps, swaps: 0 },
+        });
+
+        if (sortedArr[mid] === target) {
+          frames.push({
+            array: [...sortedArr],
+            active: { i: mid, j: mid, pivot: mid, found: true, sorted: true },
+            stats: { step: frames.length + 1, comps, swaps: 0 },
+          });
+          break;
+        } else if (sortedArr[mid] < target) {
+          left = mid + 1;
+        } else {
+          right = mid - 1;
+        }
+      }
+    } else {
+      // Quick sort trace
+      function qs(low, high) {
+        if (low < high) {
+          const pivotVal = arr[high];
+          let i = low - 1;
+
+          for (let j = low; j < high; j++) {
+            comps++;
+            frames.push({
+              array: [...arr],
+              active: { i: Math.max(0, i), j, pivot: high },
+              stats: { step: frames.length + 1, comps, swaps },
+            });
+
+            if (arr[j] < pivotVal) {
+              i++;
+              swaps++;
+              [arr[i], arr[j]] = [arr[j], arr[i]];
+              frames.push({
+                array: [...arr],
+                active: { i, j, pivot: high },
+                stats: { step: frames.length + 1, comps, swaps },
+              });
+            }
+          }
+          swaps++;
+          [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+          const pi = i + 1;
+          frames.push({
+            array: [...arr],
+            active: { i: pi, j: pi, pivot: -1 },
+            stats: { step: frames.length + 1, comps, swaps },
+          });
+
+          qs(low, pi - 1);
+          qs(pi + 1, high);
+        }
+      }
+      qs(0, arr.length - 1);
+      frames.push({
+        array: [...arr],
+        active: { i: -1, j: -1, pivot: -1, sorted: true },
+        stats: { step: frames.length + 1, comps, swaps },
+      });
+    }
+    return frames;
+  };
 
   /* Hero sandbox helpers */
   const shuffleHero = () => {
     clearInterval(heroTimerRef.current);
     setHeroSorting(false);
-    setHeroActiveIdx({ i: -1, j: -1, pivot: -1 });
+    setHeroActiveIdx({ i: -1, j: -1, pivot: -1, sorted: false, found: false });
     setHeroStats({ step: 0, comps: 0, swaps: 0 });
-    const fresh = Array.from({ length: 10 }, () => Math.floor(Math.random() * 75) + 15);
+    heroFramesRef.current = [];
+    heroFrameIdxRef.current = 0;
+    const fresh = Array.from({ length: 10 }, () => Math.floor(Math.random() * 75) + 20);
     if (heroMode === 'binary') fresh.sort((a, b) => a - b);
     setHeroArray(fresh);
   };
@@ -73,10 +187,12 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
   const handleSwitchHeroMode = (mode) => {
     clearInterval(heroTimerRef.current);
     setHeroSorting(false);
-    setHeroActiveIdx({ i: -1, j: -1, pivot: -1 });
+    setHeroActiveIdx({ i: -1, j: -1, pivot: -1, sorted: false, found: false });
     setHeroStats({ step: 0, comps: 0, swaps: 0 });
     setHeroMode(mode);
-    const fresh = Array.from({ length: 10 }, () => Math.floor(Math.random() * 75) + 15);
+    heroFramesRef.current = [];
+    heroFrameIdxRef.current = 0;
+    const fresh = Array.from({ length: 10 }, () => Math.floor(Math.random() * 75) + 20);
     if (mode === 'binary') fresh.sort((a, b) => a - b);
     setHeroArray(fresh);
   };
@@ -87,76 +203,28 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
       setHeroSorting(false);
       return;
     }
-    setHeroSorting(true);
-    let arr = [...heroArray];
-    let stepCount = heroStats.step;
-    let compCount = heroStats.comps;
-    let swapCount = heroStats.swaps;
 
-    if (heroMode === 'bubble') {
-      let i = 0, j = 0;
-      const n = arr.length;
-      heroTimerRef.current = setInterval(() => {
-        if (i < n) {
-          if (j < n - i - 1) {
-            compCount++; stepCount++;
-            setHeroActiveIdx({ i: j, j: j + 1, pivot: -1 });
-            if (arr[j] > arr[j + 1]) {
-              swapCount++;
-              [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-              setHeroArray([...arr]);
-            }
-            setHeroStats({ step: stepCount, comps: compCount, swaps: swapCount });
-            j++;
-          } else { j = 0; i++; }
-        } else {
-          clearInterval(heroTimerRef.current);
-          setHeroSorting(false);
-          setHeroActiveIdx({ i: -1, j: -1, pivot: -1 });
-        }
-      }, 90);
-    } else if (heroMode === 'binary') {
-      let left = 0, right = arr.length - 1;
-      const target = arr[Math.floor(Math.random() * arr.length)];
-      heroTimerRef.current = setInterval(() => {
-        if (left <= right) {
-          stepCount++; compCount++;
-          const mid = Math.floor((left + right) / 2);
-          setHeroActiveIdx({ i: left, j: right, pivot: mid });
-          setHeroStats({ step: stepCount, comps: compCount, swaps: swapCount });
-          if (arr[mid] === target) { clearInterval(heroTimerRef.current); setHeroSorting(false); }
-          else if (arr[mid] < target) left = mid + 1;
-          else right = mid - 1;
-        } else {
-          clearInterval(heroTimerRef.current);
-          setHeroSorting(false);
-          setHeroActiveIdx({ i: -1, j: -1, pivot: -1 });
-        }
-      }, 350);
-    } else {
-      // Quick sort simulation
-      let i = 0, j = 0;
-      const n = arr.length;
-      heroTimerRef.current = setInterval(() => {
-        if (i < n) {
-          if (j < n - i - 1) {
-            compCount++; stepCount++;
-            setHeroActiveIdx({ i: j, j: j + 1, pivot: n - 1 });
-            if (arr[j] > arr[j + 1]) {
-              swapCount++;
-              [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-              setHeroArray([...arr]);
-            }
-            setHeroStats({ step: stepCount, comps: compCount, swaps: swapCount });
-            j++;
-          } else { j = 0; i++; }
-        } else {
-          clearInterval(heroTimerRef.current);
-          setHeroSorting(false);
-          setHeroActiveIdx({ i: -1, j: -1, pivot: -1 });
-        }
-      }, 80);
+    if (!heroFramesRef.current.length || heroFrameIdxRef.current >= heroFramesRef.current.length) {
+      heroFramesRef.current = generateFrames(heroMode, heroArray);
+      heroFrameIdxRef.current = 0;
     }
+
+    setHeroSorting(true);
+    const speed = heroMode === 'binary' ? 320 : 100;
+
+    heroTimerRef.current = setInterval(() => {
+      if (heroFrameIdxRef.current < heroFramesRef.current.length) {
+        const frame = heroFramesRef.current[heroFrameIdxRef.current];
+        setHeroArray([...frame.array]);
+        setHeroActiveIdx(frame.active);
+        setHeroStats(frame.stats);
+        heroFrameIdxRef.current++;
+      } else {
+        clearInterval(heroTimerRef.current);
+        setHeroSorting(false);
+        setHeroActiveIdx(prev => ({ ...prev, sorted: true }));
+      }
+    }, speed);
   };
 
   /* Catalog filters */
@@ -259,10 +327,10 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
               ))}
             </div>
             <div className="hp-sb-controls">
-              <button className="hp-sb-icon-btn" onClick={shuffleHero} title="Shuffle">
+              <button className="hp-sb-icon-btn" onClick={shuffleHero} title="Shuffle Data">
                 <ShuffleIcon size={12} />
               </button>
-              <button className="hp-sb-play-btn" onClick={runHeroAnimation}>
+              <button className="hp-sb-play-btn" onClick={runHeroAnimation} title={heroSorting ? 'Pause Simulation' : 'Run Simulation'}>
                 {heroSorting ? <PauseIcon size={11} /> : <PlayIcon size={11} />}
                 <span>{heroSorting ? 'Pause' : 'Run'}</span>
               </button>
@@ -274,17 +342,20 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
               const isI = idx === heroActiveIdx.i;
               const isJ = idx === heroActiveIdx.j;
               const isPivot = idx === heroActiveIdx.pivot;
+              const isSorted = heroActiveIdx.sorted;
               const isActive = isI || isJ || isPivot;
               return (
                 <div key={idx} className="hp-sb-col">
-                  <div
-                    className={`hp-sb-bar${isActive ? ' active' : ''}${isPivot ? ' pivot' : ''}`}
-                    style={{ height: `${Math.max(12, val)}%` }}
-                  />
+                  <div className="hp-sb-bar-track">
+                    <div
+                      className={`hp-sb-bar${isActive ? ' active' : ''}${isPivot ? ' pivot' : ''}${isSorted ? ' sorted' : ''}`}
+                      style={{ height: `${Math.max(16, val)}%` }}
+                    />
+                  </div>
                   <span className="hp-sb-val font-mono">{val}</span>
-                  {isI && <span className="hp-sb-ptr hp-ptr-i">i</span>}
-                  {isJ && <span className="hp-sb-ptr hp-ptr-j">j</span>}
-                  {isPivot && <span className="hp-sb-ptr hp-ptr-p">p</span>}
+                  {isI && <span className="hp-sb-ptr hp-ptr-i">{heroMode === 'binary' ? 'L' : 'i'}</span>}
+                  {isJ && <span className="hp-sb-ptr hp-ptr-j">{heroMode === 'binary' ? 'R' : 'j'}</span>}
+                  {isPivot && <span className="hp-sb-ptr hp-ptr-p">{heroMode === 'binary' ? 'M' : 'P'}</span>}
                 </div>
               );
             })}
