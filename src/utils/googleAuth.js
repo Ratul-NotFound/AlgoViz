@@ -3,11 +3,14 @@
 const GIS_SCRIPT_ID = 'google-identity-services-script';
 const GIS_SCRIPT_URL = 'https://accounts.google.com/gsi/client';
 
+let isGsiInitialized = false;
+let gsiCallbackRegistry = new Set();
+
 /**
  * Dynamically loads the Google Identity Services SDK script if not already present.
  */
 export function loadGoogleIdentityScript() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (typeof window === 'undefined') {
       return resolve(null);
     }
@@ -20,25 +23,30 @@ export function loadGoogleIdentityScript() {
       existingScript.addEventListener('load', () => {
         resolve(window.google?.accounts?.id || null);
       });
-      existingScript.addEventListener('error', (err) => {
-        reject(err);
+      existingScript.addEventListener('error', () => {
+        // Blocked by ad-blocker or client extension
+        resolve(null);
       });
       return;
     }
 
-    const script = document.createElement('script');
-    script.id = GIS_SCRIPT_ID;
-    script.src = GIS_SCRIPT_URL;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      resolve(window.google?.accounts?.id || null);
-    };
-    script.onerror = (err) => {
-      console.warn('[GoogleAuth] Failed to load Google Identity Services script:', err);
-      reject(err);
-    };
-    document.head.appendChild(script);
+    try {
+      const script = document.createElement('script');
+      script.id = GIS_SCRIPT_ID;
+      script.src = GIS_SCRIPT_URL;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        resolve(window.google?.accounts?.id || null);
+      };
+      script.onerror = (err) => {
+        // Silently handled: adblocker / privacy extension blocked GSI script
+        resolve(null);
+      };
+      document.head.appendChild(script);
+    } catch {
+      resolve(null);
+    }
   });
 }
 
@@ -70,15 +78,15 @@ export function parseJwtCredential(token) {
       provider: 'google',
     };
   } catch (err) {
-    console.error('[GoogleAuth] Failed to parse JWT credential:', err);
+    console.warn('[GoogleAuth] Failed to parse JWT credential:', err);
     return null;
   }
 }
 
-const DEFAULT_GOOGLE_CLIENT_ID = '38255739556-oforkmkbij62j65tiabp2pj14r93886c.apps.googleusercontent.com';
+const DEFAULT_GOOGLE_CLIENT_ID = '951225872440-o7k8vd736m03bgi13q5v679l79p821f1.apps.googleusercontent.com';
 
 /**
- * Checks if a real custom Google Client ID is configured in .env or default fallback.
+ * Checks if a custom Google Client ID is configured in .env or default fallback.
  */
 export function hasCustomGoogleClientId() {
   return Boolean(getGoogleClientId());
@@ -96,46 +104,61 @@ export function getGoogleClientId() {
 }
 
 /**
- * Initialize Google One Tap & Google Accounts API.
+ * Global single-point dispatcher for Google OAuth responses to avoid multiple initialize() warnings.
  */
-export async function initGoogleOneTap({ onCredentialResponse, promptParentId = null }) {
+function ensureGsiInitialized(googleId, clientId) {
+  if (isGsiInitialized) return;
+
   try {
-    const clientId = getGoogleClientId();
-    if (!clientId) {
-      // No real Google Client ID provided in .env, skip triggering Google's 401 prompt
-      return false;
-    }
-
-    const googleId = await loadGoogleIdentityScript();
-    if (!googleId) return false;
-
-    const config = {
+    googleId.initialize({
       client_id: clientId,
       callback: (response) => {
         if (response && response.credential) {
           const user = parseJwtCredential(response.credential);
-          if (user && onCredentialResponse) {
-            onCredentialResponse(user, response.credential);
+          if (user) {
+            gsiCallbackRegistry.forEach((cb) => {
+              try { cb(user, response.credential); } catch {}
+            });
           }
         }
       },
       auto_select: false,
       cancel_on_tap_outside: false,
       use_fedcm_for_prompt: true,
-    };
+    });
+    isGsiInitialized = true;
+  } catch (err) {
+    console.warn('[GoogleAuth] GSI initialize suppressed:', err);
+  }
+}
 
-    if (promptParentId && document.getElementById(promptParentId)) {
-      config.prompt_parent_id = promptParentId;
+/**
+ * Initialize Google One Tap & Google Accounts API.
+ */
+export async function initGoogleOneTap({ onCredentialResponse }) {
+  try {
+    const clientId = getGoogleClientId();
+    if (!clientId) return false;
+
+    const googleId = await loadGoogleIdentityScript();
+    if (!googleId) return false;
+
+    if (onCredentialResponse) {
+      gsiCallbackRegistry.add(onCredentialResponse);
     }
 
-    googleId.initialize(config);
+    ensureGsiInitialized(googleId, clientId);
 
     // Prompt Google One Tap popup gracefully
-    googleId.prompt();
+    googleId.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // One tap skipped or blocked by browser/client
+      }
+    });
 
     return true;
-  } catch (e) {
-    // Graceful fallback if One Tap is blocked or FedCM is suppressed by browser settings
+  } catch {
+    // Graceful fallback if One Tap is blocked or FedCM is suppressed
     return false;
   }
 }
@@ -145,21 +168,18 @@ export async function initGoogleOneTap({ onCredentialResponse, promptParentId = 
  */
 export async function renderGoogleButton(containerElement, { onSuccess, theme = 'outline', size = 'large' }) {
   try {
+    if (!containerElement) return false;
     const googleId = await loadGoogleIdentityScript();
-    if (!googleId || !containerElement) return false;
+    if (!googleId) return false;
 
     const clientId = getGoogleClientId();
-    googleId.initialize({
-      client_id: clientId,
-      callback: (response) => {
-        if (response && response.credential) {
-          const user = parseJwtCredential(response.credential);
-          if (user && onSuccess) {
-            onSuccess(user, response.credential);
-          }
-        }
-      },
-    });
+    if (!clientId) return false;
+
+    if (onSuccess) {
+      gsiCallbackRegistry.add(onSuccess);
+    }
+
+    ensureGsiInitialized(googleId, clientId);
 
     googleId.renderButton(containerElement, {
       type: 'standard',
@@ -172,8 +192,8 @@ export async function renderGoogleButton(containerElement, { onSuccess, theme = 
     });
 
     return true;
-  } catch (e) {
-    console.warn('[GoogleAuth] Failed to render Google button:', e);
+  } catch {
     return false;
   }
 }
+
