@@ -3,26 +3,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { GoogleIcon, BookmarkIcon, CheckCircleIcon, AlgoFlowXLogo } from './Icons.jsx';
-import { renderGoogleButton, triggerGooglePrompt, hasCustomGoogleClientId } from '../utils/googleAuth.js';
+import { launchGoogleOAuthRedirect, hasCustomGoogleClientId } from '../utils/googleAuth.js';
 
 export default function AuthModal() {
-  const { authModalOpen, closeAuthModal, handleGoogleSuccess } = useAuth();
-  const googleBtnContainerRef = useRef(null);
+  const { authModalOpen, closeAuthModal } = useAuth();
   const [hasClientId, setHasClientId] = useState(false);
 
   useEffect(() => {
-    const isConfigured = hasCustomGoogleClientId();
-    setHasClientId(isConfigured);
-
-    if (authModalOpen && isConfigured && googleBtnContainerRef.current) {
-      renderGoogleButton(googleBtnContainerRef.current, {
-        onSuccess: (userProfile, credential) => {
-          handleGoogleSuccess(userProfile, credential);
-        },
-        size: 'large',
-      });
-    }
-  }, [authModalOpen, handleGoogleSuccess]);
+    setHasClientId(hasCustomGoogleClientId());
+  }, []);
 
   if (!authModalOpen) return null;
 
@@ -83,16 +72,14 @@ export default function AuthModal() {
 
         {/* Actions Group — 100% Real Google OAuth */}
         <div className="auth-actions-group">
-          <div className="google-btn-wrapper" ref={googleBtnContainerRef}>
-            <button
-              type="button"
-              className="btn-google-sign-in"
-              onClick={() => triggerGooglePrompt({ onSuccess: handleGoogleSuccess })}
-            >
-              <GoogleIcon size={18} />
-              <span>Continue with Google</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className="btn-google-sign-in"
+            onClick={() => launchGoogleOAuthRedirect()}
+          >
+            <GoogleIcon size={18} />
+            <span>Continue with Google</span>
+          </button>
         </div>
 
         {/* Modal Footer Note */}

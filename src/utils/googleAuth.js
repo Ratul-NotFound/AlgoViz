@@ -133,9 +133,9 @@ function ensureGsiInitialized(googleId, clientId) {
 }
 
 /**
- * Initialize Google One Tap & Google Accounts API.
+ * Initialize Google One Tap & Google Accounts API gracefully.
  */
-export async function initGoogleOneTap({ onCredentialResponse }) {
+export async function initGoogleOneTap({ onCredentialResponse } = {}) {
   try {
     const clientId = getGoogleClientId();
     if (!clientId) return false;
@@ -149,12 +149,8 @@ export async function initGoogleOneTap({ onCredentialResponse }) {
 
     ensureGsiInitialized(googleId, clientId);
 
-    // Prompt Google One Tap popup gracefully
-    googleId.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        // One tap skipped or blocked by browser/client
-      }
-    });
+    // Prompt Google One Tap cleanly without deprecated status methods
+    googleId.prompt();
 
     return true;
   } catch {
@@ -162,6 +158,7 @@ export async function initGoogleOneTap({ onCredentialResponse }) {
     return false;
   }
 }
+
 
 /**
  * Render official Google Sign-In Button inside a specified container element.
