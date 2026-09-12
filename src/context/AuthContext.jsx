@@ -116,41 +116,41 @@ export function AuthProvider({ children }) {
     }
   }, [cQuizScores]);
 
-  // Save Bookmarks to LocalStorage & Supabase
+  // Save Bookmarks to LocalStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_BOOKMARKS, JSON.stringify(bookmarkedAlgos));
     } catch (e) {
       console.warn('Failed to save bookmarks:', e);
     }
-    if (user) {
-      upsertUserProfile(user, bookmarkedAlgos, completedAlgos, cCompletedLessons);
-    }
-  }, [bookmarkedAlgos, user, completedAlgos, cCompletedLessons]);
+  }, [bookmarkedAlgos]);
 
-  // Save Completed algorithms to LocalStorage & Supabase
+  // Save Completed algorithms to LocalStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_COMPLETED, JSON.stringify(completedAlgos));
     } catch (e) {
       console.warn('Failed to save completed algorithms:', e);
     }
-    if (user) {
-      upsertUserProfile(user, bookmarkedAlgos, completedAlgos, cCompletedLessons);
-    }
-  }, [completedAlgos, user, bookmarkedAlgos, cCompletedLessons]);
+  }, [completedAlgos]);
 
-  // Save Completed C Lessons to LocalStorage & Supabase
+  // Save Completed C Lessons to LocalStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_C_COMPLETED, JSON.stringify(cCompletedLessons));
     } catch (e) {
       console.warn('Failed to save completed C lessons:', e);
     }
-    if (user) {
+  }, [cCompletedLessons]);
+
+  // Consolidated Cloud Sync (debounced to avoid redundant network requests)
+  useEffect(() => {
+    if (!user) return;
+    const timer = setTimeout(() => {
       upsertUserProfile(user, bookmarkedAlgos, completedAlgos, cCompletedLessons);
-    }
-  }, [cCompletedLessons, user, bookmarkedAlgos, completedAlgos]);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [user, bookmarkedAlgos, completedAlgos, cCompletedLessons]);
 
   // ── 4. Google Sign-In & Login Handlers ──
   const handleGoogleSuccess = useCallback((userProfile, credentialToken) => {
