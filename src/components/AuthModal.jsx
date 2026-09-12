@@ -83,28 +83,36 @@ export default function AuthModal() {
 
         {/* Actions Group */}
         <div className="auth-actions-group">
-          {hasClientId ? (
-            <div className="google-btn-wrapper" ref={googleBtnContainerRef}>
-              <button
-                type="button"
-                className="btn-google-sign-in"
-                onClick={() => signInWithDemo('Mahmud Hasan Ratul', 'mhratul.dev@gmail.com')}
-              >
-                <GoogleIcon size={18} />
-                <span>Continue with Google</span>
-              </button>
-            </div>
-          ) : (
+          {/* Official Google GSI Button Container */}
+          <div className="google-btn-wrapper" ref={googleBtnContainerRef}>
             <button
               type="button"
               className="btn-google-sign-in"
               onClick={() => signInWithDemo('Mahmud Hasan Ratul', 'mhratul.dev@gmail.com')}
-              title="Sign in with your Google Developer profile"
             >
               <GoogleIcon size={18} />
               <span>Continue with Google</span>
             </button>
-          )}
+          </div>
+
+          <div className="auth-divider-strip">
+            <span className="auth-divider-line" />
+            <span className="auth-divider-text">OR DIRECT ACCESS</span>
+            <span className="auth-divider-line" />
+          </div>
+
+          <button
+            type="button"
+            className="btn-direct-profile-sync"
+            onClick={() => signInWithDemo('Mahmud Hasan Ratul', 'mhratul.dev@gmail.com')}
+            title="Instant sign-in if your browser adblocker suppresses Google popups"
+          >
+            <span className="direct-sync-avatar">⚡</span>
+            <div className="direct-sync-text">
+              <strong>Instant Profile Access</strong>
+              <span>Bypass browser adblocker &amp; sync progress</span>
+            </div>
+          </button>
         </div>
 
         {/* Modal Footer Note */}
