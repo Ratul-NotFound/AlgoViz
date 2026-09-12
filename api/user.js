@@ -1,5 +1,5 @@
 // api/user.js — Serverless Endpoint for User Profile Synchronization (MongoDB Atlas)
-import clientPromise from './_mongo.js';
+import { getMongoClient } from './_mongo.js';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -16,12 +16,16 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!clientPromise) {
-    return res.status(503).json({ error: 'MongoDB connection string not configured' });
-  }
-
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
+    if (!client) {
+      // In offline / fallback mode, return 200 so frontend local storage handles it smoothly
+      if (req.method === 'POST') {
+        return res.status(200).json({ success: true, localOnly: true });
+      }
+      return res.status(404).json({ error: 'User not found in offline mode' });
+    }
+
     const db = client.db('algoflowx');
     const users = db.collection('users');
 
@@ -72,7 +76,10 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: 'Method Not Allowed' });
   } catch (err) {
-    console.error('[MongoDB API] Error in /api/user:', err);
+    console.warn('[MongoDB API] Error in /api/user:', err.message);
+    if (req.method === 'POST') {
+      return res.status(200).json({ success: true, localOnly: true });
+    }
     return res.status(500).json({ error: err.message || 'Internal Server Error' });
   }
 }

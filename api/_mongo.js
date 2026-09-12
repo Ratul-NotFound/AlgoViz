@@ -1,28 +1,39 @@
-// api/_mongo.js — Shared MongoDB Atlas Client Pool for Serverless & Local API
+// api/_mongo.js — Safe, Lazy MongoDB Atlas Client Pool for Serverless & Local API
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || process.env.VITE_MONGODB_URI || '';
-const options = {};
+let cachedClient = null;
+let cachedPromise = null;
 
-let client;
-let clientPromise;
+export async function getMongoClient() {
+  const uri = process.env.MONGODB_URI || process.env.VITE_MONGODB_URI || '';
 
-if (!uri) {
-  // Graceful fallback if MONGODB_URI is not set yet
-  clientPromise = null;
-} else {
-  if (process.env.NODE_ENV === 'development') {
-    // In development mode, use a global variable so the client is preserved across HMR reloads
-    if (!global._mongoClientPromise) {
-      client = new MongoClient(uri, options);
-      global._mongoClientPromise = client.connect();
-    }
-    clientPromise = global._mongoClientPromise;
-  } else {
-    // In production mode, create a standard client instance
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
+  if (!uri || uri.includes('<db_username>')) {
+    return null;
+  }
+
+  if (cachedPromise) {
+    return cachedPromise;
+  }
+
+  const options = {
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 10000,
+    maxPoolSize: 10,
+  };
+
+  try {
+    cachedClient = new MongoClient(uri, options);
+    cachedPromise = cachedClient.connect().catch((err) => {
+      console.warn('[MongoDB] Connection initialization warning:', err.message);
+      cachedPromise = null;
+      return null;
+    });
+    return cachedPromise;
+  } catch (err) {
+    console.warn('[MongoDB] Client creation error:', err.message);
+    cachedPromise = null;
+    return null;
   }
 }
 
-export default clientPromise;
+export default getMongoClient;

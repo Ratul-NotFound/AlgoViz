@@ -1,5 +1,5 @@
 // api/stats.js — Serverless Endpoint for Registered Users Count (MongoDB Atlas)
-import clientPromise from './_mongo.js';
+import { getMongoClient } from './_mongo.js';
 
 const BASE_USER_OFFSET = 120;
 
@@ -18,12 +18,12 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!clientPromise) {
-    return res.status(200).json({ count: BASE_USER_OFFSET });
-  }
-
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
+    if (!client) {
+      return res.status(200).json({ count: BASE_USER_OFFSET });
+    }
+
     const db = client.db('algoflowx');
     const users = db.collection('users');
 
