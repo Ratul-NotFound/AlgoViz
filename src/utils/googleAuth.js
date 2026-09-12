@@ -198,27 +198,101 @@ export async function renderGoogleButton(containerElement, { onSuccess, theme = 
 }
 
 /**
+ * Launch Standard Google OAuth 2.0 Top-Level Redirect Flow.
+ * Bypasses all browser popup blockers and ad-blockers completely.
+ */
+export function launchGoogleOAuthRedirect() {
+  if (typeof window === 'undefined') return;
+
+  const clientId = getGoogleClientId();
+  if (!clientId) {
+    console.warn('[GoogleAuth] No Google Client ID configured.');
+    return;
+  }
+
+  const origin = window.location.origin;
+  const currentHash = window.location.hash || '#/';
+  const state = encodeURIComponent(currentHash);
+  const nonce = String(Date.now());
+
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${encodeURIComponent(clientId)}&` +
+    `redirect_uri=${encodeURIComponent(origin)}&` +
+    `response_type=token%20id_token&` +
+    `scope=${encodeURIComponent('openid email profile')}&` +
+    `nonce=${nonce}&` +
+    `state=${state}&` +
+    `prompt=select_account`;
+
+  window.location.href = authUrl;
+}
+
+/**
+ * Check if the current URL contains OAuth tokens after a redirect return.
+ */
+export function checkOAuthRedirectCallback() {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const rawHash = window.location.hash || '';
+    const rawSearch = window.location.search || '';
+
+    let params = null;
+    if (rawHash.includes('id_token=') || rawHash.includes('access_token=')) {
+      params = new URLSearchParams(rawHash.replace(/^#\/?/, ''));
+    } else if (rawSearch.includes('id_token=') || rawSearch.includes('credential=')) {
+      params = new URLSearchParams(rawSearch.replace(/^\?/, ''));
+    }
+
+    if (!params) return null;
+
+    const idToken = params.get('id_token') || params.get('credential');
+    if (idToken) {
+      const user = parseJwtCredential(idToken);
+      if (user) {
+        const returnState = params.get('state');
+        const targetHash = returnState ? decodeURIComponent(returnState) : '#/';
+        
+        // Clean URL without tokens
+        try {
+          window.history.replaceState(null, '', window.location.pathname + targetHash);
+        } catch {}
+
+        return { user, credential: idToken };
+      }
+    }
+  } catch (err) {
+    console.warn('[GoogleAuth] Error parsing OAuth redirect callback:', err);
+  }
+
+  return null;
+}
+
+/**
  * Trigger authentic Google Account selection prompt on click.
  */
 export async function triggerGooglePrompt({ onSuccess } = {}) {
+  // First try Google Identity Services prompt
   try {
     const googleId = await loadGoogleIdentityScript();
-    if (!googleId) return false;
-
-    const clientId = getGoogleClientId();
-    if (!clientId) return false;
-
-    if (onSuccess) {
-      gsiCallbackRegistry.add(onSuccess);
+    if (googleId) {
+      const clientId = getGoogleClientId();
+      if (onSuccess) {
+        gsiCallbackRegistry.add(onSuccess);
+      }
+      ensureGsiInitialized(googleId, clientId);
+      googleId.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // If popup is suppressed by browser, automatically fall back to standard redirect
+          launchGoogleOAuthRedirect();
+        }
+      });
+      return true;
     }
+  } catch {}
 
-    ensureGsiInitialized(googleId, clientId);
-
-    googleId.prompt();
-    return true;
-  } catch (err) {
-    console.warn('[GoogleAuth] Failed to trigger Google prompt:', err);
-    return false;
-  }
+  // Fallback to top-level redirect flow
+  launchGoogleOAuthRedirect();
+  return true;
 }
 

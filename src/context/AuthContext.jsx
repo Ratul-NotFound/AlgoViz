@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { initGoogleOneTap } from '../utils/googleAuth.js';
-import { upsertUserProfile, fetchUserProfile } from '../utils/supabase.js';
+import { initGoogleOneTap, checkOAuthRedirectCallback } from '../utils/googleAuth.js';
+import { upsertUserProfile, fetchUserProfile } from '../utils/database.js';
 
 const AuthContext = createContext(null);
 
@@ -219,8 +219,16 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // ── 5. Automatic Google One Tap on Mount ──
+  // ── 5. Automatic Google OAuth Redirect Detection & One Tap on Mount ──
   useEffect(() => {
+    // 1. Check if user returned from Google OAuth redirect flow
+    const redirectRes = checkOAuthRedirectCallback();
+    if (redirectRes && redirectRes.user) {
+      handleGoogleSuccess(redirectRes.user, redirectRes.credential);
+      return;
+    }
+
+    // 2. Otherwise trigger One-Tap if available
     if (!user && typeof window !== 'undefined') {
       const timer = setTimeout(() => {
         initGoogleOneTap({
