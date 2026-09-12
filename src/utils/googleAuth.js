@@ -226,8 +226,9 @@ export function launchGoogleOAuthRedirect() {
 
 /**
  * Check if the current URL contains OAuth tokens after a redirect return.
+ * Supports both id_token JWT decoding and access_token userinfo API fetching.
  */
-export function checkOAuthRedirectCallback() {
+export async function checkOAuthRedirectCallback() {
   if (typeof window === 'undefined') return null;
 
   try {
@@ -237,25 +238,55 @@ export function checkOAuthRedirectCallback() {
     let params = null;
     if (rawHash.includes('id_token=') || rawHash.includes('access_token=')) {
       params = new URLSearchParams(rawHash.replace(/^#\/?/, ''));
-    } else if (rawSearch.includes('id_token=') || rawSearch.includes('credential=')) {
+    } else if (rawSearch.includes('id_token=') || rawSearch.includes('access_token=') || rawSearch.includes('credential=')) {
       params = new URLSearchParams(rawSearch.replace(/^\?/, ''));
     }
 
     if (!params) return null;
 
     const idToken = params.get('id_token') || params.get('credential');
+    const accessToken = params.get('access_token');
+
+    const cleanUrl = () => {
+      const returnState = params.get('state');
+      const targetHash = returnState ? decodeURIComponent(returnState) : '#/';
+      try {
+        window.history.replaceState(null, '', window.location.pathname + targetHash);
+      } catch {}
+    };
+
+    // 1. Try decoding id_token JWT
     if (idToken) {
       const user = parseJwtCredential(idToken);
       if (user) {
-        const returnState = params.get('state');
-        const targetHash = returnState ? decodeURIComponent(returnState) : '#/';
-        
-        // Clean URL without tokens
-        try {
-          window.history.replaceState(null, '', window.location.pathname + targetHash);
-        } catch {}
-
+        cleanUrl();
         return { user, credential: idToken };
+      }
+    }
+
+    // 2. Try fetching user profile with access_token
+    if (accessToken) {
+      try {
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (userInfoRes.ok) {
+          const profile = await userInfoRes.json();
+          const user = {
+            sub: profile.sub || String(Date.now()),
+            email: profile.email || '',
+            email_verified: Boolean(profile.email_verified),
+            name: profile.name || profile.email?.split('@')[0] || 'AlgoFlow User',
+            given_name: profile.given_name || '',
+            family_name: profile.family_name || '',
+            picture: profile.picture || '',
+            provider: 'google',
+          };
+          cleanUrl();
+          return { user, credential: accessToken };
+        }
+      } catch (err) {
+        console.warn('[GoogleAuth] Failed to fetch Google userinfo:', err);
       }
     }
   } catch (err) {
@@ -264,6 +295,7 @@ export function checkOAuthRedirectCallback() {
 
   return null;
 }
+
 
 /**
  * Trigger authentic Google Account selection prompt on click.

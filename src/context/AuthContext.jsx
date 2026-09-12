@@ -219,27 +219,24 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // ── 5. Automatic Google OAuth Redirect Detection & One Tap on Mount ──
+  // ── 5. Automatic Google OAuth Redirect Return Detection on Mount ──
   useEffect(() => {
-    // 1. Check if user returned from Google OAuth redirect flow
-    const redirectRes = checkOAuthRedirectCallback();
-    if (redirectRes && redirectRes.user) {
-      handleGoogleSuccess(redirectRes.user, redirectRes.credential);
-      return;
+    let isMounted = true;
+
+    async function handleAuthInit() {
+      // 1. Check if user returned from Google OAuth redirect flow
+      const redirectRes = await checkOAuthRedirectCallback();
+      if (redirectRes && redirectRes.user && isMounted) {
+        handleGoogleSuccess(redirectRes.user, redirectRes.credential);
+      }
     }
 
-    // 2. Otherwise trigger One-Tap if available
-    if (!user && typeof window !== 'undefined') {
-      const timer = setTimeout(() => {
-        initGoogleOneTap({
-          onCredentialResponse: (userProfile, credential) => {
-            handleGoogleSuccess(userProfile, credential);
-          },
-        });
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [user, handleGoogleSuccess]);
+    handleAuthInit();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [handleGoogleSuccess]);
 
   // ── 6. Coin Economy Methods ──
   const addCoins = useCallback((amount, reason = '') => {
