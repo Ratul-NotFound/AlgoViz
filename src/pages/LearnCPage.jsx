@@ -438,8 +438,8 @@ export default function LearnCPage({
                 <span className="dev-online-beacon" />
               </div>
               <div className="dev-meta">
+                <span className="dev-role-label">Made by</span>
                 <span className="dev-name">Ratul</span>
-                <span className="dev-role-label">Creator & Engineer</span>
               </div>
             </a>
 
