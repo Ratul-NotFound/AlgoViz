@@ -197,3 +197,28 @@ export async function renderGoogleButton(containerElement, { onSuccess, theme = 
   }
 }
 
+/**
+ * Trigger authentic Google Account selection prompt on click.
+ */
+export async function triggerGooglePrompt({ onSuccess } = {}) {
+  try {
+    const googleId = await loadGoogleIdentityScript();
+    if (!googleId) return false;
+
+    const clientId = getGoogleClientId();
+    if (!clientId) return false;
+
+    if (onSuccess) {
+      gsiCallbackRegistry.add(onSuccess);
+    }
+
+    ensureGsiInitialized(googleId, clientId);
+
+    googleId.prompt();
+    return true;
+  } catch (err) {
+    console.warn('[GoogleAuth] Failed to trigger Google prompt:', err);
+    return false;
+  }
+}
+

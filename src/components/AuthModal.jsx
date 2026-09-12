@@ -3,10 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { GoogleIcon, BookmarkIcon, CheckCircleIcon, AlgoFlowXLogo } from './Icons.jsx';
-import { renderGoogleButton, hasCustomGoogleClientId } from '../utils/googleAuth.js';
+import { renderGoogleButton, triggerGooglePrompt, hasCustomGoogleClientId } from '../utils/googleAuth.js';
 
 export default function AuthModal() {
-  const { authModalOpen, closeAuthModal, handleGoogleSuccess, signInWithDemo } = useAuth();
+  const { authModalOpen, closeAuthModal, handleGoogleSuccess } = useAuth();
   const googleBtnContainerRef = useRef(null);
   const [hasClientId, setHasClientId] = useState(false);
 
@@ -81,45 +81,26 @@ export default function AuthModal() {
           </div>
         </div>
 
-        {/* Actions Group */}
+        {/* Actions Group — 100% Real Google OAuth */}
         <div className="auth-actions-group">
-          {/* Official Google GSI Button Container */}
           <div className="google-btn-wrapper" ref={googleBtnContainerRef}>
             <button
               type="button"
               className="btn-google-sign-in"
-              onClick={() => signInWithDemo('Mahmud Hasan Ratul', 'mhratul.dev@gmail.com')}
+              onClick={() => triggerGooglePrompt({ onSuccess: handleGoogleSuccess })}
             >
               <GoogleIcon size={18} />
               <span>Continue with Google</span>
             </button>
           </div>
-
-          <div className="auth-divider-strip">
-            <span className="auth-divider-line" />
-            <span className="auth-divider-text">OR DIRECT ACCESS</span>
-            <span className="auth-divider-line" />
-          </div>
-
-          <button
-            type="button"
-            className="btn-direct-profile-sync"
-            onClick={() => signInWithDemo('Mahmud Hasan Ratul', 'mhratul.dev@gmail.com')}
-            title="Instant sign-in if your browser adblocker suppresses Google popups"
-          >
-            <span className="direct-sync-avatar">⚡</span>
-            <div className="direct-sync-text">
-              <strong>Instant Profile Access</strong>
-              <span>Bypass browser adblocker &amp; sync progress</span>
-            </div>
-          </button>
         </div>
 
         {/* Modal Footer Note */}
         <div className="auth-modal-footer">
-          <span>We respect your privacy. Profile data is stored locally for session sync.</span>
+          <span>Sign in with your Google account to sync your profile across devices.</span>
         </div>
       </div>
     </div>
   );
 }
+
