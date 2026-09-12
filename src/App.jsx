@@ -16,6 +16,11 @@ function parseRouteFromHash() {
   if (typeof window === 'undefined') return { mode: 'algo', slug: null, lesson: null };
   const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
 
+  // Guard: if hash contains OAuth tokens from Google redirect, ignore it for routing
+  if (rawHash.includes('access_token=') || rawHash.includes('id_token=') || rawHash.includes('credential=')) {
+    return { mode: 'algo', slug: null, lesson: null };
+  }
+
   if (rawHash.startsWith('learn/c')) {
     const parts = rawHash.split('/');
     const lesson = parts[2] || 'hello-world-intro';
@@ -57,6 +62,11 @@ function AppContent() {
 
   // Synchronize URL hash whenever mode or slug changes
   useEffect(() => {
+    // If hash currently has OAuth tokens, let GoogleAuth interceptor process it
+    if (window.location.hash.includes('access_token=') || window.location.hash.includes('id_token=') || window.location.hash.includes('credential=')) {
+      return;
+    }
+
     if (viewMode === 'learn-c') {
       window.location.hash = `#learn/c/${learnLessonSlug}`;
     } else if (currentSlug) {

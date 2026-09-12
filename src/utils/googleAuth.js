@@ -194,6 +194,55 @@ export async function renderGoogleButton(containerElement, { onSuccess, theme = 
   }
 }
 
+// Module-level synchronous interceptor to capture Google OAuth tokens BEFORE React mounts
+let cachedRedirectResult = null;
+
+if (typeof window !== 'undefined') {
+  try {
+    const rawHash = window.location.hash || '';
+    const rawSearch = window.location.search || '';
+
+    let params = null;
+    if (rawHash.includes('id_token=') || rawHash.includes('access_token=') || rawHash.includes('credential=')) {
+      params = new URLSearchParams(rawHash.replace(/^#\/?/, ''));
+    } else if (rawSearch.includes('id_token=') || rawSearch.includes('access_token=') || rawSearch.includes('credential=')) {
+      params = new URLSearchParams(rawSearch.replace(/^\?/, ''));
+    }
+
+    if (params) {
+      const idToken = params.get('id_token') || params.get('credential');
+      const accessToken = params.get('access_token');
+      const state = params.get('state');
+
+      if (idToken) {
+        const user = parseJwtCredential(idToken);
+        if (user) {
+          const fullUser = {
+            ...user,
+            token: idToken,
+            lastLogin: new Date().toISOString(),
+          };
+          try {
+            localStorage.setItem('algoflowx_auth_user', JSON.stringify(fullUser));
+          } catch {}
+          cachedRedirectResult = { user: fullUser, credential: idToken };
+        }
+      } else if (accessToken) {
+        cachedRedirectResult = { accessToken, state };
+      }
+
+      // Clean the URL so tokens don't sit in the address bar
+      try {
+        const returnState = state ? decodeURIComponent(state) : '';
+        const targetHash = returnState && returnState !== '/' && returnState !== '#/' ? (returnState.startsWith('#') ? returnState : `#/${returnState.replace(/^\//, '')}`) : '';
+        window.history.replaceState(null, '', window.location.pathname + targetHash);
+      } catch {}
+    }
+  } catch (err) {
+    console.warn('[GoogleAuth] Synchronous redirect intercept error:', err);
+  }
+}
+
 /**
  * Launch Standard Google OAuth 2.0 Top-Level Redirect Flow.
  * Bypasses all browser popup blockers and ad-blockers completely.
@@ -231,12 +280,52 @@ export function launchGoogleOAuthRedirect() {
 export async function checkOAuthRedirectCallback() {
   if (typeof window === 'undefined') return null;
 
+  // 1. If we already decoded id_token synchronously at module load
+  if (cachedRedirectResult && cachedRedirectResult.user) {
+    const result = cachedRedirectResult;
+    cachedRedirectResult = null;
+    return result;
+  }
+
+  // 2. If we only had access_token and need to fetch userinfo
+  if (cachedRedirectResult && cachedRedirectResult.accessToken) {
+    const accessToken = cachedRedirectResult.accessToken;
+    cachedRedirectResult = null;
+    try {
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (userInfoRes.ok) {
+        const profile = await userInfoRes.json();
+        const user = {
+          sub: profile.sub || String(Date.now()),
+          email: profile.email || '',
+          email_verified: Boolean(profile.email_verified),
+          name: profile.name || profile.email?.split('@')[0] || 'AlgoFlow User',
+          given_name: profile.given_name || '',
+          family_name: profile.family_name || '',
+          picture: profile.picture || '',
+          provider: 'google',
+          token: accessToken,
+          lastLogin: new Date().toISOString(),
+        };
+        try {
+          localStorage.setItem('algoflowx_auth_user', JSON.stringify(user));
+        } catch {}
+        return { user, credential: accessToken };
+      }
+    } catch (err) {
+      console.warn('[GoogleAuth] Failed to fetch Google userinfo:', err);
+    }
+  }
+
+  // 3. Fallback: inspect live URL
   try {
     const rawHash = window.location.hash || '';
     const rawSearch = window.location.search || '';
 
     let params = null;
-    if (rawHash.includes('id_token=') || rawHash.includes('access_token=')) {
+    if (rawHash.includes('id_token=') || rawHash.includes('access_token=') || rawHash.includes('credential=')) {
       params = new URLSearchParams(rawHash.replace(/^#\/?/, ''));
     } else if (rawSearch.includes('id_token=') || rawSearch.includes('access_token=') || rawSearch.includes('credential=')) {
       params = new URLSearchParams(rawSearch.replace(/^\?/, ''));
@@ -249,13 +338,13 @@ export async function checkOAuthRedirectCallback() {
 
     const cleanUrl = () => {
       const returnState = params.get('state');
-      const targetHash = returnState ? decodeURIComponent(returnState) : '#/';
+      const targetHash = returnState && returnState !== '/' && returnState !== '#/' ? (returnState.startsWith('#') ? returnState : `#/${returnState.replace(/^\//, '')}`) : '';
       try {
         window.history.replaceState(null, '', window.location.pathname + targetHash);
       } catch {}
     };
 
-    // 1. Try decoding id_token JWT
+    // Try decoding id_token JWT
     if (idToken) {
       const user = parseJwtCredential(idToken);
       if (user) {
@@ -264,7 +353,7 @@ export async function checkOAuthRedirectCallback() {
       }
     }
 
-    // 2. Try fetching user profile with access_token
+    // Try fetching user profile with access_token
     if (accessToken) {
       try {
         const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -281,6 +370,8 @@ export async function checkOAuthRedirectCallback() {
             family_name: profile.family_name || '',
             picture: profile.picture || '',
             provider: 'google',
+            token: accessToken,
+            lastLogin: new Date().toISOString(),
           };
           cleanUrl();
           return { user, credential: accessToken };
