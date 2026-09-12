@@ -396,8 +396,11 @@ export default function Sidebar({
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.style.display = 'none';
+                  const fallback = e.target.nextElementSibling;
+                  if (fallback) fallback.style.display = 'flex';
                 }}
               />
+              <span className="dev-avatar-fallback-letter" style={{ display: 'none' }}>R</span>
               <span className="dev-online-beacon" />
             </div>
             <div className="dev-meta">

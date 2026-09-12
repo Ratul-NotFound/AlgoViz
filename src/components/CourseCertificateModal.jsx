@@ -10,6 +10,7 @@ export default function CourseCertificateModal({ isOpen, onClose }) {
     totalCQuizMarksPossible,
     cOverallGradePct,
     completedQuizCount,
+    totalCChapters,
     isCCourseFullyCompleted,
   } = useAuth();
   const [studentName, setStudentName] = useState(user?.name || 'AlgoFlowX Scholar');
@@ -17,6 +18,10 @@ export default function CourseCertificateModal({ isOpen, onClose }) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef(null);
+
+  const chaptersTotal = totalCChapters || 23;
+  const examsPassed = completedQuizCount || 0;
+  const completionPct = Math.round((examsPassed / chaptersTotal) * 100);
 
   useEffect(() => {
     if (user?.name) {
@@ -26,7 +31,7 @@ export default function CourseCertificateModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // ── Eligibility Gate: Must have completed all 14 chapter quizzes ──
+  // ── Eligibility Gate: Must have completed all chapter quizzes ──
   if (!isCCourseFullyCompleted) {
     return (
       <div className="certificate-modal-overlay" onClick={onClose}>
@@ -40,26 +45,26 @@ export default function CourseCertificateModal({ isOpen, onClose }) {
             Certificate of Completion Locked
           </h2>
           <p style={{ color: '#cbd5e1', fontSize: '14px', lineHeight: '1.6', marginBottom: '20px' }}>
-            To be eligible for your verified <strong>C Master Academy Certificate</strong>, you must complete the 10-question examination for all 14 chapters.
+            To be eligible for your verified <strong>C Master Academy Certificate</strong>, you must complete the examination for all {chaptersTotal} chapters.
           </p>
 
           {/* Progress Tracker */}
           <div style={{ background: '#070d1e', border: '1px solid #334155', borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#94a3b8', marginBottom: '8px' }}>
               <span>Examinations Passed</span>
-              <strong style={{ color: '#38bdf8' }}>{completedQuizCount || 0} of 14 Chapters ({Math.round(((completedQuizCount || 0) / 14) * 100)}%)</strong>
+              <strong style={{ color: '#38bdf8' }}>{examsPassed} of {chaptersTotal} Chapters ({completionPct}%)</strong>
             </div>
             <div style={{ width: '100%', height: '8px', background: '#1e293b', borderRadius: '4px', overflow: 'hidden' }}>
               <div
                 style={{
-                  width: `${Math.round(((completedQuizCount || 0) / 14) * 100)}%`,
+                  width: `${completionPct}%`,
                   height: '100%',
                   background: 'linear-gradient(90deg, #3b82f6, #10b981)',
                 }}
               />
             </div>
             <div style={{ marginTop: '10px', fontSize: '12px', color: '#64748b' }}>
-              Remaining: <strong>{Math.max(0, 14 - (completedQuizCount || 0))} Chapter Quizzes</strong> to unlock certificate.
+              Remaining: <strong>{Math.max(0, chaptersTotal - examsPassed)} Chapter Quizzes</strong> to unlock certificate.
             </div>
           </div>
 

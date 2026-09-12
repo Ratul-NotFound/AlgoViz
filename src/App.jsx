@@ -161,6 +161,7 @@ function AppContent() {
   }, []);
 
   const handleSelectAlgo = useCallback((slug) => {
+    setViewMode('algo');
     setCurrentSlug(slug);
     setSidebarOpen(false);
   }, []);

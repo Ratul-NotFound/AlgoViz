@@ -329,10 +329,10 @@ export function AuthProvider({ children }) {
   const isBookmarked = useCallback((slug) => bookmarkedAlgos.includes(slug), [bookmarkedAlgos]);
   const isCompleted = useCallback((slug) => completedAlgos.includes(slug), [completedAlgos]);
   
-  // Chapter is completed if quiz taken
+  // Chapter is completed if quiz taken or marked complete
   const isCLessonCompleted = useCallback((slug) => {
-    return Boolean(cQuizScores[slug] && cQuizScores[slug].score !== undefined);
-  }, [cQuizScores]);
+    return Boolean((cQuizScores[slug] && cQuizScores[slug].score !== undefined) || cCompletedLessons.includes(slug));
+  }, [cQuizScores, cCompletedLessons]);
 
   // Overall marks calculations across all 23 chapters
   const totalCChapters = 23;
@@ -348,13 +348,13 @@ export function AuthProvider({ children }) {
   
   // ── Student Mastery Rank ──
   const userRank = useMemo(() => {
-    const chapters = completedQuizCount;
+    const chapters = Math.max(completedQuizCount, cCompletedLessons.length);
     if (chapters >= 23) return { title: 'C Grandmaster & Architect', icon: '👑', color: '#f59e0b', level: 5 };
     if (chapters >= 15) return { title: 'Algorithm Master', icon: '🏆', color: '#38bdf8', level: 4 };
     if (chapters >= 8) return { title: 'Logic Knight', icon: '⚔️', color: '#818cf8', level: 3 };
     if (chapters >= 3) return { title: 'Syntax Apprentice', icon: '⚡', color: '#10b981', level: 2 };
     return { title: 'Novice Coder', icon: '🌱', color: '#94a3b8', level: 1 };
-  }, [completedQuizCount]);
+  }, [completedQuizCount, cCompletedLessons.length]);
 
   // ── Custom Display Name Update ──
   const updateUserName = useCallback((newName) => {
@@ -368,9 +368,10 @@ export function AuthProvider({ children }) {
       } catch (e) {
         console.warn('Failed to update user name:', e);
       }
+      upsertUserProfile(updated, bookmarkedAlgos, completedAlgos, cCompletedLessons);
       return updated;
     });
-  }, []);
+  }, [bookmarkedAlgos, completedAlgos, cCompletedLessons]);
 
   // ── Reset All Learning Progress ──
   const resetAllProgress = useCallback(() => {
@@ -414,7 +415,7 @@ export function AuthProvider({ children }) {
     unlockedHints,
     bookmarkedAlgos,
     completedAlgos,
-    cCompletedLessons: Object.keys(cQuizScores),
+    cCompletedLessons: Array.from(new Set([...cCompletedLessons, ...Object.keys(cQuizScores)])),
     cQuizScores,
     saveCQuizScore,
     totalCChapters,

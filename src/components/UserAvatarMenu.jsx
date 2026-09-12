@@ -58,7 +58,12 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
   const cDoneCount = (cCompletedLessons || []).length;
   const cProgressPct = Math.round((cDoneCount / totalCChapters) * 100);
 
+  // Dynamic next uncompleted chapter
+  const nextUncompletedChapter = C_LESSONS.find((l) => !(cCompletedLessons || []).includes(l.slug))?.slug || 'hello-world-intro';
+
   const initial = (user.name || user.email || 'U').charAt(0).toUpperCase();
+  const displayName = user.given_name || (user.name ? user.name.split(' ')[0] : (user.email ? user.email.split('@')[0] : 'User'));
+  const fullName = user.name || (user.email ? user.email.split('@')[0] : 'AlgoFlow User');
 
   const handleSaveName = () => {
     if (nameInput.trim()) {
@@ -78,14 +83,14 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
           setNameInput(user.name || '');
           setConfirmReset(false);
         }}
-        title={`${user.name} • ${userRank.title}`}
+        title={`${fullName} • ${userRank.title}`}
         aria-label="User profile and progress menu"
         aria-expanded={open}
       >
         {user.picture ? (
           <img
             src={user.picture}
-            alt={user.name}
+            alt={fullName}
             className="user-avatar-img"
             referrerPolicy="no-referrer"
             onError={(e) => {
@@ -95,7 +100,7 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
         ) : (
           <div className="user-avatar-fallback">{initial}</div>
         )}
-        <span className="user-avatar-name">{user.given_name || user.name.split(' ')[0]}</span>
+        <span className="user-avatar-name">{displayName}</span>
         <span className="user-avatar-badge" style={{ color: userRank.color }}>
           {userRank.icon} {cDoneCount}/{totalCChapters}
         </span>
@@ -110,9 +115,12 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
               {user.picture ? (
                 <img
                   src={user.picture}
-                  alt={user.name}
+                  alt={fullName}
                   className="dropdown-avatar-large"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
                 />
               ) : (
                 <div className="dropdown-avatar-fallback-large">{initial}</div>
@@ -125,16 +133,20 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
                       className="inline-name-input"
                       value={nameInput}
                       onChange={(e) => setNameInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveName();
+                        if (e.key === 'Escape') setIsEditingName(false);
+                      }}
                       autoFocus
                       maxLength={40}
+                      placeholder="Your full name"
                     />
                     <button type="button" className="btn-save-name" onClick={handleSaveName}>✓</button>
                     <button type="button" className="btn-cancel-name" onClick={() => setIsEditingName(false)}>✕</button>
                   </div>
                 ) : (
                   <div className="user-name-edit-row">
-                    <span className="user-dropdown-fullname">{user.name}</span>
+                    <span className="user-dropdown-fullname">{fullName}</span>
                     <button
                       type="button"
                       className="btn-edit-pencil"
@@ -148,7 +160,7 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
                     </button>
                   </div>
                 )}
-                <div className="user-dropdown-email">{user.email}</div>
+                <div className="user-dropdown-email">{user.email || 'Google Authenticated'}</div>
               </div>
             </div>
 
@@ -207,7 +219,7 @@ export default function UserAvatarMenu({ onSelectAlgo, onOpenLearnC }) {
                 type="button"
                 className="btn-resume-academy"
                 onClick={() => {
-                  if (onOpenLearnC) onOpenLearnC();
+                  if (onOpenLearnC) onOpenLearnC(nextUncompletedChapter);
                   setOpen(false);
                 }}
               >
