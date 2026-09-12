@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     const db = client.db('algoflowx');
     const users = db.collection('users');
 
-    const dbCount = await users.estimatedDocumentCount();
+    const dbCount = await users.countDocuments();
     const totalCount = BASE_USER_OFFSET + (dbCount || 0);
 
     return res.status(200).json({

@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { fetchTotalUserCount } from '../utils/database.js';
 
-export default function LiveUserCounter() {
+export default function LiveUserCounter({ className = '' }) {
   const [userCount, setUserCount] = useState(() => {
     try {
       const saved = localStorage.getItem('algoflowx_sim_user_count');
-      return saved ? Math.max(120, parseInt(saved, 10)) : 124;
+      const val = saved ? parseInt(saved, 10) : NaN;
+      return !isNaN(val) && val >= 120 ? val : 120;
     } catch {
-      return 124;
+      return 120;
     }
   });
   const [isPulsing, setIsPulsing] = useState(false);
@@ -21,51 +22,37 @@ export default function LiveUserCounter() {
       const count = await fetchTotalUserCount();
       if (isMounted && typeof count === 'number' && count >= 120) {
         setUserCount((prev) => {
-          const nextVal = Math.max(prev, count);
+          if (count !== prev) {
+            setIsPulsing(true);
+            setTimeout(() => {
+              if (isMounted) setIsPulsing(false);
+            }, 1000);
+          }
           try {
-            localStorage.setItem('algoflowx_sim_user_count', String(nextVal));
+            localStorage.setItem('algoflowx_sim_user_count', String(count));
           } catch {}
-          return nextVal;
+          return count;
         });
       }
     }
 
     loadCount();
 
-    // 1. Poll database periodically (every 45s)
-    const pollInterval = setInterval(loadCount, 45000);
-
-    // 2. Organic live learner activity tick (every 35-75s)
-    const tickInterval = setInterval(() => {
-      if (isMounted) {
-        setIsPulsing(true);
-        setUserCount((prev) => {
-          const updated = prev + 1;
-          try {
-            localStorage.setItem('algoflowx_sim_user_count', String(updated));
-          } catch {}
-          return updated;
-        });
-        setTimeout(() => {
-          if (isMounted) setIsPulsing(false);
-        }, 1200);
-      }
-    }, 48000);
+    // Poll live MongoDB registered count every 20 seconds
+    const pollInterval = setInterval(loadCount, 20000);
 
     return () => {
       isMounted = false;
       clearInterval(pollInterval);
-      clearInterval(tickInterval);
     };
   }, []);
 
   return (
     <div
-      className={`live-user-counter-pill ${isPulsing ? 'counter-updated-pulse' : ''}`}
-      title={`${userCount.toLocaleString()} engineers and students mastering Data Structures & Algorithms on AlgoFlowX`}
+      className={`live-user-counter-pill ${isPulsing ? 'counter-updated-pulse' : ''} ${className}`}
+      title={`${userCount.toLocaleString()} learners and engineers enrolled on AlgoFlowX`}
     >
       <span className="live-pulse-dot" aria-hidden="true" />
-      <span className="live-counter-icon">👥</span>
       <span className="live-counter-number font-mono">
         {userCount.toLocaleString()}
       </span>

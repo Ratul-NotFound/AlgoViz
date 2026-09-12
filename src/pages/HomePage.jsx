@@ -8,6 +8,7 @@ import {
   BookmarkIcon, CheckCircleIcon
 } from '../components/Icons.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { fetchTotalUserCount } from '../utils/database.js';
 
 /* ─── Helpers ─────────────────────────────────────── */
 function calculateOperations(n) {
@@ -54,6 +55,24 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
   const heroTimerRef = useRef(null);
   const heroFramesRef = useRef([]);
   const heroFrameIdxRef = useRef(0);
+
+  const [totalLearners, setTotalLearners] = useState(() => {
+    try {
+      const saved = localStorage.getItem('algoflowx_sim_user_count');
+      const val = saved ? parseInt(saved, 10) : NaN;
+      return !isNaN(val) && val >= 120 ? val : 120;
+    } catch {
+      return 120;
+    }
+  });
+
+  useEffect(() => {
+    fetchTotalUserCount().then((count) => {
+      if (typeof count === 'number' && count >= 120) {
+        setTotalLearners(count);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (initialTab !== undefined) setActiveTab(initialTab);
@@ -296,7 +315,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </div>
 
           <div className="hp-hero-pills">
-            {['100% Free & Open Access', '230 Quizzes & Labs', 'In-Browser C Compiler', 'Free Certificate'].map(t => (
+            {[`👥 ${totalLearners.toLocaleString()}+ Active Learners`, '100% Free & Open Access', '230 Quizzes & Labs', 'In-Browser C Compiler', 'Free Certificate'].map(t => (
               <div key={t} className="hp-hero-pill">
                 <span className="hp-pill-check">✓</span>
                 <span>{t}</span>
@@ -1192,6 +1211,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
       {/* ══ SECTION 6: PLATFORM STATS STRIP ══════════════════════════════ */}
       <section className="hp-stats-strip">
         {[
+          { value: `${totalLearners.toLocaleString()}+`, label: 'Active Learners', color: '#38bdf8' },
           { value: '23', label: 'C Chapters', color: '#10b981' },
           { value: '230', label: 'Quizzes & Labs', color: '#2563eb' },
           { value: `${ALGORITHMS.length}+`, label: 'Algorithm Visualizers', color: '#8b5cf6' },
