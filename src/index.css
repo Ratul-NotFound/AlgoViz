@@ -17895,7 +17895,134 @@ button,
   color: #1e293b;
 }
 
-[data-theme="light"] .pipeline-stage-viewer,
+[data-theme="light"] .pipeline-step-node {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #334155;
+}
+
+[data-theme="light"] .pipeline-step-node:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .pipeline-step-node.active {
+  background: rgba(2, 132, 199, 0.12) !important;
+  border-color: #0284c7 !important;
+  color: #0369a1 !important;
+  font-weight: 700;
+}
+
+[data-theme="light"] .pipeline-step-node .step-num {
+  font-weight: 800;
+}
+
+[data-theme="light"] .btn-type-pill {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #475569;
+}
+
+[data-theme="light"] .btn-type-pill:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .btn-type-pill.active {
+  background: rgba(2, 132, 199, 0.12) !important;
+  border-color: #0284c7 !important;
+  color: #0369a1 !important;
+  font-weight: 700;
+}
+
+[data-theme="light"] .pipeline-stage-viewer {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .stage-info-bar {
+  background: #f1f5f9;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .stage-desc {
+  color: #475569;
+}
+
+[data-theme="light"] .stage-code-window {
+  background: #ffffff;
+}
+
+[data-theme="light"] .stage-code-window pre,
+[data-theme="light"] .stage-code-window code {
+  color: #0f172a;
+}
+
+[data-theme="light"] .ram-summary-callout {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.25);
+  color: #0f172a;
+}
+
+[data-theme="light"] .ram-byte-cell {
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="light"] .ram-byte-cell.empty {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+[data-theme="light"] .ram-byte-cell.occupied {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #047857;
+}
+
+[data-theme="light"] .cast-code {
+  color: #0f172a;
+}
+
+[data-theme="light"] .cast-note,
+[data-theme="light"] .scope-desc {
+  color: #475569;
+}
+
+[data-theme="light"] .alu-register-row .reg-label {
+  color: #334155;
+}
+
+[data-theme="light"] .bit-toggle-btn.bit-off {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #64748b;
+}
+
+[data-theme="light"] .bit-toggle-btn.bit-on {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+  border-color: #10b981;
+}
+
+[data-theme="light"] .bit-toggle-btn.bit-res {
+  background: rgba(2, 132, 199, 0.15);
+  color: #0284c7;
+  border-color: #0284c7;
+}
+
+[data-theme="light"] .btn-alu-op {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #475569;
+}
+
+[data-theme="light"] .btn-alu-op.active {
+  background: rgba(217, 119, 6, 0.12);
+  border-color: #d97706;
+  color: #b45309;
+  font-weight: 700;
+}
+
 [data-theme="light"] .alu-result-card,
 [data-theme="light"] .io-pipeline-visual,
 [data-theme="light"] .pointer-link-visual {
@@ -17903,7 +18030,6 @@ button,
   border-color: rgba(15, 23, 42, 0.1);
 }
 
-[data-theme="light"] .stage-code-window pre,
 [data-theme="light"] .result-header {
   color: #0f172a;
 }
@@ -17918,9 +18044,112 @@ button,
   border-color: rgba(15, 23, 42, 0.1);
 }
 
+[data-theme="light"] .tree-branch-node.active {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
 [data-theme="light"] .branch-cond,
 [data-theme="light"] .box-title {
   color: #0f172a;
+}
+
+[data-theme="light"] .branch-result {
+  color: #334155;
+}
+
+[data-theme="light"] .io-arrow,
+[data-theme="light"] .pointer-glowing-arrow {
+  color: #475569;
+}
+
+[data-theme="light"] .ram-tape-cell,
+[data-theme="light"] .char-cell {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+[data-theme="light"] .matrix-cell {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+[data-theme="light"] .matrix-cell.hovered,
+[data-theme="light"] .ram-tape-cell.hovered {
+  background: rgba(2, 132, 199, 0.15);
+  border-color: #0284c7;
+}
+
+[data-theme="light"] .null-term-cell {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+[data-theme="light"] .struct-memory-block {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .struct-header-bar {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .struct-field {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+[data-theme="light"] .heap-block-item.allocated {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #b45309;
+}
+
+[data-theme="light"] .heap-block-item.freed {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #047857;
+}
+
+[data-theme="light"] .leak-status-bar {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="light"] .stack-frame-box {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+[data-theme="light"] .stack-frame-box.base-frame {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+}
+
+[data-theme="light"] .loop-step-cell.pending {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #64748b;
+}
+
+[data-theme="light"] .loop-step-cell.current {
+  background: rgba(2, 132, 199, 0.12);
+  border-color: #0284c7;
+  color: #0369a1;
+}
+
+[data-theme="light"] .loop-step-cell.completed {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #047857;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
