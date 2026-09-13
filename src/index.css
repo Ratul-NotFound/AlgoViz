@@ -5475,9 +5475,10 @@ button,
 
 /* ─────────────────────────────────────────
    Algorithm Workspace Layout
+───────────────────────────────────────── */
 .algo-page {
   display: grid;
-  grid-template-columns: 1fr 6px var(--right-panel-width, 420px);
+  grid-template-columns: minmax(320px, 1fr) 6px var(--right-panel-width, 420px);
   height: 100%;
   overflow: hidden;
 }
@@ -6705,9 +6706,10 @@ button,
     min-width: 38px !important;
     min-height: 38px !important;
   }
-  .header-langs, .header-badge { display: none !important; }
+}
 
-  /* Mobile/Tablet algo page: clean unified vertical flow inside scrollable .main */
+/* Mobile algo page: clean unified vertical flow only on small mobile phone screens (<= 600px) */
+@media (max-width: 600px) {
   .algo-page {
     display: flex !important;
     flex-direction: column !important;
@@ -15627,8 +15629,10 @@ button,
     width: 100% !important;
     box-sizing: border-box !important;
   }
+}
 
-  /* Visualizer on tablet/mobile */
+/* Mobile algorithm page stacked flow only for screens ≤600px */
+@media (max-width: 600px) {
   .algo-page {
     display: flex !important;
     flex-direction: column !important;
@@ -20077,6 +20081,115 @@ button,
 
 .hp-hub-hint { font-size: 10.5px; color: var(--text-dim); }
 
+/* ── Segmented Studio Nav Bar ── */
+.hp-studio-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hp-studio-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 140ms ease;
+  font-family: var(--font-sans);
+}
+
+.hp-studio-nav-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.hp-studio-nav-btn.active {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+  color: var(--text-main);
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hp-studio-nav-btn.active.tab-green {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.hp-studio-nav-btn.active.tab-amber {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.hp-studio-nav-btn.active.tab-blue {
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #3b82f6;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.hp-studio-nav-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--bg-hover);
+}
+
+[data-theme="light"] .hp-studio-nav-bar {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .hp-studio-nav-btn {
+  color: #64748b;
+}
+
+[data-theme="light"] .hp-studio-nav-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .hp-studio-nav-btn.active {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.18);
+  color: #0f172a;
+}
+
+[data-theme="light"] .hp-studio-nav-btn.active.tab-green {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+  color: #047857;
+}
+
+[data-theme="light"] .hp-studio-nav-btn.active.tab-amber {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+[data-theme="light"] .hp-studio-nav-btn.active.tab-blue {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
 .hp-drawer-expanded {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -20501,6 +20614,24 @@ button,
 .hp-final-actions {
   display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
   margin-top: 4px;
+}
+
+.hp-final-author {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.hp-author-link {
+  color: #10b981;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 120ms ease;
+}
+
+.hp-author-link:hover {
+  color: #059669;
+  text-decoration: underline;
 }
 
 /* ═══════════════════════════════════════════════════════════════════

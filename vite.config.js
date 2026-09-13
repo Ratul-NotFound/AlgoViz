@@ -14,6 +14,21 @@ export default defineConfig(({ mode }) => {
         configureServer(server) {
           // Dynamic import only when dev server starts up and receives request
           server.middlewares.use(async (req, res, next) => {
+            // Polyfill Express/Vercel serverless helper methods on standard http.ServerResponse
+            if (!res.status) {
+              res.status = function(code) {
+                res.statusCode = code;
+                return res;
+              };
+            }
+            if (!res.json) {
+              res.json = function(data) {
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(data));
+                return res;
+              };
+            }
+
             const url = new URL(req.url, `http://${req.headers.host}`);
 
             if (url.pathname === '/api/user') {

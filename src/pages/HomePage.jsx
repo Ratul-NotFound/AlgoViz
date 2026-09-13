@@ -4,8 +4,7 @@ import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
 import AlgorithmDuel from '../components/AlgorithmDuel.jsx';
 import {
   SearchIcon, ArrowRightIcon, PlayIcon, PauseIcon, ShuffleIcon,
-  PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, getAlgoIcon,
-  BookmarkIcon, CheckCircleIcon
+  getAlgoIcon, BookmarkIcon
 } from '../components/Icons.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchTotalUserCount } from '../utils/database.js';
@@ -30,18 +29,18 @@ function getComplexityColor(comp = '') {
 }
 
 /* ─── Component ─────────────────────────────────────── */
-export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal, initialTab = null }) {
+export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal, initialTab = 'catalog' }) {
   const { isBookmarked, toggleBookmark, isCompleted } = useAuth();
 
-  /* Catalog state - closed by default */
+  /* Catalog state */
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState(initialTab || null); // null | 'catalog' | 'duel' | 'matrix'
+  const [activeTab, setActiveTab] = useState(initialTab || 'catalog'); // 'catalog' | 'duel' | 'matrix'
   const [showAllAlgos, setShowAllAlgos] = useState(false);
 
-  /* Academy state - closed by default */
-  const [expandedCourse, setExpandedCourse] = useState(null); // null | 'c' | 'python' | 'java' | 'cpp'
-  const [expandedModule, setExpandedModule] = useState(null);
+  /* Academy state */
+  const [expandedCourse, setExpandedCourse] = useState('c'); // 'c' | 'python' | 'java' | 'cpp'
+  const [expandedModule, setExpandedModule] = useState(C_MODULES[0]?.id || null);
 
   /* Big-O slider */
   const [sliderN, setSliderN] = useState(64);
@@ -75,7 +74,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
   }, []);
 
   useEffect(() => {
-    if (initialTab !== undefined) setActiveTab(initialTab);
+    if (initialTab) setActiveTab(initialTab);
   }, [initialTab]);
 
   useEffect(() => () => clearInterval(heroTimerRef.current), []);
@@ -268,6 +267,14 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
 
   const complexityResults = useMemo(() => calculateOperations(sliderN), [sliderN]);
 
+  const scrollToDsaStudio = (tab = 'catalog') => {
+    setActiveTab(tab);
+    setTimeout(() => {
+      const el = document.getElementById('hp-dsa-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 40);
+  };
+
   /* ──────────────────────────────────────────────────────────────────── */
   return (
     <div className="hp-layout">
@@ -301,13 +308,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             </button>
             <button
               className="hp-btn-studio"
-              onClick={() => {
-                setActiveTab('catalog');
-                setTimeout(() => {
-                  const el = document.getElementById('hp-dsa-section');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 50);
-              }}
+              onClick={() => scrollToDsaStudio('catalog')}
             >
               <PlayIcon size={13} />
               <span>Explore 40+ Visualizers</span>
@@ -414,9 +415,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             Learn C from absolute basics to advanced memory mastery. Write code, compile in-browser, and master pointers through real physical mental models.
           </p>
 
-          {/* Creative Conceptual C Learning Workbench */}
           <div className="hp-fc-canvas canvas-c-ide font-mono">
-            {/* Editor Window Header */}
             <div className="c-ide-header">
               <div className="c-ide-tabs">
                 <span className="c-ide-tab active">
@@ -431,9 +430,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
               </div>
             </div>
 
-            {/* Split Editor + Live Terminal Output */}
             <div className="c-ide-body">
-              {/* Code Panel */}
               <div className="c-code-panel">
                 <div className="code-line"><span className="ln">1</span><span><span className="kw-c">#include</span> <span className="str-c">&lt;stdio.h&gt;</span></span></div>
                 <div className="code-line"><span className="ln">2</span><span><span className="kw-c">int</span> <span className="fn-c">main</span>() &#123;</span></div>
@@ -442,7 +439,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
                 <div className="code-line"><span className="ln">5</span><span>&#125;</span></div>
               </div>
 
-              {/* Terminal / Live Learning Output Panel */}
               <div className="c-term-panel">
                 <div className="term-header">
                   <span className="term-dot green-dot" />
@@ -478,13 +474,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         {/* DSA Studio Card */}
         <div
           className="hp-flagship-card hp-card-studio"
-          onClick={() => {
-            setActiveTab('catalog');
-            setTimeout(() => {
-              const el = document.getElementById('hp-dsa-section');
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
-          }}
+          onClick={() => scrollToDsaStudio('catalog')}
         >
           <div className="hp-fc-header">
             <span className="hp-fc-badge hp-badge-blue">⚡ DSA STUDIO</span>
@@ -495,7 +485,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             Watch sorting, searching, trees, and graphs execute step-by-step with real data and Big-O analytics.
           </p>
 
-          {/* Rich Graphical Multi-Visualizer Stage */}
           <div className="hp-fc-canvas canvas-dsa-stage font-mono">
             <div className="dsa-stage-top">
               <div className="dsa-telemetry-badge">
@@ -506,7 +495,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             </div>
 
             <div className="dsa-visual-duo">
-              {/* Mini Array Wave */}
               <div className="dsa-array-wave">
                 {[
                   { v: 18, h: 35, type: 'sorted' },
@@ -523,7 +511,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
                 ))}
               </div>
 
-              {/* Mini Graph Nodes */}
               <div className="dsa-graph-mini">
                 <svg viewBox="0 0 110 65" className="dsa-graph-svg" fill="none">
                   <line x1="20" y1="20" x2="55" y2="45" stroke="#3b82f6" strokeWidth="1.5" />
@@ -559,34 +546,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         </div>
       </section>
 
-      {/* ══ SECTION 3: VALUE PILLARS ══════════════════════════════════════ */}
-      <section className="hp-pillars">
-        {[
-          {
-            icon: '🧠',
-            title: 'Real-World Analogies',
-            desc: 'Every concept is explained using physical analogies — RAM as a bookshelf, pointers as addresses — so mental models click fast.',
-          },
-          {
-            icon: '🎬',
-            title: 'Frame-by-Frame Tracing',
-            desc: 'Watch every comparison, swap, and pointer move highlighted live. Pause, rewind, and replay any step you want.',
-          },
-          {
-            icon: '🌐',
-            title: 'Multi-Language Code',
-            desc: 'See every algorithm in C, Python, C++, Java, and JavaScript side-by-side with the same visualizer running in sync.',
-          },
-        ].map(p => (
-          <div key={p.title} className="hp-pillar-card">
-            <div className="hp-pillar-icon">{p.icon}</div>
-            <h3 className="hp-pillar-title">{p.title}</h3>
-            <p className="hp-pillar-desc">{p.desc}</p>
-          </div>
-        ))}
-      </section>
-
-      {/* ══ SECTION 4: DSA VISUALIZER STUDIO ═══════════════════════════ */}
+      {/* ══ SECTION 3: DSA VISUALIZER STUDIO (SEGMENTED HUB) ════════════ */}
       <section className="hp-section" id="hp-dsa-section">
         <div className="hp-section-header">
           <div>
@@ -596,218 +556,34 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </div>
         </div>
 
-        {/* 3-Column Conceptual Cards Grid */}
-        <div className="hp-hub-grid">
-          {/* Card 1: Visualizations */}
-          <div
-            className={`hp-hub-card${activeTab === 'catalog' ? ' hp-hub-open' : ''}`}
-            onClick={() => setActiveTab(t => t === 'catalog' ? null : 'catalog')}
+        {/* Streamlined Segmented Navigation Bar */}
+        <div className="hp-studio-nav-bar">
+          <button
+            className={`hp-studio-nav-btn tab-green${activeTab === 'catalog' ? ' active' : ''}`}
+            onClick={() => setActiveTab('catalog')}
           >
-            <div className="hp-hub-card-top">
-              <span className="hp-hub-status-pill hp-pill-green font-mono">● {ALGORITHMS.length} ALGORITHMS</span>
-              <span className="hp-hub-badge font-mono">STEP-BY-STEP TRACE</span>
-            </div>
-            <div className="hp-hub-icon-row">
-              <span className="hp-hub-icon hp-icon-green">⚡</span>
-              <h3 className="hp-hub-title">Interactive Visualizations</h3>
-            </div>
-            <p className="hp-hub-desc">Step through sorting, searching, trees, and graphs with live pointers and variable trace.</p>
-
-            {/* Creative Graphical SVG Preview: Tree & Array Visualizer */}
-            <div className="hp-graphical-canvas canvas-visualizer">
-              <svg viewBox="0 0 320 110" className="hp-svg-diagram" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Tree Branches */}
-                <path d="M160 22 L100 56" stroke="rgba(59,130,246,0.4)" strokeWidth="2" strokeDasharray="3 3" />
-                <path d="M160 22 L220 56" stroke="rgba(16,185,129,0.4)" strokeWidth="2" />
-                <path d="M100 56 L65 88" stroke="rgba(59,130,246,0.3)" strokeWidth="1.5" />
-                <path d="M100 56 L135 88" stroke="#10b981" strokeWidth="2" />
-                <path d="M220 56 L255 88" stroke="rgba(16,185,129,0.3)" strokeWidth="1.5" />
-
-                {/* Curved Swap Arc */}
-                <path d="M65 92 Q 100 70 135 92" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeDasharray="2 2" />
-
-                {/* Nodes */}
-                <g className="svg-node">
-                  <circle cx="160" cy="22" r="14" fill="#0284c7" fillOpacity="0.2" stroke="#0284c7" strokeWidth="1.5" />
-                  <text x="160" y="26" textAnchor="middle" fill="#38bdf8" fontSize="10" fontWeight="700" fontFamily="monospace">50</text>
-                </g>
-                <g className="svg-node">
-                  <circle cx="100" cy="56" r="12" fill="#2563eb" fillOpacity="0.2" stroke="#2563eb" strokeWidth="1.5" />
-                  <text x="100" y="60" textAnchor="middle" fill="#60a5fa" fontSize="9.5" fontWeight="700" fontFamily="monospace">25</text>
-                </g>
-                <g className="svg-node">
-                  <circle cx="220" cy="56" r="12" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1.5" />
-                  <text x="220" y="60" textAnchor="middle" fill="#34d399" fontSize="9.5" fontWeight="700" fontFamily="monospace">75</text>
-                </g>
-                <g className="svg-node">
-                  <circle cx="65" cy="88" r="11" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-                  <text x="65" y="92" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="600" fontFamily="monospace">15</text>
-                </g>
-                <g className="svg-node target-node">
-                  <circle cx="135" cy="88" r="12" fill="#10b981" fillOpacity="0.3" stroke="#10b981" strokeWidth="2" />
-                  <text x="135" y="92" textAnchor="middle" fill="#10b981" fontSize="9.5" fontWeight="800" fontFamily="monospace">35</text>
-                  <text x="135" y="105" textAnchor="middle" fill="#10b981" fontSize="7" fontWeight="700" fontFamily="sans-serif">FOUND</text>
-                </g>
-                <g className="svg-node">
-                  <circle cx="255" cy="88" r="11" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-                  <text x="255" y="92" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="600" fontFamily="monospace">90</text>
-                </g>
-              </svg>
-              <div className="hp-canvas-footer font-mono">
-                <span className="c-pill green-pill">● Binary Search Tree</span>
-                <span className="c-pill blue-pill">40+ Simulators</span>
-              </div>
-            </div>
-
-            <div className="hp-hub-footer">
-              <button
-                className="hp-btn-hub hp-btn-hub-green"
-                onClick={e => { e.stopPropagation(); setActiveTab(t => t === 'catalog' ? null : 'catalog'); }}
-              >
-                <span>⚡ Explore Visualizers</span>
-                <ArrowRightIcon size={12} />
-              </button>
-              <span className="hp-hub-hint font-mono">
-                {activeTab === 'catalog' ? '▲ Close' : `▼ Open (${ALGORITHMS.length})`}
-              </span>
-            </div>
-          </div>
-
-          {/* Card 2: Battle Arena */}
-          <div
-            className={`hp-hub-card${activeTab === 'duel' ? ' hp-hub-open' : ''}`}
-            onClick={() => setActiveTab(t => t === 'duel' ? null : 'duel')}
+            <span>⚡ Interactive Visualizers</span>
+            <span className="hp-studio-nav-badge font-mono">{ALGORITHMS.length}</span>
+          </button>
+          <button
+            className={`hp-studio-nav-btn tab-amber${activeTab === 'duel' ? ' active' : ''}`}
+            onClick={() => setActiveTab('duel')}
           >
-            <div className="hp-hub-card-top">
-              <span className="hp-hub-status-pill hp-pill-amber font-mono">● SPEED BENCHMARK</span>
-              <span className="hp-hub-badge font-mono">SIDE-BY-SIDE RACE</span>
-            </div>
-            <div className="hp-hub-icon-row">
-              <span className="hp-hub-icon hp-icon-amber">⚔️</span>
-              <h3 className="hp-hub-title">Algorithm Battle Arena</h3>
-            </div>
-            <p className="hp-hub-desc">Race sorting algorithms head-to-head on identical arrays to see algorithmic speed in action.</p>
-
-            {/* Creative Graphical SVG Preview: Race Telemetry Track */}
-            <div className="hp-graphical-canvas canvas-duel">
-              <div className="hp-race-hud font-mono">
-                {/* Lane 1 */}
-                <div className="race-lane-row">
-                  <div className="lane-header">
-                    <span className="lane-badge badge-winner">🏎️ QuickSort O(n log n)</span>
-                    <span className="lane-time winner">1.2ms 🏆</span>
-                  </div>
-                  <div className="race-track">
-                    <div className="race-boost-fill fill-quick" style={{ width: '96%' }} />
-                    <span className="race-flag">🏁</span>
-                  </div>
-                </div>
-
-                {/* Lane 2 */}
-                <div className="race-lane-row">
-                  <div className="lane-header">
-                    <span className="lane-badge badge-slow">🐢 BubbleSort O(n²)</span>
-                    <span className="lane-time slower">48.6ms (40x)</span>
-                  </div>
-                  <div className="race-track">
-                    <div className="race-boost-fill fill-bubble" style={{ width: '28%' }} />
-                    <span className="race-flag">🏁</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="hp-canvas-footer font-mono">
-                <span className="c-pill amber-pill">⚡ 10K Elements Race</span>
-                <span className="c-pill gray-pill">Live Delta HUD</span>
-              </div>
-            </div>
-
-            <div className="hp-hub-footer">
-              <button
-                className="hp-btn-hub hp-btn-hub-amber"
-                onClick={e => { e.stopPropagation(); setActiveTab(t => t === 'duel' ? null : 'duel'); }}
-              >
-                <span>⚔️ Launch Arena</span>
-                <ArrowRightIcon size={12} />
-              </button>
-              <span className="hp-hub-hint font-mono">
-                {activeTab === 'duel' ? '▲ Close Arena' : '▼ Open Race Arena'}
-              </span>
-            </div>
-          </div>
-
-          {/* Card 3: Big-O Matrix */}
-          <div
-            className={`hp-hub-card${activeTab === 'matrix' ? ' hp-hub-open' : ''}`}
-            onClick={() => setActiveTab(t => t === 'matrix' ? null : 'matrix')}
+            <span>⚔️ Algorithm Battle Arena</span>
+            <span className="hp-studio-nav-badge font-mono">Live Race</span>
+          </button>
+          <button
+            className={`hp-studio-nav-btn tab-blue${activeTab === 'matrix' ? ' active' : ''}`}
+            onClick={() => setActiveTab('matrix')}
           >
-            <div className="hp-hub-card-top">
-              <span className="hp-hub-status-pill hp-pill-blue font-mono">● GROWTH ANALYZER</span>
-              <span className="hp-hub-badge font-mono">STEP CALCULATOR</span>
-            </div>
-            <div className="hp-hub-icon-row">
-              <span className="hp-hub-icon hp-icon-blue">📈</span>
-              <h3 className="hp-hub-title">Big-O Complexity Matrix</h3>
-            </div>
-            <p className="hp-hub-desc">Analyze performance curves and calculate exact CPU steps across logarithmic and quadratic scales.</p>
-
-            {/* Creative Graphical SVG Preview: Big-O Coordinate Graph */}
-            <div className="hp-graphical-canvas canvas-matrix">
-              <svg viewBox="0 0 320 110" className="hp-svg-diagram" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Coordinate Grid */}
-                <line x1="30" y1="95" x2="300" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                <line x1="30" y1="10" x2="30" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                <line x1="30" y1="55" x2="300" y2="55" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="3 3" />
-                <line x1="165" y1="10" x2="165" y2="95" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="3 3" />
-
-                {/* O(1) Constant (Green) */}
-                <line x1="30" y1="90" x2="300" y2="90" stroke="#10b981" strokeWidth="2" />
-                <text x="260" y="86" fill="#10b981" fontSize="8" fontWeight="700" fontFamily="monospace">O(1)</text>
-
-                {/* O(log n) (Teal) */}
-                <path d="M30 92 Q 100 85 300 78" stroke="#06b6d4" strokeWidth="2" />
-                <text x="260" y="74" fill="#06b6d4" fontSize="8" fontWeight="700" fontFamily="monospace">O(log n)</text>
-
-                {/* O(n) Linear (Blue) */}
-                <line x1="30" y1="95" x2="280" y2="45" stroke="#3b82f6" strokeWidth="2" />
-                <text x="265" y="42" fill="#3b82f6" fontSize="8" fontWeight="700" fontFamily="monospace">O(n)</text>
-
-                {/* O(n log n) (Amber) */}
-                <path d="M30 95 Q 180 75 250 25" stroke="#f59e0b" strokeWidth="2" />
-                <text x="220" y="20" fill="#f59e0b" fontSize="8" fontWeight="700" fontFamily="monospace">O(n log n)</text>
-
-                {/* O(n^2) Quadratic (Red) with Danger Zone */}
-                <path d="M30 95 Q 90 90 120 15" stroke="#ef4444" strokeWidth="2.5" />
-                <text x="125" y="18" fill="#ef4444" fontSize="8.5" fontWeight="800" fontFamily="monospace">O(n²)</text>
-
-                {/* Axis Labels */}
-                <text x="15" y="55" fill="#64748b" fontSize="7" fontWeight="600" fontFamily="sans-serif">Ops</text>
-                <text x="290" y="105" fill="#64748b" fontSize="7" fontWeight="600" fontFamily="sans-serif">N</text>
-              </svg>
-              <div className="hp-canvas-footer font-mono">
-                <span className="c-pill purple-pill">📈 Coordinate Growth Graph</span>
-                <span className="c-pill blue-pill">Interactive N-Slider</span>
-              </div>
-            </div>
-
-            <div className="hp-hub-footer">
-              <button
-                className="hp-btn-hub hp-btn-hub-blue"
-                onClick={e => { e.stopPropagation(); setActiveTab(t => t === 'matrix' ? null : 'matrix'); }}
-              >
-                <span>📈 Open Matrix</span>
-                <ArrowRightIcon size={12} />
-              </button>
-              <span className="hp-hub-hint font-mono">
-                {activeTab === 'matrix' ? '▲ Close Matrix' : '▼ Open Complexity Table'}
-              </span>
-            </div>
-          </div>
+            <span>📈 Big-O Complexity Matrix</span>
+            <span className="hp-studio-nav-badge font-mono">Calculator</span>
+          </button>
         </div>
 
-        {/* Dedicated Unfolded Drawer for Active Section */}
+        {/* Tab 1: Algorithm Catalog */}
         {activeTab === 'catalog' && (
-          <div className="hp-drawer hp-drawer-expanded" onClick={e => e.stopPropagation()}>
+          <div className="hp-drawer-expanded">
             <div className="hp-drawer-header">
               <div className="hp-cat-pills">
                 <button
@@ -906,15 +682,16 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </div>
         )}
 
+        {/* Tab 2: Battle Arena */}
         {activeTab === 'duel' && (
-          <div className="hp-drawer hp-drawer-expanded" onClick={e => e.stopPropagation()}>
+          <div className="hp-drawer-expanded">
             <AlgorithmDuel />
           </div>
         )}
 
+        {/* Tab 3: Big-O Matrix */}
         {activeTab === 'matrix' && (
-          <div className="hp-drawer hp-drawer-expanded" onClick={e => e.stopPropagation()}>
-            {/* Live Calculator */}
+          <div className="hp-drawer-expanded">
             <div className="hp-calc-card">
               <div className="hp-calc-header">
                 <div>
@@ -949,7 +726,6 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
               </div>
             </div>
 
-            {/* Matrix Table */}
             <div className="hp-matrix-table-wrap">
               <table className="hp-matrix-table">
                 <thead>
@@ -988,7 +764,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         )}
       </section>
 
-      {/* ══ SECTION 5: CODING ACADEMY HUB ═══════════════════════════════ */}
+      {/* ══ SECTION 4: CODING ACADEMY HUB ═══════════════════════════════ */}
       <section className="hp-section" id="hp-academy-section">
         <div className="hp-section-header">
           <div>
@@ -1011,7 +787,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
             onClick={() => setExpandedCourse(c => c === 'c' ? null : 'c')}
           >
             <div className="hp-course-top">
-              <span className="hp-course-pill hp-pill-green font-mono">● LIVE & FREE</span>
+              <span className="hp-course-pill hp-pill-green font-mono">● LIVE &amp; FREE</span>
               <span className="hp-course-meta font-mono">23 CHAPTERS • 230 QUIZZES</span>
             </div>
             <h3 className="hp-course-title">C Programming Academy</h3>
@@ -1208,6 +984,33 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         </div>
       </section>
 
+      {/* ══ SECTION 5: VALUE PILLARS & STATS ════════════════════════════ */}
+      <section className="hp-pillars">
+        {[
+          {
+            icon: '🧠',
+            title: 'Real-World Analogies',
+            desc: 'Every concept is explained using physical analogies — RAM as a bookshelf, pointers as addresses — so mental models click fast.',
+          },
+          {
+            icon: '🎬',
+            title: 'Frame-by-Frame Tracing',
+            desc: 'Watch every comparison, swap, and pointer move highlighted live. Pause, rewind, and replay any step you want.',
+          },
+          {
+            icon: '🌐',
+            title: 'Multi-Language Code',
+            desc: 'See every algorithm in C, Python, C++, Java, and JavaScript side-by-side with the same visualizer running in sync.',
+          },
+        ].map(p => (
+          <div key={p.title} className="hp-pillar-card">
+            <div className="hp-pillar-icon">{p.icon}</div>
+            <h3 className="hp-pillar-title">{p.title}</h3>
+            <p className="hp-pillar-desc">{p.desc}</p>
+          </div>
+        ))}
+      </section>
+
       {/* ══ SECTION 6: PLATFORM STATS STRIP ══════════════════════════════ */}
       <section className="hp-stats-strip">
         {[
@@ -1224,7 +1027,7 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
         ))}
       </section>
 
-      {/* ══ SECTION 7: FINAL CTA ══════════════════════════════════════════ */}
+      {/* ══ SECTION 7: FINAL CTA WITH CREATOR ATTRIBUTION ═══════════════ */}
       <section className="hp-final-cta">
         <span className="hp-final-badge">🚀 START LEARNING TODAY</span>
         <h2 className="hp-final-title">Ready to Master Coding &amp; Algorithms?</h2>
@@ -1240,10 +1043,21 @@ export default function HomePage({ onSelectAlgo, onOpenLearnC, onOpenPythonModal
           </button>
           <button
             className="hp-btn-studio"
-            onClick={() => onSelectAlgo('quick-sort')}
+            onClick={() => scrollToDsaStudio('catalog')}
           >
             ⚡ Explore Algorithm Studio
           </button>
+        </div>
+        <div className="hp-final-author font-mono">
+          <span>Crafted with 💙 by </span>
+          <a
+            href="https://ratul-dev.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hp-author-link"
+          >
+            Mahmud Hasan Ratul
+          </a>
         </div>
       </section>
     </div>
