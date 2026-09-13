@@ -9383,10 +9383,11 @@ button,
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  max-width: 900px;
+  max-width: 860px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Operational Header Ribbon */
@@ -9395,81 +9396,90 @@ button,
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8px 16px;
+  padding: 6px 14px;
   background: rgba(15, 23, 42, 0.65);
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(8px);
+  box-sizing: border-box;
 }
 [data-theme="light"] .queue-3d-header-ribbon {
   background: rgba(241, 245, 249, 0.9);
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
 }
 
+.ribbon-text-mobile { display: none; }
+.ribbon-text-full { display: inline; }
+
 .ribbon-exit-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
+  gap: 5px;
+  font-size: 10px;
   font-family: var(--font-mono);
   font-weight: 800;
   color: #10b981;
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.35);
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
 }
 
 .ribbon-entry-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
+  gap: 5px;
+  font-size: 10px;
   font-family: var(--font-mono);
   font-weight: 800;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.35);
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
 }
 
 .ribbon-flow-text {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 9.5px;
   font-family: var(--font-mono);
   font-weight: 800;
+  white-space: nowrap;
 }
 .flow-chevron {
   color: #38bdf8;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 .flow-label {
   color: var(--text-muted);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
-/* 3D Hyperloop Assembly */
+/* 3D Hyperloop Transit Assembly */
 .queue-3d-transit-assembly {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 12px;
+  gap: 8px;
   position: relative;
+  box-sizing: border-box;
 }
 
 /* 3D Air-Lock Ports */
 .queue-3d-port {
-  width: 100px;
+  width: 75px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   position: relative;
 }
 
@@ -9478,61 +9488,66 @@ button,
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 8px;
-  border-radius: 12px;
+  padding: 6px 4px;
+  border-radius: 10px;
   position: relative;
+  box-sizing: border-box;
 }
 
 .port-exit .port-arch-ring {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(15, 23, 42, 0.85) 100%);
-  border: 2px solid rgba(16, 185, 129, 0.45);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  border: 1.5px solid rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
 }
 .port-entry .port-arch-ring {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(15, 23, 42, 0.85) 100%);
-  border: 2px solid rgba(56, 189, 248, 0.45);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+  border: 1.5px solid rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
 }
 
 [data-theme="light"] .port-exit .port-arch-ring {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, #ffffff 100%);
   border-color: rgba(16, 185, 129, 0.5);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
 }
 [data-theme="light"] .port-entry .port-arch-ring {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, #ffffff 100%);
   border-color: rgba(56, 189, 248, 0.5);
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.12);
 }
 
 .port-sign {
-  font-size: 9.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 8.5px;
   font-family: var(--font-mono);
   font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 5px;
+  padding: 2px 5px;
+  border-radius: 4px;
   white-space: nowrap;
 }
 .sign-exit { color: #10b981; }
 .sign-entry { color: #38bdf8; }
 
 .port-laser-beam {
-  width: 4px;
-  height: 75px;
+  width: 3px;
+  height: 60px;
   border-radius: 2px;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 .beam-exit {
   background: linear-gradient(180deg, #10b981 0%, transparent 100%);
-  box-shadow: 0 0 10px #10b981;
+  box-shadow: 0 0 8px #10b981;
 }
 .beam-entry {
   background: linear-gradient(180deg, #38bdf8 0%, transparent 100%);
-  box-shadow: 0 0 10px #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
 }
 
 .port-flying-bay {
-  height: 72px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9542,13 +9557,13 @@ button,
 
 /* Flying Pods */
 .flying-queue-pod {
-  width: 85px;
-  border-radius: 8px;
+  width: 70px;
+  border-radius: 7px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 .flying-pod-bevel {
-  height: 4px;
+  height: 3px;
   width: 100%;
 }
 .flying-pod-bevel.gold-bevel {
@@ -9562,10 +9577,10 @@ button,
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px 8px;
+  padding: 4px 6px;
   border: 1.5px solid;
   border-top: none;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 7px 7px;
 }
 .flying-pod-front.gold-front {
   background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), #0f172a);
@@ -9584,13 +9599,13 @@ button,
 }
 
 .flying-pod-tag {
-  font-size: 8px;
+  font-size: 7.5px;
   font-family: var(--font-mono);
   font-weight: 800;
   color: var(--text-dim);
 }
 .flying-pod-val {
-  font-size: 16px;
+  font-size: 14px;
   font-family: var(--font-mono);
   font-weight: 900;
   color: var(--text-main);
@@ -9606,26 +9621,27 @@ button,
 .queue-3d-tube-glass {
   background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
   border: 2px solid rgba(56, 189, 248, 0.35);
-  border-radius: 14px;
-  padding: 12px 14px 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 8px 10px 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: relative;
+  box-sizing: border-box;
 }
 [data-theme="light"] .queue-3d-tube-glass {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.95) 100%);
   border-color: rgba(56, 189, 248, 0.45);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
 }
 
 /* Calipers Track */
 .queue-3d-calipers-track {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  min-height: 22px;
+  gap: 6px;
+  min-height: 18px;
   width: 100%;
 }
 
@@ -9636,14 +9652,17 @@ button,
   position: relative;
 }
 
+.badge-text-mobile { display: none; }
+.badge-text-full { display: inline; }
+
 .queue-caliper-badge {
-  font-size: 8.5px;
+  font-size: 8px;
   font-family: var(--font-mono);
   font-weight: 800;
-  padding: 2px 6px;
+  padding: 1.5px 5px;
   border-radius: 4px;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   z-index: 5;
 }
 .queue-caliper-badge.badge-both {
@@ -9653,24 +9672,24 @@ button,
 .queue-caliper-badge.badge-front {
   background: #10b981;
   color: #070a13;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
 }
 .queue-caliper-badge.badge-rear {
   background: #38bdf8;
   color: #070a13;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
 /* Slots Track */
 .queue-3d-slots-track {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
+  gap: 6px;
   width: 100%;
 }
 
 .queue-3d-dock-slot {
-  min-height: 80px;
+  min-height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9680,15 +9699,15 @@ button,
 /* 3D Volumetric Pod */
 .queue-3d-volumetric-pod {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 7px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 200ms ease;
 }
 
 .pod-top-facet {
-  height: 4px;
+  height: 3px;
   width: 100%;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.35));
 }
@@ -9698,12 +9717,17 @@ button,
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 4px 6px;
-  min-height: 72px;
+  padding: 4px 2px 4px;
+  min-height: 64px;
   border: 1.5px solid rgba(255, 255, 255, 0.12);
   border-top: none;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 7px 7px;
   background: linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+  box-sizing: border-box;
+}
+[data-theme="light"] .pod-front-facet {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border-color: rgba(15, 23, 42, 0.12);
 }
 [data-theme="light"] .pod-front-facet {
   background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
@@ -22038,76 +22062,169 @@ button,
 /* Responsive rules for 3D Queue Workspace */
 @media (max-width: 640px) {
   .ds-3d-queue-workspace {
-    gap: 12px;
-    padding: 0 4px;
+    gap: 8px;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
   }
+
+  /* Header Ribbon */
   .queue-3d-header-ribbon {
-    padding: 6px 10px;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  .ribbon-text-full { display: none; }
+  .ribbon-text-mobile { display: inline; }
+  .ribbon-exit-pill, .ribbon-entry-pill {
+    font-size: 8px;
+    padding: 2px 5px;
+    gap: 3px;
   }
   .ribbon-flow-text {
-    display: none;
+    font-size: 7.5px;
+    gap: 3px;
   }
-  .ribbon-exit-pill, .ribbon-entry-pill {
-    font-size: 9px;
-    padding: 3px 6px;
+  .flow-chevron {
+    letter-spacing: 0;
   }
+
+  /* Keep Transit Assembly in Clean Horizontal Row */
   .queue-3d-transit-assembly {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .queue-3d-port {
+    flex-direction: row !important;
+    gap: 4px;
     width: 100%;
-    flex-direction: row;
-    justify-content: space-around;
+    max-width: 100%;
+  }
+
+  /* Compact Air-Lock Ports */
+  .queue-3d-port {
+    width: 38px;
+    flex-shrink: 0;
+    gap: 4px;
   }
   .port-arch-ring {
-    width: auto;
-    padding: 4px 10px;
+    padding: 3px 2px;
+    border-radius: 6px;
+  }
+  .port-sign {
+    font-size: 7px;
+    padding: 1px 2px;
+    gap: 1px;
+    flex-direction: column;
+  }
+  .port-sign-icon {
+    font-size: 10px;
   }
   .port-laser-beam {
-    display: none;
+    width: 2px;
+    height: 44px;
+    margin-top: 2px;
   }
   .port-flying-bay {
-    height: 54px;
+    height: 44px;
   }
   .flying-queue-pod {
-    width: 70px;
+    width: 34px;
+    border-radius: 5px;
   }
+  .flying-pod-front {
+    padding: 2px 2px;
+    border-radius: 0 0 5px 5px;
+  }
+  .flying-pod-tag {
+    font-size: 5.5px;
+  }
+  .flying-pod-val {
+    font-size: 11px;
+  }
+
+  /* Tube Chassis & Grid */
   .queue-3d-tube-glass {
-    padding: 8px 6px 6px;
+    padding: 4px 4px 4px;
+    border-radius: 8px;
+    border-width: 1.5px;
+    gap: 4px;
   }
   .queue-3d-calipers-track {
-    gap: 4px;
+    gap: 2px;
+    min-height: 14px;
   }
+  .badge-text-full { display: none; }
+  .badge-text-mobile { display: inline; }
   .queue-caliper-badge {
-    font-size: 7px;
-    padding: 1px 3px;
+    font-size: 6px;
+    padding: 1px 2px;
+    border-radius: 3px;
   }
   .queue-3d-slots-track {
-    gap: 4px;
+    gap: 3px;
+  }
+  .queue-3d-dock-slot {
+    min-height: 52px;
+  }
+
+  /* 3D Volumetric Pod Mobile Sizing */
+  .queue-3d-volumetric-pod {
+    border-radius: 5px;
+  }
+  .pod-top-facet {
+    height: 2.5px;
+  }
+  .pod-front-facet {
+    min-height: 48px;
+    padding: 2px 1px 2px;
+    border-radius: 0 0 5px 5px;
+  }
+  .pod-meta-top {
+    padding: 0 1px;
+  }
+  .pod-pos-tag {
+    font-size: 6.5px;
   }
   .pod-mem-addr {
     display: none;
   }
-  .pod-pos-tag {
-    font-size: 7px;
-  }
   .pod-val-num {
-    font-size: 13px;
-  }
-  .pod-front-facet {
-    min-height: 56px;
-    padding: 3px 2px;
+    font-size: 12px;
   }
   .pod-status-pill {
-    font-size: 6.5px;
-    padding: 1px 3px;
+    font-size: 5.5px;
+    padding: 0.5px 2px;
+    border-radius: 2px;
   }
+
+  /* Empty Dock Slot Mobile Sizing */
   .queue-3d-empty-dock {
-    height: 56px;
+    height: 48px;
+    gap: 1px;
+    border-radius: 5px;
   }
-  .mag-track-pulses {
+  .empty-dock-idx {
     font-size: 6.5px;
+  }
+  .empty-dock-dash {
+    font-size: 6px;
+    letter-spacing: -2px;
+  }
+  .empty-dock-label {
+    font-size: 5.5px;
+  }
+
+  /* Magnetic Rails Mobile */
+  .mag-text-full { display: none; }
+  .mag-text-mobile { display: inline; }
+  .mag-track-pulses {
+    font-size: 6px;
+    padding: 0 4px;
+    letter-spacing: 0.04em;
+  }
+  .queue-pedestal-bar {
+    height: 3px;
+  }
+  .queue-pedestal-sub {
+    font-size: 6.5px;
+    letter-spacing: 0.04em;
   }
 }
+
 

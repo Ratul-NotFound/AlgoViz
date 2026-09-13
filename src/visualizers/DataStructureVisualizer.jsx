@@ -112,26 +112,9 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
 
   return (
     <div className="ds-viz-main">
-      {/* ── 1. Live Pointer & Variable Dashboard (For Queue, Trees, Graphs) ── */}
-      {type !== 'stack' && (
+      {/* ── 1. Live Pointer & Variable Dashboard (For Trees, Graphs, LL) ── */}
+      {type !== 'stack' && type !== 'queue' && (
         <div className="ds-variables-dashboard">
-
-        {type === 'queue' && (
-          <>
-            <div className="var-badge">
-              <span className="var-name">front index:</span>
-              <span className="var-val highlight-front">{items.length > 0 ? '[0]' : '-1'}</span>
-            </div>
-            <div className="var-badge">
-              <span className="var-name">rear index:</span>
-              <span className="var-val highlight-rear">{items.length > 0 ? `[${items.length - 1}]` : '-1'}</span>
-            </div>
-            <div className="var-badge">
-              <span className="var-name">Rule:</span>
-              <span className="var-rule">FIFO (Enqueue at REAR, Dequeue at FRONT)</span>
-            </div>
-          </>
-        )}
 
         {type === 'linked-list' && (
           <>
@@ -465,16 +448,18 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
             <div className="queue-3d-header-ribbon">
               <div className="ribbon-exit-pill">
                 <span className="ribbon-icon">🚪</span>
-                <span>DEQUEUE (Leaves from FRONT)</span>
+                <span className="ribbon-text-full">DEQUEUE (Leaves from FRONT)</span>
+                <span className="ribbon-text-mobile">DEQUEUE (FRONT)</span>
               </div>
               <div className="ribbon-flow-text">
-                <span className="flow-chevron">⬅ ⬅ ⬅</span>
-                <span className="flow-label">FIFO TRANSIT FLOW</span>
-                <span className="flow-chevron">⬅ ⬅ ⬅</span>
+                <span className="flow-chevron">⬅</span>
+                <span className="flow-label">FIFO TRANSIT</span>
+                <span className="flow-chevron">⬅</span>
               </div>
               <div className="ribbon-entry-pill">
                 <span className="ribbon-icon">📥</span>
-                <span>ENQUEUE (Enters at REAR)</span>
+                <span className="ribbon-text-full">ENQUEUE (Enters at REAR)</span>
+                <span className="ribbon-text-mobile">ENQUEUE (REAR)</span>
               </div>
             </div>
 
@@ -484,7 +469,8 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
               <div className="queue-3d-port port-exit">
                 <div className="port-arch-ring">
                   <div className="port-sign sign-exit">
-                    <span>🚪 FRONT EXIT</span>
+                    <span className="port-sign-icon">🚪</span>
+                    <span className="port-sign-text">EXIT</span>
                   </div>
                   <div className="port-laser-beam beam-exit" />
                 </div>
@@ -496,15 +482,15 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                       <motion.div
                         key={`deq-${leavingItem}`}
                         className="flying-queue-pod pod-discharged"
-                        initial={{ x: 30, scale: 0.9, opacity: 0 }}
+                        initial={{ x: 20, scale: 0.9, opacity: 0 }}
                         animate={{
-                          x: -40,
+                          x: -12,
                           scale: 1.05,
                           opacity: 1,
                           transition: { type: 'spring', stiffness: 380, damping: 18 },
                         }}
                         exit={{
-                          x: -80,
+                          x: -40,
                           scale: 0.7,
                           opacity: 0,
                           transition: { duration: 0.2, ease: 'easeIn' },
@@ -512,7 +498,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                       >
                         <div className="flying-pod-bevel gold-bevel" />
                         <div className="flying-pod-front gold-front">
-                          <span className="flying-pod-tag">⬆ SERVED</span>
+                          <span className="flying-pod-tag">SERVED</span>
                           <span className="flying-pod-val">{leavingItem}</span>
                         </div>
                       </motion.div>
@@ -536,31 +522,34 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                           {isFront && isRear && (
                             <motion.div
                               className="queue-caliper-badge badge-both"
-                              initial={{ y: -10, opacity: 0 }}
+                              initial={{ y: -6, opacity: 0 }}
                               animate={{ y: 0, opacity: 1 }}
                               transition={{ type: 'spring', stiffness: 450, damping: 20 }}
                             >
-                              <span>FRONT & REAR ⬇</span>
+                              <span className="badge-text-full">FRONT & REAR ⬇</span>
+                              <span className="badge-text-mobile">F & R ⬇</span>
                             </motion.div>
                           )}
                           {isFront && !isRear && (
                             <motion.div
                               className="queue-caliper-badge badge-front"
-                              initial={{ y: -10, opacity: 0 }}
+                              initial={{ y: -6, opacity: 0 }}
                               animate={{ y: 0, opacity: 1 }}
                               transition={{ type: 'spring', stiffness: 450, damping: 20 }}
                             >
-                              <span>FRONT ⬇ [0]</span>
+                              <span className="badge-text-full">FRONT ⬇ [0]</span>
+                              <span className="badge-text-mobile">FRONT ⬇</span>
                             </motion.div>
                           )}
                           {isRear && !isFront && (
                             <motion.div
                               className="queue-caliper-badge badge-rear"
-                              initial={{ y: -10, opacity: 0 }}
+                              initial={{ y: -6, opacity: 0 }}
                               animate={{ y: 0, opacity: 1 }}
                               transition={{ type: 'spring', stiffness: 450, damping: 20 }}
                             >
-                              <span>REAR ⬇ [{slotIdx}]</span>
+                              <span className="badge-text-full">REAR ⬇ [{slotIdx}]</span>
+                              <span className="badge-text-mobile">REAR ⬇</span>
                             </motion.div>
                           )}
                         </div>
@@ -598,14 +587,14 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                               key={id}
                               layout
                               className={`queue-3d-volumetric-pod ${podTheme} ${isFront ? 'is-front-pod' : ''} ${isRear ? 'is-rear-pod' : ''} ${isPeeking ? 'is-peeking-pod' : ''} ${isLeaving ? 'is-leaving-pod' : ''}`}
-                              initial={{ x: 60, scale: 0.8, opacity: 0 }}
+                              initial={{ x: 40, scale: 0.85, opacity: 0 }}
                               animate={{
-                                x: isLeaving ? -15 : 0,
-                                scale: isLeaving ? 1.06 : 1,
+                                x: isLeaving ? -8 : 0,
+                                scale: isLeaving ? 1.05 : 1,
                                 opacity: 1,
                               }}
                               exit={{
-                                x: -60,
+                                x: -40,
                                 scale: 0.75,
                                 opacity: 0,
                                 transition: { duration: 0.2, ease: 'easeIn' },
@@ -635,11 +624,11 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
 
                                 <div className="pod-meta-bottom">
                                   {isLeaving ? (
-                                    <span className="pod-status-pill pill-dequeueing">⚡ SERVING</span>
+                                    <span className="pod-status-pill pill-dequeueing">⚡ DEQ</span>
                                   ) : isPeeking ? (
                                     <span className="pod-status-pill pill-peeking">👁️ PEEK</span>
                                   ) : isFront ? (
-                                    <span className="pod-status-pill pill-front">1st (FRONT)</span>
+                                    <span className="pod-status-pill pill-front">FRONT</span>
                                   ) : isRear ? (
                                     <span className="pod-status-pill pill-rear">REAR</span>
                                   ) : (
@@ -661,7 +650,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                             <div className="queue-3d-empty-dock">
                               <span className="empty-dock-idx">[{slotIdx}]</span>
                               <span className="empty-dock-dash">╌╌</span>
-                              <span className="empty-dock-label">Dock Slot</span>
+                              <span className="empty-dock-label">Dock</span>
                             </div>
                           )}
                         </div>
@@ -673,7 +662,8 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                   <div className="queue-3d-mag-rails">
                     <div className="mag-rail-line left-line" />
                     <div className="mag-track-pulses">
-                      <span>• • • MAGNETIC CONVEYOR PROPULSION TRACK • • •</span>
+                      <span className="mag-text-full">• • • MAGNETIC CONVEYOR PROPULSION TRACK • • •</span>
+                      <span className="mag-text-mobile">• • • MAGNETIC PROPULSION • • •</span>
                     </div>
                     <div className="mag-rail-line right-line" />
                   </div>
@@ -684,7 +674,8 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
               <div className="queue-3d-port port-entry">
                 <div className="port-arch-ring">
                   <div className="port-sign sign-entry">
-                    <span>📥 REAR INTAKE</span>
+                    <span className="port-sign-icon">📥</span>
+                    <span className="port-sign-text">INTAKE</span>
                   </div>
                   <div className="port-laser-beam beam-entry" />
                 </div>
@@ -696,7 +687,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                       <motion.div
                         key={`enq-${incomingItem}`}
                         className="flying-queue-pod pod-incoming"
-                        initial={{ x: 60, scale: 0.7, opacity: 0 }}
+                        initial={{ x: 40, scale: 0.8, opacity: 0 }}
                         animate={{
                           x: 0,
                           scale: 1,
@@ -704,7 +695,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                           transition: { type: 'spring', stiffness: 400, damping: 20 },
                         }}
                         exit={{
-                          x: -30,
+                          x: -20,
                           scale: 0.9,
                           opacity: 0,
                           transition: { duration: 0.18, ease: 'easeIn' },
@@ -712,7 +703,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
                       >
                         <div className="flying-pod-bevel cyan-bevel" />
                         <div className="flying-pod-front cyan-front">
-                          <span className="flying-pod-tag">⬇ INCOMING</span>
+                          <span className="flying-pod-tag">INCOMING</span>
                           <span className="flying-pod-val">{incomingItem}</span>
                         </div>
                       </motion.div>
