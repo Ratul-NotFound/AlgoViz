@@ -4,6 +4,33 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playImpactSound, playLiftSound, playChimeSound, toggleMute, getIsMuted } from '../utils/audioFX';
 
+function SpringCoilSVG({ height = 50, width = 140 }) {
+  const turns = 5;
+  const h = Math.max(20, height);
+  const step = h / turns;
+  let path = `M ${width * 0.5} 0 `;
+  for (let i = 0; i < turns; i++) {
+    const y1 = i * step + step * 0.25;
+    const y2 = i * step + step * 0.75;
+    const y3 = (i + 1) * step;
+    path += `C ${width * 0.88} ${y1}, ${width * 0.12} ${y2}, ${width * 0.5} ${y3} `;
+  }
+  return (
+    <svg width={width} height={h} viewBox={`0 0 ${width} ${h}`} className="stack-spring-svg">
+      <defs>
+        <linearGradient id="springMetalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#475569" />
+          <stop offset="25%" stopColor="#94a3b8" />
+          <stop offset="50%" stopColor="#f8fafc" />
+          <stop offset="75%" stopColor="#94a3b8" />
+          <stop offset="100%" stopColor="#334155" />
+        </linearGradient>
+      </defs>
+      <path d={path} fill="none" stroke="url(#springMetalGrad)" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function DataStructureVisualizer({ frame, type = 'stack' }) {
   const [muted, setMuted] = useState(getIsMuted());
 
@@ -34,6 +61,8 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
     topIndex = items.length - 1,
     incomingItem = null,
     poppingItem = null,
+    inputStream = [],
+    inputIndex = -1,
     message = '',
   } = frame || {};
 
@@ -82,49 +111,9 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
 
   return (
     <div className="ds-viz-main">
-      {/* ── 1. Synced Concept & Operation Header ── */}
-      <div className={`ds-status-bar ds-status-${action}`}>
-        <div className="ds-action-badge">
-          {action.startsWith('push') && '⬇ PUSH (LIFO)'}
-          {action.startsWith('pop') && '⬆ POP (LIFO)'}
-          {action === 'peek' && '🔍 PEEK (TOP ELEMENT)'}
-          {action.startsWith('enqueue') && '📥 ENQUEUE (FIFO)'}
-          {action.startsWith('dequeue') && '📤 DEQUEUE (FIFO)'}
-          {action.startsWith('insert_head') && '➕ INSERT AT HEAD (O(1))'}
-          {action.startsWith('insert_tail') && '➕ INSERT AT TAIL (O(1))'}
-          {action.startsWith('append') && '➕ APPEND TO TAIL'}
-          {action.startsWith('insert') && '➕ INSERT ELEMENT'}
-          {action === 'traverse' && (direction === 'backward' ? '⬅ BACKWARD TRAVERSAL' : '➔ FORWARD TRAVERSAL')}
-          {action.startsWith('sift_up') && '🔼 SIFT UP (BUBBLE UP)'}
-          {action.startsWith('sift_down') && '🔽 SIFT DOWN (BUBBLE DOWN)'}
-          {action.startsWith('extract_min') && '⭐ EXTRACT MIN (O(log n))'}
-          {action === 'collision' && '⚠️ HASH COLLISION (SEPARATE CHAINING)'}
-          {action === 'lookup' && '⚡ HASH LOOKUP (O(1) AVERAGE)'}
-          {action === 'idle' && 'READY'}
-          {action === 'complete' && 'COMPLETED'}
-        </div>
-
-        <div className="ds-action-text">{message || 'Step through the animation to inspect memory operations'}</div>
-      </div>
-
-      {/* ── 2. Live Pointer & Variable Dashboard ── */}
-      <div className="ds-variables-dashboard">
-        {type === 'stack' && (
-          <>
-            <div className="var-badge">
-              <span className="var-name">top index:</span>
-              <span className="var-val highlight">{topIndex >= 0 ? `[${topIndex}]` : '-1 (Empty)'}</span>
-            </div>
-            <div className="var-badge">
-              <span className="var-name">stack[top]:</span>
-              <span className="var-val">{topIndex >= 0 && items[topIndex] ? getItemData(items[topIndex], topIndex).val : 'null'}</span>
-            </div>
-            <div className="var-badge">
-              <span className="var-name">Rule:</span>
-              <span className="var-rule">LIFO (Push/Pop at TOP only)</span>
-            </div>
-          </>
-        )}
+      {/* ── 1. Live Pointer & Variable Dashboard (For Queue, Trees, Graphs) ── */}
+      {type !== 'stack' && (
+        <div className="ds-variables-dashboard">
 
         {type === 'queue' && (
           <>
@@ -224,74 +213,243 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
           </>
         )}
       </div>
+      )}
 
       {/* ── 3. Main Stage Canvas ── */}
       <div className="ds-viewport">
         {/* ========================================================
-            1. STACK (LIFO - Vertical Spring Dispenser Well)
+            1. REALISTIC 3D MECHANICAL STACK CHAMBER (LIFO)
             ======================================================== */}
         {type === 'stack' && (
-          <div className="ds-clean-stack-stage">
-            <div className="stack-aperture-guide">
-              <span className="flow-pill flow-in">⬇ PUSH (Enters at TOP)</span>
-              <span className="flow-pill flow-out">⬆ POP (Leaves from TOP)</span>
-            </div>
+          <div className="ds-realistic-stack-workspace">
+            {/* Centered 3D Chamber Assembly */}
+            <div className="stack-chamber-assembly">
+              {/* Top Overhead Flight Deck / Gantry Area */}
+              <div className="stack-3d-gantry-bay">
+                <AnimatePresence mode="wait">
+                  {incomingItem !== null && (
+                    <motion.div
+                      key={`incoming-${incomingItem}`}
+                      className="stack-3d-flying-block push-incoming"
+                      initial={{ y: -60, scale: 0.7, opacity: 0, rotateX: 35 }}
+                      animate={{
+                        y: 0,
+                        scale: 1,
+                        opacity: 1,
+                        rotateX: 0,
+                        transition: { type: 'spring', stiffness: 420, damping: 20 },
+                      }}
+                      exit={{
+                        y: 80,
+                        opacity: 0,
+                        scale: 0.9,
+                        transition: { duration: 0.18, ease: 'easeIn' },
+                      }}
+                    >
+                      <div className="flying-block-top-bevel" />
+                      <div className="flying-block-body">
+                        <span className="flying-tag">⬇ INCOMING PUSH</span>
+                        <span className="flying-val">{incomingItem}</span>
+                      </div>
+                      <div className="gravity-beam-guide" />
+                    </motion.div>
+                  )}
 
-            {/* Vertical Glass Column Container */}
-            <div className="stack-glass-column">
-              <div className="stack-column-inner">
-                <AnimatePresence initial={false}>
-                  {items.length === 0 ? (
-                    <div className="ds-stage-empty-state">
-                      <span className="empty-icon">📭</span>
-                      <span className="empty-title">Stack is Empty</span>
-                      <span className="empty-sub">top = -1. Push an item to start.</span>
-                    </div>
-                  ) : (
-                    [...items].reverse().map((item, revIdx) => {
-                      const actualIdx = items.length - 1 - revIdx;
-                      const isTop = actualIdx === topIndex;
-                      const { id, val } = getItemData(item, actualIdx);
-
-                      return (
-                        <motion.div
-                          key={id}
-                          layout
-                          className={`stack-card-tile ${isTop ? 'tile-is-top' : ''}`}
-                          initial={{ y: -90, opacity: 0, scale: 0.9 }}
-                          animate={{ y: 0, opacity: 1, scale: 1 }}
-                          exit={{
-                            y: -100,
-                            opacity: 0,
-                            scale: 0.85,
-                            transition: { duration: 0.22, ease: 'easeOut' },
-                          }}
-                          transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-                        >
-                          <div className="tile-slot-pill">Slot [{actualIdx}]</div>
-                          <div className="tile-value">{val}</div>
-
-                          {isTop && (
-                            <motion.div
-                              className="stack-top-badge"
-                              layoutId="stack-top-pointer"
-                              transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                            >
-                              <span className="badge-arrow">👈</span>
-                              <span className="badge-label">TOP OF STACK (idx: {actualIdx})</span>
-                            </motion.div>
-                          )}
-                        </motion.div>
-                      );
-                    })
+                  {action.startsWith('pop') && poppingItem !== null && (
+                    <motion.div
+                      key={`popping-${poppingItem}`}
+                      className="stack-3d-flying-block pop-ejecting"
+                      initial={{ y: 50, scale: 0.9, opacity: 0 }}
+                      animate={{
+                        y: 0,
+                        scale: 1.08,
+                        opacity: 1,
+                        transition: { type: 'spring', stiffness: 380, damping: 18 },
+                      }}
+                      exit={{
+                        y: -70,
+                        scale: 0.75,
+                        opacity: 0,
+                        transition: { duration: 0.2, ease: 'easeOut' },
+                      }}
+                    >
+                      <div className="flying-block-top-bevel gold-bevel" />
+                      <div className="flying-block-body gold-body">
+                        <span className="flying-tag gold-tag">⬆ POPPED (LIFO RETURN)</span>
+                        <span className="flying-val gold-val">{poppingItem}</span>
+                      </div>
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Physical Spring Dispenser Base */}
-              <div className="stack-spring-base">
-                <div className="spring-plate">DISPENSER WELL BASE</div>
-                <div className="spring-coils-line">~~~~~</div>
+              {/* 3D Top Aperture Intake Funnel Mouth */}
+              <div className="stack-3d-aperture-mouth">
+                <div className="mouth-bevel-ring">
+                  <div className="mouth-interior-glow" />
+                  <div className="mouth-gate-badges">
+                    <span className={`mouth-badge ${action.startsWith('push') ? 'active-push' : ''}`}>⬇ PUSH TOP</span>
+                    <span className="mouth-dot">●</span>
+                    <span className={`mouth-badge ${action.startsWith('pop') ? 'active-pop' : ''}`}>⬆ POP TOP</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3D Volumetric Glass Chamber Shaft */}
+              <div className="stack-3d-shaft-container">
+                {/* 3D Fixed Vertical Slots [5..0] */}
+                <div className="stack-3d-slots-stack">
+                  {[5, 4, 3, 2, 1, 0].map(slotIdx => {
+                    const isOccupied = slotIdx < items.length;
+                    const item = isOccupied ? items[slotIdx] : null;
+                    const isTop = slotIdx === topIndex;
+                    const isPeeking = isTop && action === 'peek';
+                    const isLifting = isTop && action === 'pop_lift';
+                    const { id, val } = item ? getItemData(item, slotIdx) : {};
+                    const memHex = `0x7FFEE${slotIdx}0`;
+
+                    // Distinct metallic block colors per slot
+                    const colorVariants = [
+                      'brick-blue',
+                      'brick-emerald',
+                      'brick-violet',
+                      'brick-amber',
+                      'brick-cyan',
+                      'brick-rose',
+                    ];
+                    const blockTheme = colorVariants[slotIdx % colorVariants.length];
+
+                    return (
+                      <div
+                        key={slotIdx}
+                        className={`stack-3d-slot-row ${isOccupied ? 'row-occupied' : 'row-empty'} ${isTop ? 'row-top' : ''}`}
+                      >
+                        {/* Left Ruler Tick */}
+                        <div className="slot-3d-ruler-tag">
+                          <span className="ruler-slot-label">[{slotIdx}]</span>
+                          <div className={`ruler-slot-led ${isOccupied ? 'led-on' : ''}`} />
+                        </div>
+
+                        {/* Center: 3D Volumetric Block or Translucent Ghost Tray */}
+                        <div className="slot-3d-stage-cell">
+                          {isOccupied ? (
+                            <motion.div
+                              key={id}
+                              layout
+                              className={`stack-3d-volumetric-brick ${blockTheme} ${isTop ? 'is-top-brick' : ''} ${isPeeking ? 'is-peeking-brick' : ''} ${isLifting ? 'is-lifting-brick' : ''}`}
+                              initial={{ y: -90, scale: 0.85, opacity: 0, rotateX: 20 }}
+                              animate={{
+                                y: isLifting ? -20 : 0,
+                                scale: isLifting ? 1.05 : 1,
+                                opacity: 1,
+                                rotateX: 0,
+                              }}
+                              exit={{
+                                y: -110,
+                                scale: 0.8,
+                                opacity: 0,
+                                transition: { duration: 0.22, ease: 'easeInOut' },
+                              }}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 500,
+                                damping: 22,
+                                mass: 0.9,
+                              }}
+                            >
+                              {/* 3D Top Bevel Face */}
+                              <div className="brick-top-facet">
+                                <div className="brick-gloss-sheen" />
+                              </div>
+
+                              {/* 3D Front Face */}
+                              <div className="brick-front-facet">
+                                <div className="brick-meta-left">
+                                  <span className="brick-slot-idx">SLOT {slotIdx}</span>
+                                  <span className="brick-mem-addr">{memHex}</span>
+                                </div>
+
+                                <div className="brick-core-value">
+                                  <span className="brick-value-text">{val}</span>
+                                </div>
+
+                                <div className="brick-meta-right">
+                                  {isLifting ? (
+                                    <span className="brick-status-pill pill-extracting">⚡ LIFT</span>
+                                  ) : isPeeking ? (
+                                    <span className="brick-status-pill pill-peeking">👁️ PEEK</span>
+                                  ) : isTop ? (
+                                    <span className="brick-status-pill pill-top">👉 TOP</span>
+                                  ) : (
+                                    <span className="brick-status-pill pill-locked">LOCKED</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Peeking Laser Scanner Sweep */}
+                              {isPeeking && (
+                                <motion.div
+                                  className="brick-scanner-beam"
+                                  animate={{ left: ['-20%', '120%'] }}
+                                  transition={{ duration: 0.85, repeat: Infinity, ease: 'easeInOut' }}
+                                />
+                              )}
+                            </motion.div>
+                          ) : (
+                            <div className="stack-3d-empty-ghost-tray">
+                              <span className="ghost-socket-notch">╌╌</span>
+                              <span className="ghost-socket-text">Slot [{slotIdx}] Ready</span>
+                              <span className="ghost-socket-notch">╌╌</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right: Active TOP Pointer Caliper */}
+                        <div className="slot-3d-pointer-col">
+                          {isTop && (
+                            <motion.div
+                              className="stack-top-caliper-pointer"
+                              initial={{ opacity: 0, x: -12, scale: 0.8 }}
+                              animate={{ opacity: 1, x: 0, scale: 1 }}
+                              transition={{ type: 'spring', stiffness: 480, damping: 20 }}
+                            >
+                              <span className="caliper-arrow">◀</span>
+                              <span className="caliper-tag">TOP</span>
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* 3D Hydraulic Suspension Base & Parametric Coil Spring */}
+                <motion.div
+                  className="stack-3d-piston-assembly"
+                  animate={{
+                    y: Math.min(22, items.length * 3),
+                  }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 18 }}
+                >
+                  <div className="piston-3d-top-plate">
+                    <div className="piston-bolt-icon">🔩</div>
+                    <span className="piston-plate-text">HYDRAULIC SUSPENSION BASE</span>
+                    <div className="piston-bolt-icon">🔩</div>
+                  </div>
+
+                  <div className="piston-3d-spring-box">
+                    <SpringCoilSVG
+                      height={Math.max(28, 80 - items.length * 9)}
+                      width={150}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Heavy Pedestal Base */}
+              <div className="stack-3d-pedestal-stand">
+                <div className="pedestal-metal-slab" />
+                <div className="pedestal-engraved-text">MEMORY BUFFER ALLOCATION BED</div>
               </div>
             </div>
           </div>

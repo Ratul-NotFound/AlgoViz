@@ -130,10 +130,15 @@ export function* generate(input) {
     vals = [...input.array];
   }
 
+  // Cap at 6 for optimal transit tube visualization
+  if (vals.length > 6) {
+    vals = vals.slice(0, 6);
+  }
+
   let idCounter = 1;
   const queue = [];
 
-  // Initial State: Empty service lane
+  // Initial State: Empty transit tube
   yield {
     type: 'queue',
     items: [...queue],
@@ -142,7 +147,8 @@ export function* generate(input) {
     incomingItem: null,
     leavingItem: null,
     action: 'idle',
-    message: `Initial Queue: Empty service lane. Preparing to enqueue ${vals.length} element(s).`,
+    capacity: 6,
+    message: `Queue Transit Tube Initialized (Empty, FRONT = -1, REAR = -1). Ready for ${vals.length} element(s).`,
     codeLine: { python: 4, c: 6, cpp: 4, java: 2, js: 2 },
   };
 
@@ -151,6 +157,7 @@ export function* generate(input) {
     const enqVal = vals[i];
     const enqItem = { id: `q-${idCounter++}`, val: enqVal };
 
+    // Stage 1: Arrival at REAR Ingestion Gate
     yield {
       type: 'queue',
       items: [...queue],
@@ -159,10 +166,12 @@ export function* generate(input) {
       incomingItem: enqVal,
       leavingItem: null,
       action: 'enqueue_ready',
-      message: `ENQUEUE(${enqVal}) [${i + 1}/${vals.length}]: Element ${enqVal} arrives at REAR intake gate...`,
+      capacity: 6,
+      message: `ENQUEUE(${enqVal}) [Step 1/2]: Value ${enqVal} arrives at the REAR Intake Injector...`,
       codeLine: { python: 7, c: 9, cpp: 6, java: 4, js: 6 },
     };
 
+    // Stage 2: Glides into rear position
     queue.push(enqItem);
     yield {
       type: 'queue',
@@ -172,7 +181,8 @@ export function* generate(input) {
       incomingItem: null,
       leavingItem: null,
       action: 'enqueue_done',
-      message: `ENQUEUE(${enqVal}) [${i + 1}/${vals.length}]: ${enqVal} joined line at REAR (Index: ${queue.length - 1}). Queue length = ${queue.length}.`,
+      capacity: 6,
+      message: `ENQUEUE(${enqVal}) [Step 2/2]: Element ${enqVal} docked at REAR (Slot [${queue.length - 1}]). FRONT is at [0].`,
       codeLine: { python: 8, c: 11, cpp: 6, java: 5, js: 7 },
     };
   }
@@ -187,7 +197,8 @@ export function* generate(input) {
       incomingItem: null,
       leavingItem: null,
       action: 'peek',
-      message: `PEEK(): Inspecting FRONT element ${queue[0]?.val} (first in line to be served).`,
+      capacity: 6,
+      message: `PEEK(): Optical sensor reads FRONT element [${queue[0]?.val}] at Slot [0] (first to be discharged, O(1)).`,
       codeLine: { python: 15, c: 15, cpp: 13, java: 13, js: 15 },
     };
   }
@@ -196,6 +207,8 @@ export function* generate(input) {
   const deqCount = Math.max(1, Math.min(2, Math.floor(queue.length / 2)));
   for (let i = 0; i < deqCount; i++) {
     const deqItem = queue[0];
+
+    // Dequeue Stage 1: Departure clamp locks onto FRONT
     yield {
       type: 'queue',
       items: [...queue],
@@ -204,10 +217,12 @@ export function* generate(input) {
       incomingItem: null,
       leavingItem: deqItem?.val,
       action: 'dequeue_ready',
-      message: `DEQUEUE() [${i + 1}/${deqCount}]: Discharging FRONT element ${deqItem?.val} (FIFO principle)...`,
+      capacity: 6,
+      message: `DEQUEUE() [Step 1/2]: Departure clamp locks onto FRONT element [${deqItem?.val}] for discharge...`,
       codeLine: { python: 10, c: 15, cpp: 7, java: 8, js: 10 },
     };
 
+    // Dequeue Stage 2: Ejected through exit port; remaining elements shift forward
     queue.shift();
     yield {
       type: 'queue',
@@ -215,11 +230,12 @@ export function* generate(input) {
       frontIndex: queue.length > 0 ? 0 : -1,
       rearIndex: queue.length > 0 ? queue.length - 1 : -1,
       incomingItem: null,
-      leavingItem: null,
+      leavingItem: deqItem?.val,
       action: 'dequeue_done',
+      capacity: 6,
       message: queue.length > 0
-        ? `DEQUEUE() [${i + 1}/${deqCount}]: Discharged ${deqItem?.val} from FRONT. New FRONT is ${queue[0]?.val}. Queue length = ${queue.length}.`
-        : `DEQUEUE() [${i + 1}/${deqCount}]: Discharged ${deqItem?.val}. Queue is now empty.`,
+        ? `DEQUEUE() [Step 2/2]: Element [${deqItem?.val}] served at FRONT. Queue advanced forward (New FRONT = [${queue[0]?.val}]).`
+        : `DEQUEUE() [Step 2/2]: Element [${deqItem?.val}] served. Queue is now empty.`,
       codeLine: { python: 12, c: 17, cpp: 9, java: 9, js: 12 },
     };
   }
@@ -233,7 +249,8 @@ export function* generate(input) {
     incomingItem: null,
     leavingItem: null,
     action: 'complete',
-    message: `Queue Demonstration Complete! Total ${vals.length} custom element(s) processed. FIFO order preserved.`,
+    capacity: 6,
+    message: `Queue Demonstration Complete! All operations strictly preserved FIFO (First-In, First-Out) discipline.`,
     codeLine: { python: 18, c: 18, cpp: 14, java: 16, js: 19 },
   };
 }
