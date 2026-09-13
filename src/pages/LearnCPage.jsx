@@ -419,7 +419,7 @@ export default function LearnCPage({
         <div className="sidebar-footer">
           <div className="dev-profile-card">
             <a
-              href="https://mh-ratul.vercel.app/"
+              href="https://ratul-dev.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="dev-profile-header"

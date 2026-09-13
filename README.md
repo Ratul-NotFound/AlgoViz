@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://algoflowx.vercel.app/">🌐 <strong>Live Platform: algoflowx.vercel.app</strong></a> •
-  <a href="https://mh-ratul.vercel.app/">👨‍💻 <strong>Creator Portfolio</strong></a> •
+  <a href="https://ratul-dev.vercel.app/">👨‍💻 <strong>Creator Portfolio</strong></a> •
   <a href="#-c-programming-academy-23-chapters">🎓 <strong>C Academy</strong></a> •
   <a href="#-supported-algorithms--data-structures">⚡ <strong>DSA Studio</strong></a>
 </p>
@@ -218,7 +218,7 @@ AlgoViz/
 **Mahmud Hasan Ratul**  
 *Full Stack & AI Systems Engineer*
 
-* 🌐 **Portfolio**: [mh-ratul.vercel.app](https://mh-ratul.vercel.app/)
+* 🌐 **Portfolio**: [ratul-dev.vercel.app](https://ratul-dev.vercel.app/)
 * 💼 **LinkedIn**: [linkedin.com/in/mahmud-hasan-ratul-0831b9257](https://www.linkedin.com/in/mahmud-hasan-ratul-0831b9257)
 * 📘 **Facebook**: [facebook.com/mahmud.hasan.ratul.76669](https://www.facebook.com/mahmud.hasan.ratul.76669)
 * 🐙 **GitHub**: [@Ratul-NotFound](https://github.com/Ratul-NotFound)
@@ -230,5 +230,5 @@ AlgoViz/
 This project is open-source and available under the [MIT License](LICENSE).
 
 <p align="center">
-  Made with 💙 by <a href="https://mh-ratul.vercel.app/">Mahmud Hasan Ratul</a>
+  Made with 💙 by <a href="https://ratul-dev.vercel.app/">Mahmud Hasan Ratul</a>
 </p>

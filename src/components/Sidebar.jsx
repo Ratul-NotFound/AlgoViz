@@ -382,7 +382,7 @@ export default function Sidebar({
         <div className="dev-profile-card">
           {/* Top: Avatar & Creator Header */}
           <a
-            href="https://mh-ratul.vercel.app/"
+            href="https://ratul-dev.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="dev-profile-header"
