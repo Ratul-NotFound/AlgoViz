@@ -54,7 +54,10 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const canvasRef = useRef(null);
   const barsContainerRef = useRef(null);
   const colRefs = useRef({});
-  const [dim, setDim] = useState({ w: 600, h: 240 });
+  const [dim, setDim] = useState(() => ({
+    w: typeof window !== 'undefined' ? window.innerWidth : 800,
+    h: typeof window !== 'undefined' && window.innerWidth <= 600 ? 260 : 420,
+  }));
   const [swapGeometry, setSwapGeometry] = useState(null);
   const [cmpGeometry, setCmpGeometry] = useState(null);
 
@@ -82,11 +85,21 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
   const banner   = getBanner(frame);
 
   const hasPointers = frame?.pointers && Object.keys(frame.pointers).length > 0;
-  // Reserve space for labels: number on top (24px) + index below (18px) + pointers below (20px)
-  const topPad  = showLbl ? 24 : 8;
-  const botPad  = (showLbl ? 20 : 6) + (hasPointers ? 22 : 0);
-  const trackH  = Math.max(50, dim.h - topPad - botPad);
-  const barPxH  = (v) => Math.max(6, Math.round((v / maxVal) * trackH));
+
+  // Space allocation for value numbers on top (including swap/compare hover lift) and indices/pointers below
+  const topPad  = showLbl ? 38 : 14;
+  const botPad  = (showLbl ? 18 : 6) + (hasPointers ? 20 : 0);
+  const trackH  = Math.max(80, dim.h - topPad - botPad);
+  
+  // Universal Proportional Scaling:
+  // 18% minimum baseline ensures lowest elements remain readable,
+  // while highest elements gracefully fill the available canvas track with 0 clipping.
+  const minBarH = Math.max(18, Math.round(trackH * 0.18));
+  const barPxH  = (v) => {
+    if (!v || v <= 0) return 8;
+    const ratio = Math.min(1, Math.max(0, v / maxVal));
+    return Math.round(minBarH + ratio * (trackH - minBarH));
+  };
 
   // Compute exact pixel coordinates of swapping/comparing bars with instant mathematical sync
   useLayoutEffect(() => {
@@ -170,21 +183,6 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
 
   return (
     <div className="avz-root">
-      {/* ── Phase Banner ── */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={banner.label}
-          className={`avz-banner avz-banner-${banner.color}`}
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.14 }}
-        >
-          <span className="avz-banner-label">{banner.label}</span>
-          <span className="avz-banner-text">{banner.text}</span>
-        </motion.div>
-      </AnimatePresence>
-
       {/* ── Main Canvas (pinned to bottom baseline) ── */}
       <div className="avz-canvas" ref={canvasRef}>
         {/* ── Bars Row (strictly bottom-aligned baseline) ── */}
@@ -365,33 +363,34 @@ export default function ArrayVisualizer({ frame, type = 'sorting' }) {
         </div>
       </div>
 
-      {/* ── Variable Inspector ── */}
-      {frame.variables && Object.keys(frame.variables).length > 0 && (
-        <div className="avz-vars">
-          {Object.entries(frame.variables).map(([k, v]) => (
-            <span key={k} className="avz-var">
-              <span className="vk">{k}</span>
-              <span className="ve">=</span>
-              <span className="vv">{String(v)}</span>
-            </span>
+      {/* ── Variables & Legend Unified Bar ── */}
+      <div className="avz-footer-bar">
+        {frame.variables && Object.keys(frame.variables).length > 0 && (
+          <div className="avz-vars-inline">
+            {Object.entries(frame.variables).map(([k, v]) => (
+              <span key={k} className="avz-var">
+                <span className="vk">{k}</span>
+                <span className="ve">=</span>
+                <span className="vv">{String(v)}</span>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="avz-legend-inline">
+          {[
+            ['bar-comparing', 'Comparing'],
+            ['bar-swapping',  'Swapping' ],
+            ['bar-sorted',    'Sorted'   ],
+            ['bar-pivot',     'Pivot / Min'],
+            ['bar-current',   'Current'  ],
+          ].map(([cls, lbl]) => (
+            <div key={lbl} className="avz-leg-item">
+              <div className={`avz-leg-dot ${cls}`} />
+              <span>{lbl}</span>
+            </div>
           ))}
         </div>
-      )}
-
-      {/* ── Color Legend ── */}
-      <div className="avz-legend">
-        {[
-          ['bar-comparing', 'Comparing'],
-          ['bar-swapping',  'Swapping' ],
-          ['bar-sorted',    'Sorted'   ],
-          ['bar-pivot',     'Pivot / Min'],
-          ['bar-current',   'Current'  ],
-        ].map(([cls, lbl]) => (
-          <div key={lbl} className="avz-leg-item">
-            <div className={`avz-leg-dot ${cls}`} />
-            <span>{lbl}</span>
-          </div>
-        ))}
       </div>
     </div>
   );
