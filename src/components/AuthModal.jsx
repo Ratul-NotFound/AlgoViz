@@ -6,7 +6,7 @@ import { GoogleIcon, BookmarkIcon, CheckCircleIcon, AlgoFlowXLogo } from './Icon
 import { launchGoogleOAuthRedirect, hasCustomGoogleClientId } from '../utils/googleAuth.js';
 
 export default function AuthModal() {
-  const { authModalOpen, closeAuthModal } = useAuth();
+  const { authModalOpen, closeAuthModal, signInWithDemo } = useAuth();
   const [hasClientId, setHasClientId] = useState(false);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function AuthModal() {
           </div>
         </div>
 
-        {/* Actions Group — 100% Real Google OAuth */}
+        {/* Actions Group — Real Google OAuth + Quick Guest Option */}
         <div className="auth-actions-group">
           <button
             type="button"
@@ -79,6 +79,27 @@ export default function AuthModal() {
           >
             <GoogleIcon size={18} />
             <span>Continue with Google</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-demo-sign-in"
+            onClick={() => signInWithDemo()}
+            style={{
+              marginTop: '8px',
+              width: '100%',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-muted)',
+              fontSize: '12.5px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 150ms ease',
+            }}
+          >
+            <span>⚡ Quick Demo Mode (Guest Access)</span>
           </button>
         </div>
 

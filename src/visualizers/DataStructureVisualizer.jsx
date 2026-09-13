@@ -61,6 +61,7 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
     topIndex = items.length - 1,
     incomingItem = null,
     poppingItem = null,
+    leavingItem = null,
     inputStream = [],
     inputIndex = -1,
     message = '',
@@ -456,113 +457,275 @@ export default function DataStructureVisualizer({ frame, type = 'stack' }) {
         )}
 
         {/* ========================================================
-            2. QUEUE (FIFO - Checkout Service Counter Lane)
+            2. QUEUE (FIFO - 3D Hyperloop Pneumatic Transit Tube)
             ======================================================== */}
         {type === 'queue' && (
-          <div className="ds-clean-queue-stage">
-            {/* Top: FIFO Principle & Gate Direction Bar */}
-            <div className="queue-direction-bar">
-              <div className="flow-end-box exit-box">
-                <span className="flow-tag">🚪 SERVICE COUNTER / DEQUEUE</span>
-                <span className="flow-sub">1st arrived is 1st served (FIFO)</span>
+          <div className="ds-3d-queue-workspace">
+            {/* Top Operational Direction Guide */}
+            <div className="queue-3d-header-ribbon">
+              <div className="ribbon-exit-pill">
+                <span className="ribbon-icon">🚪</span>
+                <span>DEQUEUE (Leaves from FRONT)</span>
               </div>
-
-              <div className="flow-arrow-indicator">
-                <span className="animated-flow-text">⬅ ⬅ QUEUE PROGRESSION ⬅ ⬅</span>
+              <div className="ribbon-flow-text">
+                <span className="flow-chevron">⬅ ⬅ ⬅</span>
+                <span className="flow-label">FIFO TRANSIT FLOW</span>
+                <span className="flow-chevron">⬅ ⬅ ⬅</span>
               </div>
-
-              <div className="flow-end-box entry-box">
-                <span className="flow-tag">📥 INTAKE GATE / ENQUEUE</span>
-                <span className="flow-sub">New arrivals join at the back</span>
+              <div className="ribbon-entry-pill">
+                <span className="ribbon-icon">📥</span>
+                <span>ENQUEUE (Enters at REAR)</span>
               </div>
             </div>
 
-            {/* Service Lane with Physical Entry & Exit Gates */}
-            <div className="queue-lane-wrapper">
-              {/* Left Exit / Service Counter Gate */}
-              <div className="queue-gate-post exit-gate-post">
-                <div className="gate-sign sign-exit">
-                  <span className="gate-icon">🚪</span>
-                  <span className="gate-label">EXIT / SERVED</span>
+            {/* Main 3D Hyperloop Chamber Tube Assembly */}
+            <div className="queue-3d-transit-assembly">
+              {/* Left: 3D Discharge / Dequeue Air-Lock Port */}
+              <div className="queue-3d-port port-exit">
+                <div className="port-arch-ring">
+                  <div className="port-sign sign-exit">
+                    <span>🚪 FRONT EXIT</span>
+                  </div>
+                  <div className="port-laser-beam beam-exit" />
                 </div>
-                <div className="gate-beam beam-exit" />
-              </div>
 
-              {/* Central Queue Track */}
-              <div className="queue-glass-track">
-                <div className="queue-track-inner">
-                  <AnimatePresence initial={false}>
-                    {items.length === 0 ? (
-                      <div className="ds-stage-empty-state">
-                        <span className="empty-icon">📭</span>
-                        <span className="empty-title">Queue is Empty</span>
-                        <span className="empty-sub">front = -1, rear = -1. Waiting for new arrivals at REAR.</span>
-                      </div>
-                    ) : (
-                      items.map((item, idx) => {
-                        const isFront = idx === 0;
-                        const isRear = idx === items.length - 1;
-                        const { id, val } = getItemData(item, idx);
-
-                        return (
-                          <div key={id} className="queue-item-slot-wrapper">
-                            {/* Floating Pointers */}
-                            {isFront && isRear && (
-                              <div className="queue-float-ptr ptr-both">
-                                <span>FRONT & REAR ⬇</span>
-                              </div>
-                            )}
-                            {isFront && !isRear && (
-                              <div className="queue-float-ptr ptr-front">
-                                <span>FRONT ⬇ (1st to Serve)</span>
-                              </div>
-                            )}
-                            {isRear && !isFront && (
-                              <div className="queue-float-ptr ptr-rear">
-                                <span>REAR ⬇ (Back of Line)</span>
-                              </div>
-                            )}
-
-                            <motion.div
-                              layout
-                              className={`queue-card-tile ${isFront ? 'tile-is-front' : ''} ${isRear ? 'tile-is-rear' : ''}`}
-                              initial={{ x: 100, opacity: 0, scale: 0.88 }}
-                              animate={{ x: 0, opacity: 1, scale: 1 }}
-                              exit={{
-                                x: -100,
-                                opacity: 0,
-                                scale: 0.85,
-                                transition: { duration: 0.22, ease: 'easeIn' },
-                              }}
-                              transition={{ type: 'spring', stiffness: 360, damping: 24 }}
-                            >
-                              <div className="queue-tile-header">
-                                <span className="tile-pos-badge">Pos #{idx + 1}</span>
-                                <span className="tile-idx-sub">idx: [{idx}]</span>
-                              </div>
-                              <div className="tile-value">{val}</div>
-                            </motion.div>
-                          </div>
-                        );
-                      })
+                {/* Ejected Pod Flying Bay */}
+                <div className="port-flying-bay">
+                  <AnimatePresence>
+                    {(action.startsWith('dequeue') || leavingItem !== null) && leavingItem !== null && (
+                      <motion.div
+                        key={`deq-${leavingItem}`}
+                        className="flying-queue-pod pod-discharged"
+                        initial={{ x: 30, scale: 0.9, opacity: 0 }}
+                        animate={{
+                          x: -40,
+                          scale: 1.05,
+                          opacity: 1,
+                          transition: { type: 'spring', stiffness: 380, damping: 18 },
+                        }}
+                        exit={{
+                          x: -80,
+                          scale: 0.7,
+                          opacity: 0,
+                          transition: { duration: 0.2, ease: 'easeIn' },
+                        }}
+                      >
+                        <div className="flying-pod-bevel gold-bevel" />
+                        <div className="flying-pod-front gold-front">
+                          <span className="flying-pod-tag">⬆ SERVED</span>
+                          <span className="flying-pod-val">{leavingItem}</span>
+                        </div>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
+              </div>
 
-                {/* Floor Flow Guideline */}
-                <div className="queue-floor-track">
-                  <span className="floor-guideline">----------------------- ➔ FLOW TOWARDS SERVICE DESK -----------------------</span>
+              {/* Central 3D Glass Transit Tube (Fixed 6 Docking Slots [0..5]) */}
+              <div className="queue-3d-tube-chassis">
+                <div className="queue-3d-tube-glass">
+                  {/* Top Pointer Calipers Track */}
+                  <div className="queue-3d-calipers-track">
+                    {[0, 1, 2, 3, 4, 5].map(slotIdx => {
+                      const isOccupied = slotIdx < items.length;
+                      const isFront = isOccupied && slotIdx === 0;
+                      const isRear = isOccupied && slotIdx === items.length - 1;
+
+                      return (
+                        <div key={slotIdx} className="caliper-slot-anchor">
+                          {isFront && isRear && (
+                            <motion.div
+                              className="queue-caliper-badge badge-both"
+                              initial={{ y: -10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ type: 'spring', stiffness: 450, damping: 20 }}
+                            >
+                              <span>FRONT & REAR ⬇</span>
+                            </motion.div>
+                          )}
+                          {isFront && !isRear && (
+                            <motion.div
+                              className="queue-caliper-badge badge-front"
+                              initial={{ y: -10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ type: 'spring', stiffness: 450, damping: 20 }}
+                            >
+                              <span>FRONT ⬇ [0]</span>
+                            </motion.div>
+                          )}
+                          {isRear && !isFront && (
+                            <motion.div
+                              className="queue-caliper-badge badge-rear"
+                              initial={{ y: -10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ type: 'spring', stiffness: 450, damping: 20 }}
+                            >
+                              <span>REAR ⬇ [{slotIdx}]</span>
+                            </motion.div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Horizontal Pods Docking Grid (Fixed 6 Slots) */}
+                  <div className="queue-3d-slots-track">
+                    {[0, 1, 2, 3, 4, 5].map(slotIdx => {
+                      const isOccupied = slotIdx < items.length;
+                      const item = isOccupied ? items[slotIdx] : null;
+                      const isFront = isOccupied && slotIdx === 0;
+                      const isRear = isOccupied && slotIdx === items.length - 1;
+                      const isPeeking = isFront && action === 'peek';
+                      const isLeaving = isFront && action === 'dequeue_ready';
+                      const { id, val } = item ? getItemData(item, slotIdx) : {};
+                      const memHex = `0x7FFEE${slotIdx}0`;
+
+                      // Distinct color theme per queue position
+                      const podColors = [
+                        'pod-emerald', // FRONT
+                        'pod-cyan',
+                        'pod-blue',
+                        'pod-violet',
+                        'pod-amber',
+                        'pod-rose',
+                      ];
+                      const podTheme = podColors[slotIdx % podColors.length];
+
+                      return (
+                        <div key={slotIdx} className={`queue-3d-dock-slot ${isOccupied ? 'dock-occupied' : 'dock-empty'}`}>
+                          {isOccupied ? (
+                            <motion.div
+                              key={id}
+                              layout
+                              className={`queue-3d-volumetric-pod ${podTheme} ${isFront ? 'is-front-pod' : ''} ${isRear ? 'is-rear-pod' : ''} ${isPeeking ? 'is-peeking-pod' : ''} ${isLeaving ? 'is-leaving-pod' : ''}`}
+                              initial={{ x: 60, scale: 0.8, opacity: 0 }}
+                              animate={{
+                                x: isLeaving ? -15 : 0,
+                                scale: isLeaving ? 1.06 : 1,
+                                opacity: 1,
+                              }}
+                              exit={{
+                                x: -60,
+                                scale: 0.75,
+                                opacity: 0,
+                                transition: { duration: 0.2, ease: 'easeIn' },
+                              }}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 460,
+                                damping: 22,
+                                mass: 0.9,
+                              }}
+                            >
+                              {/* 3D Top Bevel Facet */}
+                              <div className="pod-top-facet">
+                                <div className="pod-gloss-sheen" />
+                              </div>
+
+                              {/* 3D Front Facet */}
+                              <div className="pod-front-facet">
+                                <div className="pod-meta-top">
+                                  <span className="pod-pos-tag">#{slotIdx + 1}</span>
+                                  <span className="pod-mem-addr">{memHex}</span>
+                                </div>
+
+                                <div className="pod-core-value">
+                                  <span className="pod-val-num">{val}</span>
+                                </div>
+
+                                <div className="pod-meta-bottom">
+                                  {isLeaving ? (
+                                    <span className="pod-status-pill pill-dequeueing">⚡ SERVING</span>
+                                  ) : isPeeking ? (
+                                    <span className="pod-status-pill pill-peeking">👁️ PEEK</span>
+                                  ) : isFront ? (
+                                    <span className="pod-status-pill pill-front">1st (FRONT)</span>
+                                  ) : isRear ? (
+                                    <span className="pod-status-pill pill-rear">REAR</span>
+                                  ) : (
+                                    <span className="pod-status-pill pill-queued">IN LINE</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Peeking Laser Scanner Sweep */}
+                              {isPeeking && (
+                                <motion.div
+                                  className="pod-scanner-beam"
+                                  animate={{ top: ['-20%', '120%'] }}
+                                  transition={{ duration: 0.85, repeat: Infinity, ease: 'easeInOut' }}
+                                />
+                              )}
+                            </motion.div>
+                          ) : (
+                            <div className="queue-3d-empty-dock">
+                              <span className="empty-dock-idx">[{slotIdx}]</span>
+                              <span className="empty-dock-dash">╌╌</span>
+                              <span className="empty-dock-label">Dock Slot</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* 3D Illuminated Runner Rails & Mag-Track */}
+                  <div className="queue-3d-mag-rails">
+                    <div className="mag-rail-line left-line" />
+                    <div className="mag-track-pulses">
+                      <span>• • • MAGNETIC CONVEYOR PROPULSION TRACK • • •</span>
+                    </div>
+                    <div className="mag-rail-line right-line" />
+                  </div>
                 </div>
               </div>
 
-              {/* Right Entry / Intake Gate */}
-              <div className="queue-gate-post entry-gate-post">
-                <div className="gate-sign sign-entry">
-                  <span className="gate-icon">📥</span>
-                  <span className="gate-label">INTAKE / ENQUEUE</span>
+              {/* Right: 3D Ingestion / Enqueue Air-Lock Port */}
+              <div className="queue-3d-port port-entry">
+                <div className="port-arch-ring">
+                  <div className="port-sign sign-entry">
+                    <span>📥 REAR INTAKE</span>
+                  </div>
+                  <div className="port-laser-beam beam-entry" />
                 </div>
-                <div className="gate-beam beam-entry" />
+
+                {/* Incoming Pod Flying Bay */}
+                <div className="port-flying-bay">
+                  <AnimatePresence>
+                    {(action.startsWith('enqueue') || incomingItem !== null) && incomingItem !== null && (
+                      <motion.div
+                        key={`enq-${incomingItem}`}
+                        className="flying-queue-pod pod-incoming"
+                        initial={{ x: 60, scale: 0.7, opacity: 0 }}
+                        animate={{
+                          x: 0,
+                          scale: 1,
+                          opacity: 1,
+                          transition: { type: 'spring', stiffness: 400, damping: 20 },
+                        }}
+                        exit={{
+                          x: -30,
+                          scale: 0.9,
+                          opacity: 0,
+                          transition: { duration: 0.18, ease: 'easeIn' },
+                        }}
+                      >
+                        <div className="flying-pod-bevel cyan-bevel" />
+                        <div className="flying-pod-front cyan-front">
+                          <span className="flying-pod-tag">⬇ INCOMING</span>
+                          <span className="flying-pod-val">{incomingItem}</span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
+            </div>
+
+            {/* Heavy Base Stand for Queue Chassis */}
+            <div className="queue-3d-base-pedestal">
+              <div className="queue-pedestal-bar" />
+              <div className="queue-pedestal-sub">PNEUMATIC LINEAR MEMORY REGISTER</div>
             </div>
           </div>
         )}
