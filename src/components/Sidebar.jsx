@@ -5,7 +5,6 @@ import { ALGORITHMS, CATEGORIES } from '../data/algorithms.js';
 import { C_LESSONS, C_MODULES } from '../data/cLessons.js';
 import { getAlgoIcon, AlgoFlowXLogo, BookmarkIcon, CIcon } from './Icons.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { usePWA } from '../context/PWAContext.jsx';
 
 export default function Sidebar({
   viewMode = 'algo', // 'algo' | 'learn-c'
@@ -19,7 +18,6 @@ export default function Sidebar({
   onSwitchToAcademy,
 }) {
   const { isBookmarked, toggleBookmark, isCompleted, cCompletedLessons, isCLessonCompleted } = useAuth();
-  const { openInstallModal, isInstalled } = usePWA();
   const [academySearch, setAcademySearch] = useState('');
   const [algoSearch, setAlgoSearch] = useState('');
 
@@ -379,36 +377,8 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* ── Common Premium Developer Profile Card & PWA Action (Footer) ── */}
+      {/* ── Common Premium Developer Profile Card (Footer) ── */}
       <div className="sidebar-footer">
-        {/* PWA Get App Action Card */}
-        {!isInstalled && (
-          <button
-            type="button"
-            className="sidebar-pwa-card"
-            onClick={() => {
-              openInstallModal();
-              if (onClose) onClose();
-            }}
-            title="Install AlgoFlowX App for Offline Learning"
-          >
-            <div className="pwa-card-left">
-              <div className="pwa-card-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-              </div>
-              <div className="pwa-card-meta">
-                <span className="pwa-card-title">Get AlgoFlowX App</span>
-                <span className="pwa-card-sub">Offline DSA &amp; Instant Speed</span>
-              </div>
-            </div>
-            <span className="pwa-card-badge">Install</span>
-          </button>
-        )}
-
         <div className="dev-profile-card">
           {/* Top: Avatar & Creator Header */}
           <a

@@ -11,45 +11,66 @@ const PWAContext = createContext({
 });
 
 export function PWAProvider({ children }) {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(() => {
+    if (typeof window !== 'undefined' && window.deferredPWAInstallPrompt) {
+      return window.deferredPWAInstallPrompt;
+    }
+    return null;
+  });
   const [isInstalled, setIsInstalled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window !== 'undefined') {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
 
-    // Check if running in standalone mode (installed PWA)
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true;
+      if (isStandalone) {
+        setIsInstalled(true);
+      }
 
-    if (isStandalone) {
-      setIsInstalled(true);
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isApple = /iphone|ipad|ipod/.test(userAgent);
+      setIsIOS(isApple);
+
+      if (window.deferredPWAInstallPrompt) {
+        setDeferredPrompt(window.deferredPWAInstallPrompt);
+      }
     }
-
-    // Detect iOS devices
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isAppleDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isAppleDevice);
 
     const handleBeforeInstall = (e) => {
       e.preventDefault();
+      window.deferredPWAInstallPrompt = e;
       setDeferredPrompt(e);
+    };
+
+    const handleCustomPromptReady = (e) => {
+      if (e.detail) {
+        setDeferredPrompt(e.detail);
+      } else if (window.deferredPWAInstallPrompt) {
+        setDeferredPrompt(window.deferredPWAInstallPrompt);
+      }
     };
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
+      window.deferredPWAInstallPrompt = null;
       setIsModalOpen(false);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('pwa-prompt-available', handleCustomPromptReady);
     window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('pwa-installed-success', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('pwa-prompt-available', handleCustomPromptReady);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('pwa-installed-success', handleAppInstalled);
     };
   }, []);
 
@@ -62,16 +83,26 @@ export function PWAProvider({ children }) {
   }, []);
 
   const promptInstall = useCallback(async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setIsInstalled(true);
-        setIsModalOpen(false);
+    const promptEvent = deferredPrompt || (typeof window !== 'undefined' ? window.deferredPWAInstallPrompt : null);
+    
+    if (promptEvent) {
+      try {
+        await promptEvent.prompt();
+        const choiceResult = await promptEvent.userChoice;
+        if (choiceResult && choiceResult.outcome === 'accepted') {
+          setIsInstalled(true);
+          setIsModalOpen(false);
+        }
+        setDeferredPrompt(null);
+        if (typeof window !== 'undefined') {
+          window.deferredPWAInstallPrompt = null;
+        }
+      } catch (err) {
+        console.warn('PWA install prompt error:', err);
+        setIsModalOpen(true);
       }
-      setDeferredPrompt(null);
     } else {
-      // If native deferred prompt is not directly ready, open the install guide modal
+      // If browser hasn't emitted beforeinstallprompt yet (or user already interacted), open popup
       setIsModalOpen(true);
     }
   }, [deferredPrompt]);
@@ -79,7 +110,7 @@ export function PWAProvider({ children }) {
   return (
     <PWAContext.Provider
       value={{
-        isInstallable: !!deferredPrompt,
+        isInstallable: !!deferredPrompt || (typeof window !== 'undefined' && !!window.deferredPWAInstallPrompt),
         isInstalled,
         isIOS,
         isModalOpen,

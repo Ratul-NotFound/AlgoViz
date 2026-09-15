@@ -17,6 +17,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.deferredPWAInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window.deferredPWAInstallPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
+      });
+      window.addEventListener('appinstalled', function() {
+        window.deferredPWAInstallPrompt = null;
+        window.dispatchEvent(new CustomEvent('pwa-installed-success'));
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
