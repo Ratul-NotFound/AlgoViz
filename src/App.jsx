@@ -8,9 +8,12 @@ import { ALGORITHMS } from './data/algorithms.js';
 import { MenuIcon, PythonIcon, CIcon, CppIcon, JavaIcon, JSIcon, SunIcon, MoonIcon, AlgoFlowXLogo, GoogleIcon } from './components/Icons.jsx';
 import { isAudioEnabled, toggleSound } from './utils/sound.js';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { PWAProvider, usePWA } from './context/PWAContext.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import UserAvatarMenu from './components/UserAvatarMenu.jsx';
 import LiveUserCounter from './components/LiveUserCounter.jsx';
+import PWAInstallBanner from './components/PWAInstallBanner.jsx';
+import PWAInstallModal from './components/PWAInstallModal.jsx';
 
 function parseRouteFromHash() {
   if (typeof window === 'undefined') return { mode: 'algo', slug: null, lesson: null };
@@ -54,6 +57,7 @@ function AppContent() {
   });
 
   const { isAuthenticated, openAuthModal } = useAuth();
+  const { openInstallModal, isInstalled } = usePWA();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -249,6 +253,25 @@ function AppContent() {
           </button>
         )}
 
+        {/* Get App / Install Button */}
+        {!isInstalled && (
+          <button
+            type="button"
+            className="header-get-app-btn"
+            onClick={openInstallModal}
+            title="Install AlgoFlowX App for Desktop & Mobile"
+            aria-label="Get the App"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Get App</span>
+            <span className="badge-pwa-pulse" />
+          </button>
+        )}
+
         {/* Theme Toggle Button */}
         <button
           className="header-theme-pill"
@@ -372,6 +395,9 @@ function AppContent() {
       {/* ── Global Google Auth Modal ── */}
       <AuthModal />
 
+      {/* ── PWA Get App Modal ── */}
+      <PWAInstallModal />
+
       {/* ── Python Coming Soon Preview Modal ── */}
       <PythonComingSoonModal
         isOpen={pythonModalOpen}
@@ -381,6 +407,9 @@ function AppContent() {
           setPythonModalOpen(false);
         }}
       />
+
+      {/* ── PWA Offline & Install Prompt Banner ── */}
+      <PWAInstallBanner />
     </div>
   );
 }
@@ -388,7 +417,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <PWAProvider>
+        <AppContent />
+      </PWAProvider>
     </AuthProvider>
   );
 }
